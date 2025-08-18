@@ -442,9 +442,9 @@
           const matchesCount = this.matches?.length || 0;
           const improvement = this.calculateImprovementRate();
           const goalsCount = Array.isArray(this.goals)
-            ? (this.goals.some((g) => typeof g.completed !== "undefined")
-                ? this.goals.filter((g) => g.completed === true).length
-                : this.goals.length)
+            ? this.goals.some((g) => typeof g.completed !== "undefined")
+              ? this.goals.filter((g) => g.completed === true).length
+              : this.goals.length
             : 0;
 
           const setText = (id, val) => {
@@ -926,7 +926,9 @@
             alert("Please log in to set goals.");
             return;
           }
-          const title = prompt("What's your new goal? (e.g., 3x training this week)");
+          const title = prompt(
+            "What's your new goal? (e.g., 3x training this week)"
+          );
           if (!title) return;
           const targetDate = prompt("Target date (YYYY-MM-DD), optional:");
           const payload = { title: title.trim(), completed: false };
