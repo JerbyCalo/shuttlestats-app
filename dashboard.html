@@ -270,6 +270,23 @@
 
       // Check authentication on page load
       document.addEventListener("DOMContentLoaded", () => {
+        // Initialize UI components first
+        setupSidebar();
+        setupDropdown();
+        
+        // Set current date
+        const today = new Date();
+        document.getElementById("currentDate").textContent =
+          today.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+        
+        // Initialize dashboard functionality
+        initializeDashboard();
+        
         if (!authService.isAuthenticated()) {
           setTimeout(() => {
             if (!authService.isAuthenticated()) {
@@ -752,46 +769,8 @@
         );
       }
 
-      // Initialize dashboard
-      document.addEventListener("DOMContentLoaded", function () {
-        // Set current date
-        const today = new Date();
-        document.getElementById("currentDate").textContent =
-          today.toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          });
-
-        // Get user role and email from localStorage or URL params
-        const urlParams = new URLSearchParams(window.location.search);
-        const userRole =
-          urlParams.get("role") || localStorage.getItem("userRole") || "player";
-        const userEmail =
-          urlParams.get("email") ||
-          localStorage.getItem("userEmail") ||
-          "practice@gmail.com";
-
-        // Store user data in localStorage if not already there
-        if (!localStorage.getItem("userRole")) {
-          localStorage.setItem("userRole", userRole);
-        }
-        if (!localStorage.getItem("userEmail")) {
-          localStorage.setItem("userEmail", userEmail);
-        }
-
-        // Set user name
-        document.getElementById("userName").textContent = `Welcome back, ${
-          userEmail.split("@")[0]
-        }!`;
-
-        // Show appropriate sidebar sections based on role
-        if (userRole === "coach") {
-          document.getElementById("playerSection").style.display = "none";
-          document.getElementById("coachSection").style.display = "block";
-        }
-
+      // Initialize dashboard when DOM is ready
+      function initializeDashboard() {
         // Initialize dashboard data manager
         window.dashboardManager = new DashboardManager(); // The constructor already calls init()
 
@@ -873,12 +852,7 @@
           }
         });
 
-        // Dropdown functionality
-        setupDropdown();
-
-        // Sidebar functionality
-        setupSidebar();
-      });
+      }
 
       function setupDropdown() {
         console.log("Setting up dropdown...");
