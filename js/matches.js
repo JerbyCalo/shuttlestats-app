@@ -1,8 +1,10 @@
 // Matches Page JavaScript Functionality
 
-class MatchManager {
+export class MatchManager {
   constructor() {
     this.matches = [];
+    this.remote = typeof window !== "undefined" && !!window.dataService;
+    this.unsubscribe = null;
     this.errorTypes = {
       netErrors: "Net Errors",
       outErrors: "Out Shots",
@@ -19,7 +21,43 @@ class MatchManager {
   }
 
   init() {
-    this.loadMatches();
+    // Prefer Firestore subscription when available
+    if (
+      this.remote &&
+      window.dataService &&
+      typeof window.dataService.subscribeToMatches === "function"
+    ) {
+      try {
+        this.unsubscribe = window.dataService.subscribeToMatches((matches) => {
+          this.matches = (matches || []).map((m) => ({
+            id: m.id,
+            date: m.date,
+            type: m.type,
+            opponent: m.opponent || "",
+            venue: m.venue || "",
+            tournament: m.tournament || "",
+            duration: m.duration ? parseInt(m.duration) : null,
+            scores: m.scores || { yourSets: 0, oppSets: 0, sets: [] },
+            result: m.result || "loss",
+            errors: m.errors || {},
+            winners: m.winners || {},
+            ratings: m.ratings || {},
+            notes: m.notes || "",
+            nextFocus: m.nextFocus || "",
+            createdAt: m.createdAt || new Date().toISOString(),
+          }));
+          this.updateStats();
+          this.renderMatches();
+          this.updateAnalysis();
+        });
+      } catch (err) {
+        console.error("Failed to subscribe to matches:", err);
+        this.remote = false;
+        this.loadMatches();
+      }
+    } else {
+      this.loadMatches();
+    }
     this.setupEventListeners();
     this.updateStats();
     this.renderMatches();
@@ -288,7 +326,7 @@ class MatchManager {
     }, 500);
   }
 
-  processSaveMatch(e, submitBtn, originalText) {
+  async processSaveMatch(e, submitBtn, originalText) {
     const formData = new FormData(e.target);
 
     // Get scores
@@ -379,11 +417,27 @@ class MatchManager {
       match.scores.sets.push({ you: yourSet3, opp: oppSet3 });
     }
 
-    this.matches.unshift(match); // Add to beginning of array
-    this.saveMatches();
-    this.updateStats();
-    this.renderMatches();
-    this.updateAnalysis();
+    try {
+      if (
+        this.remote &&
+        window.dataService &&
+        typeof window.dataService.addMatch === "function"
+      ) {
+        await window.dataService.addMatch(match);
+        // UI will refresh via subscription
+      } else {
+        this.matches.unshift(match); // Add to beginning of array
+        this.saveMatches();
+        this.updateStats();
+        this.renderMatches();
+        this.updateAnalysis();
+      }
+    } catch (err) {
+      console.error("Failed to save match:", err);
+      this.showMessage("Failed to save match. Please try again.", "error");
+      this.resetSubmitButton(submitBtn, originalText);
+      return;
+    }
 
     // Success animation
     submitBtn.innerHTML = "✅ Saved!";
@@ -805,14 +859,29 @@ class MatchManager {
     this.showMessage("Edit functionality coming soon!", "info");
   }
 
-  deleteMatch(matchId) {
-    if (confirm("Are you sure you want to delete this match record?")) {
-      this.matches = this.matches.filter((match) => match.id !== matchId);
-      this.saveMatches();
-      this.updateStats();
-      this.renderMatches();
-      this.updateAnalysis();
+  async deleteMatch(matchId) {
+    if (!confirm("Are you sure you want to delete this match record?")) {
+      return;
+    }
+    try {
+      if (
+        this.remote &&
+        window.dataService &&
+        typeof window.dataService.deleteMatch === "function"
+      ) {
+        await window.dataService.deleteMatch(matchId);
+        // UI via subscription
+      } else {
+        this.matches = this.matches.filter((match) => match.id !== matchId);
+        this.saveMatches();
+        this.updateStats();
+        this.renderMatches();
+        this.updateAnalysis();
+      }
       this.showMessage("Match record deleted.", "success");
+    } catch (err) {
+      console.error("Failed to delete match:", err);
+      this.showMessage("Failed to delete. Please try again.", "error");
     }
   }
 
@@ -896,10 +965,20 @@ class MatchManager {
   }
 }
 
-// Initialize when DOM is loaded
+// Initialize when DOM is loaded (can be suppressed by setting window.shouldAutoInitMatches = false)
 document.addEventListener("DOMContentLoaded", () => {
+  if (window.shouldAutoInitMatches === false) return;
   // Only initialize if we're on the matches page
   if (document.getElementById("matchRecordForm")) {
     window.matchManager = new MatchManager();
   }
 });
+
+// Backwards compatibility: attach to window and export default when used as module
+try {
+  if (typeof window !== "undefined") {
+    window.MatchManager = MatchManager;
+  }
+} catch (_) {}
+
+export default MatchManager;

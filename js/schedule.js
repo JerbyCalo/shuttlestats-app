@@ -1,8 +1,10 @@
 // Schedule Manager for ShuttleStats Badminton Tracking App
 
-class ScheduleManager {
+export class ScheduleManager {
   constructor() {
     this.sessions = this.loadSessions();
+    this.remote = typeof window !== "undefined" && !!window.dataService;
+    this.unsubscribe = null;
     this.currentDate = new Date();
     this.currentView = "upcoming"; // Default to upcoming view for better UX
     this.reminderSettings = this.loadReminderSettings();
@@ -11,6 +13,44 @@ class ScheduleManager {
   }
 
   initialize() {
+    // Prefer Firestore subscription when available
+    if (
+      this.remote &&
+      window.dataService &&
+      typeof window.dataService.subscribeToScheduleSessions === "function"
+    ) {
+      try {
+        this.unsubscribe = window.dataService.subscribeToScheduleSessions(
+          (sessions) => {
+            this.sessions = (sessions || []).map((s) => ({
+              id: s.id,
+              title: s.title,
+              type: s.type,
+              date: s.date,
+              time: s.time,
+              duration: parseFloat(s.duration) || 60,
+              location: s.location || "",
+              description: s.description || "",
+              opponent: s.opponent || null,
+              coach: s.coach || null,
+              intensity: s.intensity || "medium",
+              isRecurring: !!s.isRecurring,
+              reminderEnabled: !!s.reminderEnabled,
+              reminderTime: s.reminderTime || "30",
+              createdAt: s.createdAt || new Date().toISOString(),
+            }));
+            // Refresh UI when data changes
+            this.renderCalendar();
+            this.updateScheduleStats();
+            this.renderSessions();
+          }
+        );
+      } catch (err) {
+        console.error("Failed to subscribe to schedule sessions:", err);
+        this.remote = false;
+      }
+    }
+
     this.renderCalendar();
     this.setupEventListeners();
     this.updateScheduleStats();
@@ -290,7 +330,7 @@ class ScheduleManager {
     return sessionsForDate;
   }
 
-  handleSessionSubmit() {
+  async handleSessionSubmit() {
     const form = document.getElementById("sessionScheduleForm");
     const formData = new FormData(form);
 
@@ -337,14 +377,14 @@ class ScheduleManager {
       const selectedDays = formData.getAll("recurringDays");
       const endDate = formData.get("recurringEnd");
 
-      this.createRecurringSessions(
+      await this.createRecurringSessions(
         sessionData,
         recurringType,
         selectedDays,
         endDate
       );
     } else {
-      this.addSession(sessionData);
+      await this.addSession(sessionData);
     }
 
     // Hide session form and show upcoming view to see the new session
@@ -353,26 +393,43 @@ class ScheduleManager {
     this.showMessage("Session scheduled successfully!", "success");
   }
 
-  addSession(sessionData) {
-    this.sessions.push(sessionData);
-    this.saveSessions();
+  async addSession(sessionData) {
+    try {
+      if (
+        this.remote &&
+        window.dataService &&
+        typeof window.dataService.addScheduleSession === "function"
+      ) {
+        await window.dataService.addScheduleSession(sessionData);
+        // UI will refresh via subscription
+      } else {
+        this.sessions.push(sessionData);
+        this.saveSessions();
+        // Update all views immediately
+        this.renderCalendar();
+        this.renderSessions();
+        this.updateScheduleStats();
+      }
 
-    // Debug logging
-    console.log("Session added:", sessionData);
-    console.log("Total sessions now:", this.sessions.length);
-
-    // Update all views immediately
-    this.renderCalendar();
-    this.renderSessions();
-    this.updateScheduleStats();
-
-    // Schedule reminder if enabled
-    if (sessionData.reminderEnabled) {
-      this.scheduleReminder(sessionData);
+      // Schedule reminder if enabled
+      if (sessionData.reminderEnabled) {
+        this.scheduleReminder(sessionData);
+      }
+    } catch (err) {
+      console.error("Failed to add session:", err);
+      this.showMessage(
+        "Failed to schedule session. Please try again.",
+        "error"
+      );
     }
   }
 
-  createRecurringSessions(sessionData, recurringType, selectedDays, endDate) {
+  async createRecurringSessions(
+    sessionData,
+    recurringType,
+    selectedDays,
+    endDate
+  ) {
     const sessions = [];
     const startDate = new Date(sessionData.date);
     const end = new Date(endDate);
@@ -402,7 +459,9 @@ class ScheduleManager {
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    sessions.forEach((session) => this.addSession(session));
+    for (const session of sessions) {
+      await this.addSession(session);
+    }
     this.showMessage(
       `${sessions.length} recurring sessions created!`,
       "success"
@@ -673,14 +732,27 @@ class ScheduleManager {
     this.showModal("sessionModal");
   }
 
-  deleteSession(sessionId) {
-    if (confirm("Are you sure you want to delete this session?")) {
-      this.sessions = this.sessions.filter((s) => s.id !== sessionId);
-      this.saveSessions();
-      this.renderCalendar();
-      this.renderSessions();
-      this.updateScheduleStats();
+  async deleteSession(sessionId) {
+    if (!confirm("Are you sure you want to delete this session?")) return;
+    try {
+      if (
+        this.remote &&
+        window.dataService &&
+        typeof window.dataService.deleteScheduleSession === "function"
+      ) {
+        await window.dataService.deleteScheduleSession(sessionId);
+        // UI via subscription
+      } else {
+        this.sessions = this.sessions.filter((s) => s.id !== sessionId);
+        this.saveSessions();
+        this.renderCalendar();
+        this.renderSessions();
+        this.updateScheduleStats();
+      }
       this.showMessage("Session deleted successfully!", "success");
+    } catch (err) {
+      console.error("Failed to delete session:", err);
+      this.showMessage("Failed to delete session.", "error");
     }
   }
 
@@ -1230,8 +1302,9 @@ END:VALARM`
   }
 }
 
-// Initialize when DOM is ready
+// Initialize when DOM is ready (can be suppressed by setting window.shouldAutoInitSchedule = false)
 document.addEventListener("DOMContentLoaded", () => {
+  if (window.shouldAutoInitSchedule === false) return;
   // Request notification permission
   if ("Notification" in window && Notification.permission === "default") {
     Notification.requestPermission();
@@ -1242,6 +1315,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Export for use in other modules
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = ScheduleManager;
-}
+try {
+  if (typeof window !== "undefined") {
+    window.ScheduleManager = ScheduleManager;
+  }
+} catch (_) {}
+
+export default ScheduleManager;

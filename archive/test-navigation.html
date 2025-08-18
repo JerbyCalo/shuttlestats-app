@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Navigation Test</title>
+  <link rel="stylesheet" href="../css/dashboard-style.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+      }
+      .test-container {
+        padding: 20px;
+      }
+      .test-button {
+        padding: 10px 20px;
+        margin: 10px;
+        background: #1211ca;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <span class="logo-icon">🏸</span>
+          <span class="logo-text">ShuttleStats</span>
+        </div>
+        <div class="nav-right">
+          <div class="user-info">
+            <span class="user-name">Test User</span>
+            <div class="user-dropdown">
+              <button class="dropdown-toggle">⚙️</button>
+              <div class="dropdown-menu">
+                <a href="#profile">Profile</a>
+                <a href="#settings">Settings</a>
+                <a href="#" id="signOutBtn">Sign Out</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <!-- Sidebar Toggle Button -->
+      <button class="sidebar-toggle" id="sidebarToggle">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
+      <!-- Sidebar Overlay -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-menu">
+          <div class="menu-section">
+            <h3>Overview</h3>
+            <ul>
+              <li>
+                <a href="#dashboard" class="menu-item active">📊 Dashboard</a>
+              </li>
+              <li><a href="training.html" class="menu-item">🏃‍♂️ Training</a></li>
+              <li><a href="matches.html" class="menu-item">🏆 Matches</a></li>
+              <li><a href="schedule.html" class="menu-item">📅 Schedule</a></li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+
+      <div class="test-container">
+        <h1>Navigation Test</h1>
+        <p>Test the hamburger menu and dropdown:</p>
+
+        <button class="test-button" onclick="testSidebar()">
+          Test Sidebar Toggle
+        </button>
+        <button class="test-button" onclick="testDropdown()">
+          Test Dropdown Toggle
+        </button>
+
+        <div
+          id="debug-output"
+          style="
+            margin-top: 20px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+          "
+        >
+          <h3>Debug Output:</h3>
+          <div id="debug-log"></div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      console.log("Script starting...");
+
+      function log(message) {
+        console.log(message);
+        const debugLog = document.getElementById("debug-log");
+        debugLog.innerHTML +=
+          "<div>" + new Date().toLocaleTimeString() + ": " + message + "</div>";
+      }
+
+      function setupDropdown() {
+        log("Setting up dropdown...");
+
+        try {
+          const dropdownToggle = document.querySelector(".dropdown-toggle");
+          const dropdownMenu = document.querySelector(".dropdown-menu");
+
+          log("Dropdown toggle found: " + !!dropdownToggle);
+          log("Dropdown menu found: " + !!dropdownMenu);
+
+          if (!dropdownToggle || !dropdownMenu) {
+            log("ERROR: Dropdown elements not found!");
+            return;
+          }
+
+          dropdownToggle.addEventListener("click", function (e) {
+            log("Dropdown toggle clicked");
+            e.preventDefault();
+            e.stopPropagation();
+            dropdownMenu.classList.toggle("show");
+            log("Dropdown menu classes: " + dropdownMenu.className);
+          });
+
+          document.addEventListener("click", function (e) {
+            if (
+              !dropdownMenu.contains(e.target) &&
+              !dropdownToggle.contains(e.target)
+            ) {
+              dropdownMenu.classList.remove("show");
+            }
+          });
+
+          log("Dropdown setup completed successfully");
+        } catch (error) {
+          log("ERROR setting up dropdown: " + error.message);
+        }
+      }
+
+      function setupSidebar() {
+        log("Setting up sidebar...");
+
+        try {
+          const sidebarToggle = document.getElementById("sidebarToggle");
+          const sidebar = document.getElementById("sidebar");
+          const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+          log("Sidebar toggle found: " + !!sidebarToggle);
+          log("Sidebar found: " + !!sidebar);
+          log("Sidebar overlay found: " + !!sidebarOverlay);
+
+          if (!sidebarToggle || !sidebar || !sidebarOverlay) {
+            log("ERROR: Sidebar elements not found!");
+            return;
+          }
+
+          function toggleSidebar() {
+            log("Toggling sidebar");
+            sidebar.classList.toggle("active");
+            sidebarOverlay.classList.toggle("active");
+            sidebarToggle.classList.toggle("active");
+            log("Sidebar classes: " + sidebar.className);
+          }
+
+          function closeSidebar() {
+            log("Closing sidebar");
+            sidebar.classList.remove("active");
+            sidebarOverlay.classList.remove("active");
+            sidebarToggle.classList.remove("active");
+          }
+
+          sidebarToggle.addEventListener("click", function (e) {
+            log("Sidebar toggle clicked");
+            e.preventDefault();
+            toggleSidebar();
+          });
+
+          sidebarOverlay.addEventListener("click", closeSidebar);
+
+          document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && sidebar.classList.contains("active")) {
+              closeSidebar();
+            }
+          });
+
+          log("Sidebar setup completed successfully");
+        } catch (error) {
+          log("ERROR setting up sidebar: " + error.message);
+        }
+      }
+
+      function testSidebar() {
+        log("Manual sidebar test clicked");
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("active");
+      }
+
+      function testDropdown() {
+        log("Manual dropdown test clicked");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+        dropdownMenu.classList.toggle("show");
+      }
+
+      // Initialize when DOM loads
+      document.addEventListener("DOMContentLoaded", function () {
+        log("DOM Content Loaded");
+        setupSidebar();
+        setupDropdown();
+        log("Initialization complete");
+      });
+
+      log("Script loaded");
+    </script>
+  </body>
+</html>

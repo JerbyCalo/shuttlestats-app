@@ -264,6 +264,7 @@
       // Dashboard Data Manager
     </script>
 
+    <script src="js/common-ui.js"></script>
     <script type="module">
       import { authService } from "./js/auth-service.js";
       import { dataService } from "./js/data-service.js";
@@ -273,7 +274,7 @@
         // Initialize UI components first
         setupSidebar();
         setupDropdown();
-        
+
         // Set current date
         const today = new Date();
         document.getElementById("currentDate").textContent =
@@ -283,23 +284,29 @@
             month: "long",
             day: "numeric",
           });
-        
-        // Initialize dashboard functionality
-        initializeDashboard();
-        
-        if (!authService.isAuthenticated()) {
-          setTimeout(() => {
-            if (!authService.isAuthenticated()) {
-              window.location.href = "login.html";
-            }
-          }, 1000);
-        } else {
-          // Set up data service for the authenticated user
-          const user = authService.getCurrentUser();
-          if (user) {
-            dataService.setCurrentUser(user.uid);
+
+        // Gate by auth before initializing dashboard
+        const ensureAuth = async () => {
+          if (!authService.isAuthenticated()) {
+            await new Promise((r) => setTimeout(r, 600));
           }
-        }
+          const user = authService.getCurrentUser();
+          if (!user) {
+            window.location.href = "login.html";
+            return null;
+          }
+          dataService.setCurrentUser(user.uid);
+          // Expose globally for non-module scripts
+          window.dataService = dataService;
+          window.authService = authService;
+          return user;
+        };
+
+        ensureAuth().then((user) => {
+          if (!user) return;
+          // Initialize dashboard functionality after services are ready
+          initializeDashboard();
+        });
 
         // Handle sign out
         document
@@ -321,6 +328,7 @@
           this.userEmail =
             localStorage.getItem("userEmail") || "practice@gmail.com";
           this.userRole = localStorage.getItem("userRole") || "player";
+          this.remote = typeof window !== "undefined" && !!window.dataService;
 
           // Immediately set zeros before any other initialization
           this.setZerosImmediately();
@@ -345,47 +353,81 @@
           });
         }
 
-        init() {
-          this.loadAllData();
+        async init() {
+          await this.loadAllData();
           this.updateStats();
           this.updateRecentActivities();
           this.updateUpcomingEvents();
           this.updatePerformanceChart();
+          // Optionally set up live updates when remote
+          if (this.remote && window.dataService) {
+            try {
+              // Training
+              window.dataService.subscribeToTrainingSessions((sessions) => {
+                this.trainingSessions = sessions || [];
+                this.updateStats();
+                this.updatePerformanceChart();
+                this.updateRecentActivities();
+              });
+              // Matches
+              window.dataService.subscribeToMatches((matches) => {
+                this.matches = matches || [];
+                this.updateStats();
+                this.updateRecentActivities();
+              });
+              // Schedule
+              window.dataService.subscribeToScheduleSessions((sched) => {
+                this.scheduledSessions = sched || [];
+                this.updateUpcomingEvents();
+                this.updateRecentActivities();
+              });
+            } catch (err) {
+              console.warn(
+                "Dashboard subscriptions failed; continuing with one-time load.",
+                err
+              );
+            }
+          }
         }
 
-        loadAllData() {
-          // Load training sessions
+        async loadAllData() {
+          if (this.remote && window.dataService) {
+            try {
+              const [training, matches, schedule] = await Promise.all([
+                window.dataService.getTrainingSessions(),
+                window.dataService.getMatches(),
+                window.dataService.getScheduleSessions(),
+              ]);
+              this.trainingSessions = training || [];
+              this.matches = matches || [];
+              this.scheduledSessions = schedule || [];
+              this.goals = []; // TODO: future goals collection
+              return;
+            } catch (err) {
+              console.warn(
+                "Remote load failed; falling back to localStorage.",
+                err
+              );
+            }
+          }
+
+          // Fallback to localStorage
           const trainingSessions = localStorage.getItem(
             `trainingSessions_${this.userEmail}`
           );
           this.trainingSessions = trainingSessions
             ? JSON.parse(trainingSessions)
             : [];
-
-          // Load scheduled sessions
           const scheduledSessions = localStorage.getItem(
             "shuttleStats_sessions"
           );
           this.scheduledSessions = scheduledSessions
             ? JSON.parse(scheduledSessions)
             : [];
-
-          // Load matches
           const matches = localStorage.getItem(`matches_${this.userEmail}`);
           this.matches = matches ? JSON.parse(matches) : [];
-
-          // Load goals (placeholder for future implementation)
           const goals = localStorage.getItem(`goals_${this.userEmail}`);
           this.goals = goals ? JSON.parse(goals) : [];
-
-          // Debug logging
-          console.log("Dashboard Data Loaded:", {
-            userEmail: this.userEmail,
-            trainingSessions: this.trainingSessions.length,
-            scheduledSessions: this.scheduledSessions.length,
-            matches: this.matches.length,
-            goals: this.goals.length,
-          });
         }
 
         updateStats() {
@@ -851,45 +893,9 @@
             }, 100);
           }
         });
-
       }
 
-      function setupDropdown() {
-        console.log("Setting up dropdown...");
-        
-        try {
-          const dropdownToggle = document.querySelector(".dropdown-toggle");
-          const dropdownMenu = document.querySelector(".dropdown-menu");
-
-          console.log("Dropdown toggle:", dropdownToggle);
-          console.log("Dropdown menu:", dropdownMenu);
-
-          if (!dropdownToggle || !dropdownMenu) {
-            console.error("Dropdown elements not found!");
-            return;
-          }
-
-          // Simple click handler without cloning
-          dropdownToggle.addEventListener("click", function (e) {
-            console.log("Dropdown toggle clicked");
-            e.preventDefault();
-            e.stopPropagation();
-            dropdownMenu.classList.toggle("show");
-            console.log("Dropdown menu classes:", dropdownMenu.className);
-          });
-
-          // Close dropdown when clicking outside
-          document.addEventListener("click", function (e) {
-            if (!dropdownMenu.contains(e.target) && !dropdownToggle.contains(e.target)) {
-              dropdownMenu.classList.remove("show");
-            }
-          });
-
-          console.log("Dropdown setup completed successfully");
-        } catch (error) {
-          console.error("Error setting up dropdown:", error);
-        }
-      }
+      // setupDropdown now provided by common-ui.js
 
       // Quick action functions
       function logTraining() {
@@ -922,97 +928,7 @@
       }
 
       // Sidebar toggle functionality
-      function setupSidebar() {
-        console.log("Setting up sidebar...");
-        
-        try {
-          const sidebarToggle = document.getElementById("sidebarToggle");
-          const sidebar = document.getElementById("sidebar");
-          const sidebarOverlay = document.getElementById("sidebarOverlay");
-
-          console.log("Sidebar toggle:", sidebarToggle);
-          console.log("Sidebar:", sidebar);
-          console.log("Sidebar overlay:", sidebarOverlay);
-
-          if (!sidebarToggle || !sidebar || !sidebarOverlay) {
-            console.error("Sidebar elements not found!");
-            return;
-          }
-
-          function toggleSidebar() {
-            console.log("Toggling sidebar");
-            sidebar.classList.toggle("active");
-            sidebarOverlay.classList.toggle("active");
-            sidebarToggle.classList.toggle("active");
-            console.log("Sidebar classes:", sidebar.className);
-          }
-
-          function closeSidebar() {
-            console.log("Closing sidebar");
-            sidebar.classList.remove("active");
-            sidebarOverlay.classList.remove("active");
-            sidebarToggle.classList.remove("active");
-          }
-
-          // Toggle sidebar on button click
-          sidebarToggle.addEventListener("click", function(e) {
-            console.log("Sidebar toggle clicked");
-            e.preventDefault();
-            toggleSidebar();
-          });
-
-          // Close sidebar when clicking overlay
-          sidebarOverlay.addEventListener("click", closeSidebar);
-
-          // Close sidebar on escape key
-          document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape" && sidebar.classList.contains("active")) {
-              closeSidebar();
-            }
-          });
-
-          // Auto-close sidebar on menu item click (mobile behavior)
-          document.querySelectorAll(".menu-item").forEach((item) => {
-            item.addEventListener("click", function () {
-              if (window.innerWidth <= 768) {
-                closeSidebar();
-              }
-            });
-          });
-
-          console.log("Sidebar setup completed successfully");
-        } catch (error) {
-          console.error("Error setting up sidebar:", error);
-        }
-
-        function closeSidebar() {
-          sidebar.classList.remove("active");
-          sidebarOverlay.classList.remove("active");
-          sidebarToggle.classList.remove("active");
-        }
-
-        // Toggle sidebar on button click
-        sidebarToggle.addEventListener("click", toggleSidebar);
-
-        // Close sidebar when clicking overlay
-        sidebarOverlay.addEventListener("click", closeSidebar);
-
-        // Close sidebar on escape key
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape" && sidebar.classList.contains("active")) {
-            closeSidebar();
-          }
-        });
-
-        // Auto-close sidebar on menu item click (mobile behavior)
-        document.querySelectorAll(".menu-item").forEach((item) => {
-          item.addEventListener("click", function () {
-            if (window.innerWidth <= 768) {
-              closeSidebar();
-            }
-          });
-        });
-      }
+      // setupSidebar now provided by common-ui.js
 
       // Menu navigation
       document.querySelectorAll(".menu-item").forEach((item) => {

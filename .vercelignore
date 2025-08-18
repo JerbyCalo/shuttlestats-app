@@ -1,0 +1,10 @@
+# Do not deploy archived test/legacy pages
+archive/
+
+# Exclude legacy/test pages from deployment
+force-clear.html
+test-data.html
+test-navigation.html
+test-schedule.html
+test-settings.html
+test-*.html

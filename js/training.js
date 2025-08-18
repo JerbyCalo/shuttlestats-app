@@ -1,8 +1,10 @@
 // Training Page JavaScript Functionality
 
-class TrainingManager {
+export class TrainingManager {
   constructor() {
     this.sessions = [];
+    this.remote = typeof window !== "undefined" && !!window.dataService;
+    this.unsubscribe = null;
     this.focusAreaLabels = {
       footwork: "Footwork Drills",
       backhand: "Backhand Techniques",
@@ -17,7 +19,43 @@ class TrainingManager {
   }
 
   init() {
-    this.loadSessions();
+    // Prefer Firestore subscription when available
+    if (
+      this.remote &&
+      window.dataService &&
+      typeof window.dataService.subscribeToTrainingSessions === "function"
+    ) {
+      try {
+        this.unsubscribe = window.dataService.subscribeToTrainingSessions(
+          (sessions) => {
+            // Ensure data shape parity with local version
+            this.sessions = (sessions || []).map((s) => ({
+              id: s.id,
+              date: s.date,
+              duration: parseInt(s.duration) || 0,
+              location: s.location || "",
+              type: s.type || "individual",
+              focusAreas: Array.isArray(s.focusAreas) ? s.focusAreas : [],
+              rating: parseInt(s.rating) || 5,
+              effort: parseInt(s.effort) || 5,
+              notes: s.notes || "",
+              nextGoals: s.nextGoals || "",
+              createdAt: s.createdAt || new Date().toISOString(),
+            }));
+            this.updateStats();
+            this.renderSessions();
+            this.updateInsights();
+          }
+        );
+      } catch (err) {
+        console.error("Failed to subscribe to training sessions:", err);
+        // Fallback to local if something goes wrong
+        this.remote = false;
+        this.loadSessions();
+      }
+    } else {
+      this.loadSessions();
+    }
     this.setupEventListeners();
     this.updateStats();
     this.renderSessions();
@@ -109,7 +147,7 @@ class TrainingManager {
       .scrollIntoView({ behavior: "smooth" });
   }
 
-  saveSession(e) {
+  async saveSession(e) {
     e.preventDefault();
 
     const formData = new FormData(e.target);
@@ -121,6 +159,7 @@ class TrainingManager {
     }
 
     const session = {
+      // id will be assigned by Firestore when in remote mode
       id: Date.now().toString(),
       date: formData.get("date"),
       duration: parseInt(formData.get("duration")),
@@ -134,14 +173,28 @@ class TrainingManager {
       createdAt: new Date().toISOString(),
     };
 
-    this.sessions.unshift(session); // Add to beginning of array
-    this.saveSessions();
-    this.updateStats();
-    this.renderSessions();
-    this.updateInsights();
+    try {
+      if (
+        this.remote &&
+        window.dataService &&
+        typeof window.dataService.addTrainingSession === "function"
+      ) {
+        await window.dataService.addTrainingSession(session);
+        // UI will refresh via subscription
+      } else {
+        this.sessions.unshift(session);
+        this.saveSessions();
+      }
 
-    this.showMessage("Training session saved successfully!", "success");
-    this.hideSessionForm();
+      this.updateStats();
+      this.renderSessions();
+      this.updateInsights();
+      this.showMessage("Training session saved successfully!", "success");
+      this.hideSessionForm();
+    } catch (err) {
+      console.error("Failed to save session:", err);
+      this.showMessage("Failed to save session. Please try again.", "error");
+    }
   }
 
   loadSessions() {
@@ -416,16 +469,32 @@ class TrainingManager {
     this.showMessage("Edit functionality coming soon!", "info");
   }
 
-  deleteSession(sessionId) {
-    if (confirm("Are you sure you want to delete this training session?")) {
-      this.sessions = this.sessions.filter(
-        (session) => session.id !== sessionId
-      );
-      this.saveSessions();
-      this.updateStats();
-      this.renderSessions();
-      this.updateInsights();
+  async deleteSession(sessionId) {
+    if (!confirm("Are you sure you want to delete this training session?")) {
+      return;
+    }
+
+    try {
+      if (
+        this.remote &&
+        window.dataService &&
+        typeof window.dataService.deleteTrainingSession === "function"
+      ) {
+        await window.dataService.deleteTrainingSession(sessionId);
+        // UI will refresh via subscription
+      } else {
+        this.sessions = this.sessions.filter(
+          (session) => session.id !== sessionId
+        );
+        this.saveSessions();
+        this.updateStats();
+        this.renderSessions();
+        this.updateInsights();
+      }
       this.showMessage("Training session deleted.", "success");
+    } catch (err) {
+      console.error("Failed to delete session:", err);
+      this.showMessage("Failed to delete. Please try again.", "error");
     }
   }
 
@@ -501,10 +570,20 @@ class TrainingManager {
   }
 }
 
-// Initialize when DOM is loaded
+// Initialize when DOM is loaded (can be suppressed by setting window.shouldAutoInitTraining = false)
 document.addEventListener("DOMContentLoaded", () => {
+  if (window.shouldAutoInitTraining === false) return;
   // Only initialize if we're on the training page
   if (document.getElementById("trainingSessionForm")) {
     window.trainingManager = new TrainingManager();
   }
 });
+
+// Backwards compatibility: attach to window and provide default export when used as a module
+try {
+  if (typeof window !== "undefined") {
+    window.TrainingManager = TrainingManager;
+  }
+} catch (_) {}
+
+export default TrainingManager;

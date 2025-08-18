@@ -423,10 +423,25 @@
     <div id="messageContainer" class="message-container"></div>
 
     <script src="js/app.js"></script>
-    <script src="js/training.js"></script>
+    <script src="js/common-ui.js"></script>
     <script>
-      // Initialize training page
-      document.addEventListener("DOMContentLoaded", function () {
+      // Prevent auto init from training.js; we'll init after auth wiring
+      window.shouldAutoInitTraining = false;
+    </script>
+    <script type="module">
+      import { authService } from "./js/auth-service.js";
+      import { dataService } from "./js/data-service.js";
+      import "./js/training.js"; // defines TrainingManager globally
+
+      // Expose services for non-module scripts
+      window.dataService = dataService;
+      window.authService = authService;
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Setup dropdown and sidebar via shared helpers
+        if (typeof setupDropdown === "function") setupDropdown();
+        if (typeof setupSidebar === "function") setupSidebar();
+
         // Set current date
         const today = new Date();
         document.getElementById("currentDate").textContent =
@@ -436,98 +451,53 @@
             month: "long",
             day: "numeric",
           });
-
-        // Set default date for session form
         document.getElementById("sessionDate").value = today
           .toISOString()
           .split("T")[0];
 
-        // Setup user info
-        const userEmail =
-          localStorage.getItem("userEmail") || "practice@gmail.com";
-        const userRole = localStorage.getItem("userRole") || "player";
-        document.getElementById("userName").textContent = `Welcome back, ${
-          userEmail.split("@")[0]
-        }!`;
+        // Auth gating: redirect if not authenticated after a short wait
+        if (!authService.isAuthenticated()) {
+          // Give the auth listener a moment to populate on refresh
+          await new Promise((r) => setTimeout(r, 600));
+        }
 
-        // Show appropriate sidebar sections
+        const user = authService.getCurrentUser();
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        // Wire dataService with current user
+        dataService.setCurrentUser(user.uid);
+
+        // Update user display name
+        const name =
+          user.displayName ||
+          (user.email ? user.email.split("@")[0] : "Player");
+        const nameEl = document.getElementById("userName");
+        if (nameEl) nameEl.textContent = `Welcome back, ${name}!`;
+
+        // Role-based sidebar (optional: could drive from user profile later)
+        const userRole = localStorage.getItem("userRole") || "player";
         if (userRole === "coach") {
           document.getElementById("playerSection").style.display = "none";
           document.getElementById("coachSection").style.display = "block";
         }
 
-        // Initialize training functionality
+        // Initialize TrainingManager once services are ready
         if (typeof TrainingManager !== "undefined") {
           window.trainingManager = new TrainingManager();
         }
 
-        // Setup dropdown and sidebar
-        setupDropdown();
-        setupSidebar();
+        // Attach logout handler using authService
+        window.logout = async function () {
+          if (!confirm("Are you sure you want to logout?")) return;
+          const result = await authService.signOut();
+          if (result.success) {
+            window.location.href = "login.html";
+          }
+        };
       });
-
-      // Dropdown and sidebar functions (reused from dashboard)
-      function setupDropdown() {
-        const dropdownToggle = document.querySelector(".dropdown-toggle");
-        const dropdownMenu = document.querySelector(".dropdown-menu");
-
-        if (!dropdownToggle || !dropdownMenu) return;
-
-        const newToggle = dropdownToggle.cloneNode(true);
-        const newMenu = dropdownMenu.cloneNode(true);
-        dropdownToggle.parentNode.replaceChild(newToggle, dropdownToggle);
-        dropdownMenu.parentNode.replaceChild(newMenu, dropdownMenu);
-
-        const toggle = document.querySelector(".dropdown-toggle");
-        const menu = document.querySelector(".dropdown-menu");
-
-        toggle.addEventListener("click", function (e) {
-          e.stopPropagation();
-          menu.classList.toggle("show");
-        });
-
-        document.addEventListener("click", function (e) {
-          if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-            menu.classList.remove("show");
-          }
-        });
-      }
-
-      function setupSidebar() {
-        const sidebarToggle = document.getElementById("sidebarToggle");
-        const sidebar = document.getElementById("sidebar");
-        const sidebarOverlay = document.getElementById("sidebarOverlay");
-
-        function toggleSidebar() {
-          sidebar.classList.toggle("active");
-          sidebarOverlay.classList.toggle("active");
-          sidebarToggle.classList.toggle("active");
-        }
-
-        function closeSidebar() {
-          sidebar.classList.remove("active");
-          sidebarOverlay.classList.remove("active");
-          sidebarToggle.classList.remove("active");
-        }
-
-        sidebarToggle.addEventListener("click", toggleSidebar);
-        sidebarOverlay.addEventListener("click", closeSidebar);
-
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape" && sidebar.classList.contains("active")) {
-            closeSidebar();
-          }
-        });
-      }
-
-      function logout() {
-        if (confirm("Are you sure you want to logout?")) {
-          localStorage.removeItem("userRole");
-          localStorage.removeItem("userEmail");
-          localStorage.removeItem("shuttlestats-user");
-          window.location.href = "index.html";
-        }
-      }
     </script>
   </body>
 </html>
