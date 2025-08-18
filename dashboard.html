@@ -856,64 +856,38 @@
 
       function setupDropdown() {
         console.log("Setting up dropdown...");
-        const dropdownToggle = document.querySelector(".dropdown-toggle");
-        const dropdownMenu = document.querySelector(".dropdown-menu");
+        
+        try {
+          const dropdownToggle = document.querySelector(".dropdown-toggle");
+          const dropdownMenu = document.querySelector(".dropdown-menu");
 
-        console.log("Dropdown toggle:", dropdownToggle);
-        console.log("Dropdown menu:", dropdownMenu);
+          console.log("Dropdown toggle:", dropdownToggle);
+          console.log("Dropdown menu:", dropdownMenu);
 
-        if (!dropdownToggle || !dropdownMenu) {
-          console.error("Dropdown elements not found!");
-          return;
-        }
-
-        // Remove any existing event listeners by cloning elements
-        const newToggle = dropdownToggle.cloneNode(true);
-        const newMenu = dropdownMenu.cloneNode(true);
-        dropdownToggle.parentNode.replaceChild(newToggle, dropdownToggle);
-        dropdownMenu.parentNode.replaceChild(newMenu, dropdownMenu);
-
-        // Get references to the new elements
-        const toggle = document.querySelector(".dropdown-toggle");
-        const menu = document.querySelector(".dropdown-menu");
-
-        toggle.addEventListener("click", function (e) {
-          console.log("Dropdown toggle clicked");
-          e.stopPropagation();
-          menu.classList.toggle("show");
-          console.log("Dropdown menu classes:", menu.className);
-        });
-
-        // Close dropdown when clicking outside
-        document.addEventListener("click", function (e) {
-          if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-            menu.classList.remove("show");
+          if (!dropdownToggle || !dropdownMenu) {
+            console.error("Dropdown elements not found!");
+            return;
           }
-        });
 
-        // Add click handlers for dropdown menu items
-        const settingsBtn = menu.querySelector('a[href="#settings"]');
-        const profileBtn = menu.querySelector('a[href="#profile"]');
-
-        console.log("Settings button:", settingsBtn);
-        console.log("Profile button:", profileBtn);
-
-        if (settingsBtn) {
-          settingsBtn.addEventListener("click", function (e) {
-            console.log("Settings clicked");
+          // Simple click handler without cloning
+          dropdownToggle.addEventListener("click", function (e) {
+            console.log("Dropdown toggle clicked");
             e.preventDefault();
-            handleSettingsClick();
-            menu.classList.remove("show");
+            e.stopPropagation();
+            dropdownMenu.classList.toggle("show");
+            console.log("Dropdown menu classes:", dropdownMenu.className);
           });
-        }
 
-        if (profileBtn) {
-          profileBtn.addEventListener("click", function (e) {
-            console.log("Profile clicked");
-            e.preventDefault();
-            handleProfileClick();
-            menu.classList.remove("show");
+          // Close dropdown when clicking outside
+          document.addEventListener("click", function (e) {
+            if (!dropdownMenu.contains(e.target) && !dropdownToggle.contains(e.target)) {
+              dropdownMenu.classList.remove("show");
+            }
           });
+
+          console.log("Dropdown setup completed successfully");
+        } catch (error) {
+          console.error("Error setting up dropdown:", error);
         }
       }
 
@@ -949,14 +923,66 @@
 
       // Sidebar toggle functionality
       function setupSidebar() {
-        const sidebarToggle = document.getElementById("sidebarToggle");
-        const sidebar = document.getElementById("sidebar");
-        const sidebarOverlay = document.getElementById("sidebarOverlay");
+        console.log("Setting up sidebar...");
+        
+        try {
+          const sidebarToggle = document.getElementById("sidebarToggle");
+          const sidebar = document.getElementById("sidebar");
+          const sidebarOverlay = document.getElementById("sidebarOverlay");
 
-        function toggleSidebar() {
-          sidebar.classList.toggle("active");
-          sidebarOverlay.classList.toggle("active");
-          sidebarToggle.classList.toggle("active");
+          console.log("Sidebar toggle:", sidebarToggle);
+          console.log("Sidebar:", sidebar);
+          console.log("Sidebar overlay:", sidebarOverlay);
+
+          if (!sidebarToggle || !sidebar || !sidebarOverlay) {
+            console.error("Sidebar elements not found!");
+            return;
+          }
+
+          function toggleSidebar() {
+            console.log("Toggling sidebar");
+            sidebar.classList.toggle("active");
+            sidebarOverlay.classList.toggle("active");
+            sidebarToggle.classList.toggle("active");
+            console.log("Sidebar classes:", sidebar.className);
+          }
+
+          function closeSidebar() {
+            console.log("Closing sidebar");
+            sidebar.classList.remove("active");
+            sidebarOverlay.classList.remove("active");
+            sidebarToggle.classList.remove("active");
+          }
+
+          // Toggle sidebar on button click
+          sidebarToggle.addEventListener("click", function(e) {
+            console.log("Sidebar toggle clicked");
+            e.preventDefault();
+            toggleSidebar();
+          });
+
+          // Close sidebar when clicking overlay
+          sidebarOverlay.addEventListener("click", closeSidebar);
+
+          // Close sidebar on escape key
+          document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && sidebar.classList.contains("active")) {
+              closeSidebar();
+            }
+          });
+
+          // Auto-close sidebar on menu item click (mobile behavior)
+          document.querySelectorAll(".menu-item").forEach((item) => {
+            item.addEventListener("click", function () {
+              if (window.innerWidth <= 768) {
+                closeSidebar();
+              }
+            });
+          });
+
+          console.log("Sidebar setup completed successfully");
+        } catch (error) {
+          console.error("Error setting up sidebar:", error);
         }
 
         function closeSidebar() {
