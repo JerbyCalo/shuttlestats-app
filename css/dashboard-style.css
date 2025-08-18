@@ -22,6 +22,43 @@ body {
     #f8f9fa;
 }
 
+/* Shared Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1211ca, #f9b314);
+  color: #fff;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(18, 17, 202, 0.3);
+}
+
+.btn-secondary {
+  background: #f8f9fa;
+  color: #1211ca;
+  border: 2px solid #e2e8f0;
+}
+.btn-secondary:hover {
+  background: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+}
+
 /* Navigation */
 .navbar {
   position: fixed;

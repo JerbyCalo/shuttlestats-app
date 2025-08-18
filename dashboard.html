@@ -381,6 +381,11 @@
                 this.updateUpcomingEvents();
                 this.updateRecentActivities();
               });
+              // Goals
+              window.dataService.subscribeToGoals((goals) => {
+                this.goals = goals || [];
+                this.updateStats();
+              });
             } catch (err) {
               console.warn(
                 "Dashboard subscriptions failed; continuing with one-time load.",
@@ -393,15 +398,16 @@
         async loadAllData() {
           if (this.remote && window.dataService) {
             try {
-              const [training, matches, schedule] = await Promise.all([
+              const [training, matches, schedule, goals] = await Promise.all([
                 window.dataService.getTrainingSessions(),
                 window.dataService.getMatches(),
                 window.dataService.getScheduleSessions(),
+                window.dataService.getGoals(),
               ]);
               this.trainingSessions = training || [];
               this.matches = matches || [];
               this.scheduledSessions = schedule || [];
-              this.goals = []; // TODO: future goals collection
+              this.goals = goals || [];
               return;
             } catch (err) {
               console.warn(
@@ -435,7 +441,11 @@
           const trainingCount = this.trainingSessions?.length || 0;
           const matchesCount = this.matches?.length || 0;
           const improvement = this.calculateImprovementRate();
-          const goalsCount = this.goals?.length || 0;
+          const goalsCount = Array.isArray(this.goals)
+            ? (this.goals.some((g) => typeof g.completed !== "undefined")
+                ? this.goals.filter((g) => g.completed === true).length
+                : this.goals.length)
+            : 0;
 
           const setText = (id, val) => {
             const el = document.getElementById(id);
@@ -910,10 +920,25 @@
         window.location.href = "schedule.html";
       }
 
-      function setGoal() {
-        alert(
-          "Goal setting feature coming soon! This will allow you to set and track training goals."
-        );
+      async function setGoal() {
+        try {
+          if (!window.dataService || !window.authService) {
+            alert("Please log in to set goals.");
+            return;
+          }
+          const title = prompt("What's your new goal? (e.g., 3x training this week)");
+          if (!title) return;
+          const targetDate = prompt("Target date (YYYY-MM-DD), optional:");
+          const payload = { title: title.trim(), completed: false };
+          if (targetDate && /\d{4}-\d{2}-\d{2}/.test(targetDate)) {
+            payload.targetDate = targetDate;
+          }
+          await window.dataService.addGoal(payload);
+          alert("Goal added!");
+        } catch (e) {
+          console.error(e);
+          alert("Failed to add goal. Try again.");
+        }
       }
 
       function logout() {

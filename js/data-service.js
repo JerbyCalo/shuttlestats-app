@@ -217,6 +217,66 @@ class DataService {
     }
   }
 
+  // Goals
+  async getGoals() {
+    if (!this.currentUserId) return [];
+
+    try {
+      const q = query(
+        collection(db, "goals"),
+        where("userId", "==", this.currentUserId),
+        orderBy("createdAt", "desc")
+      );
+
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error("Error getting goals:", error);
+      return [];
+    }
+  }
+
+  async addGoal(goalData) {
+    if (!this.currentUserId) throw new Error("User not authenticated");
+
+    try {
+      const payload = {
+        title: goalData.title || "Untitled Goal",
+        description: goalData.description || "",
+        targetDate: goalData.targetDate || null,
+        completed: !!goalData.completed,
+        userId: this.currentUserId,
+        createdAt: new Date(),
+      };
+      const docRef = await addDoc(collection(db, "goals"), payload);
+      return { id: docRef.id, ...payload };
+    } catch (error) {
+      console.error("Error adding goal:", error);
+      throw error;
+    }
+  }
+
+  async updateGoal(goalId, updates) {
+    try {
+      const goalRef = doc(db, "goals", goalId);
+      await updateDoc(goalRef, { ...updates, updatedAt: new Date() });
+      return true;
+    } catch (error) {
+      console.error("Error updating goal:", error);
+      throw error;
+    }
+  }
+
+  async deleteGoal(goalId) {
+    try {
+      await deleteDoc(doc(db, "goals", goalId));
+      return true;
+    } catch (error) {
+      console.error("Error deleting goal:", error);
+      throw error;
+    }
+  }
+
   // Real-time listeners
   subscribeToTrainingSessions(callback) {
     if (!this.currentUserId) return null;
@@ -278,6 +338,24 @@ class DataService {
     });
 
     this.listeners.set("schedule_sessions", unsubscribe);
+    return unsubscribe;
+  }
+
+  subscribeToGoals(callback) {
+    if (!this.currentUserId) return null;
+
+    const q = query(
+      collection(db, "goals"),
+      where("userId", "==", this.currentUserId),
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const goals = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      callback(goals);
+    });
+
+    this.listeners.set("goals", unsubscribe);
     return unsubscribe;
   }
 
