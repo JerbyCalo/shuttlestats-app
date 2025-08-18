@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Schedule Debug Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ccc;
+      }
+      button {
+        margin: 5px;
+        padding: 10px;
+      }
+      pre {
+        background: #f5f5f5;
+        padding: 10px;
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Schedule Debug Test</h1>
+
+    <div class="test-section">
+      <h2>Current Sessions in Storage</h2>
+      <button onclick="showCurrentSessions()">Show Current Sessions</button>
+      <button onclick="clearSessions()">Clear All Sessions</button>
+      <div id="current-sessions"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>Add Test Session</h2>
+      <button onclick="addTestSession()">Add Test Session</button>
+      <div id="test-result"></div>
+    </div>
+
+    <div class="test-section">
+      <h2>Date Format Test</h2>
+      <button onclick="testDateFormats()">Test Date Formats</button>
+      <div id="date-test"></div>
+    </div>
+
+    <script>
+      function showCurrentSessions() {
+        const stored = localStorage.getItem("shuttleStats_sessions");
+        const sessions = stored ? JSON.parse(stored) : [];
+        document.getElementById("current-sessions").innerHTML = `<h3>Found ${
+          sessions.length
+        } sessions:</h3><pre>${JSON.stringify(sessions, null, 2)}</pre>`;
+      }
+
+      function clearSessions() {
+        localStorage.removeItem("shuttleStats_sessions");
+        document.getElementById("current-sessions").innerHTML =
+          "<p>Sessions cleared!</p>";
+      }
+
+      function addTestSession() {
+        const testSession = {
+          id: Date.now().toString(),
+          title: "Test Training Session - Aug 19",
+          type: "training",
+          date: "2025-08-19", // Today's date
+          time: "10:00",
+          duration: 60,
+          location: "Test Court",
+          description: "Test session for debugging date display",
+          intensity: "medium",
+          reminderEnabled: true,
+          reminderTime: "30",
+          createdAt: new Date().toISOString(),
+        };
+
+        const stored = localStorage.getItem("shuttleStats_sessions");
+        const sessions = stored ? JSON.parse(stored) : [];
+        sessions.push(testSession);
+        localStorage.setItem("shuttleStats_sessions", JSON.stringify(sessions));
+
+        document.getElementById(
+          "test-result"
+        ).innerHTML = `<p>Test session added! Total sessions: ${
+          sessions.length
+        }</p>
+                <pre>${JSON.stringify(testSession, null, 2)}</pre>`;
+      }
+
+      function testDateFormats() {
+        const testDate = new Date(2025, 7, 19); // August 19, 2025 (month is 0-indexed)
+        const testDateFromString = new Date("2025-08-19");
+
+        // Local timezone date formatting
+        const year = testDate.getFullYear();
+        const month = String(testDate.getMonth() + 1).padStart(2, "0");
+        const day = String(testDate.getDate()).padStart(2, "0");
+        const localDateStr = `${year}-${month}-${day}`;
+
+        const results = {
+          "Original Date": testDate.toString(),
+          "ISO Date (YYYY-MM-DD)": testDate.toISOString().split("T")[0],
+          "Local Date String": localDateStr,
+          "From String ISO": testDateFromString.toISOString().split("T")[0],
+          "Input date": "2025-08-19",
+          "Local comparison": localDateStr === "2025-08-19",
+          "ISO comparison":
+            testDate.toISOString().split("T")[0] === "2025-08-19",
+          "Timezone offset": testDate.getTimezoneOffset() + " minutes",
+        };
+
+        document.getElementById(
+          "date-test"
+        ).innerHTML = `<h3>Date Format Tests:</h3><pre>${JSON.stringify(
+          results,
+          null,
+          2
+        )}</pre>`;
+      }
+
+      // Show current sessions on load
+      window.onload = showCurrentSessions;
+    </script>
+  </body>
+</html>

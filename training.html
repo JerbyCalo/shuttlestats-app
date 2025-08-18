@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Training - ShuttleStats</title>
+    <link rel="stylesheet" href="css/dashboard-style.css" />
+    <link rel="stylesheet" href="css/training.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <span class="logo-icon">🏸</span>
+          <span class="logo-text"
+            ><span class="logo-shuttle">Shuttle</span
+            ><span class="logo-stats">Stats</span></span
+          >
+        </div>
+        <div class="nav-right">
+          <div class="user-info">
+            <span class="user-name" id="userName">Welcome back!</span>
+            <div class="user-dropdown">
+              <button class="dropdown-toggle">⚙️</button>
+              <div class="dropdown-menu">
+                <a href="#profile">Profile</a>
+                <a href="#settings">Settings</a>
+                <a href="#" onclick="logout()">Logout</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Training Content -->
+    <main class="dashboard-main">
+      <!-- Sidebar Toggle Button -->
+      <button class="sidebar-toggle" id="sidebarToggle">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
+      <!-- Sidebar Overlay -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-menu">
+          <div class="menu-section">
+            <h3>Overview</h3>
+            <ul>
+              <li>
+                <a href="dashboard.html" class="menu-item">📊 Dashboard</a>
+              </li>
+              <li>
+                <a href="training.html" class="menu-item active">🏃‍♂️ Training</a>
+              </li>
+              <li><a href="matches.html" class="menu-item">🏆 Matches</a></li>
+              <li><a href="schedule.html" class="menu-item">📅 Schedule</a></li>
+            </ul>
+          </div>
+          <div class="menu-section" id="playerSection">
+            <h3>Player Tools</h3>
+            <ul>
+              <li><a href="#progress" class="menu-item">📈 Progress</a></li>
+              <li>
+                <a href="#achievements" class="menu-item">🎯 Achievements</a>
+              </li>
+              <li><a href="#goals" class="menu-item">⭐ Goals</a></li>
+            </ul>
+          </div>
+          <div class="menu-section" id="coachSection" style="display: none">
+            <h3>Coach Tools</h3>
+            <ul>
+              <li><a href="#players" class="menu-item">👥 My Players</a></li>
+              <li><a href="#plans" class="menu-item">📋 Training Plans</a></li>
+              <li><a href="#feedback" class="menu-item">💬 Feedback</a></li>
+              <li><a href="#reports" class="menu-item">📊 Reports</a></li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Training Header -->
+        <div class="content-header">
+          <h1>Training Sessions</h1>
+          <p class="current-date" id="currentDate"></p>
+        </div>
+
+        <!-- Training Actions -->
+        <div class="training-actions">
+          <button class="btn btn-primary" id="newSessionBtn">
+            <span class="btn-icon">➕</span>
+            Log New Session
+          </button>
+          <button class="btn btn-secondary" id="viewHistoryBtn">
+            <span class="btn-icon">📊</span>
+            View History
+          </button>
+          <button class="btn btn-secondary" id="exportDataBtn">
+            <span class="btn-icon">📤</span>
+            Export Data
+          </button>
+        </div>
+
+        <!-- Training Stats Overview -->
+        <div class="training-stats">
+          <div class="stat-card">
+            <div class="stat-icon">🏃‍♂️</div>
+            <div class="stat-info">
+              <span class="stat-number" id="totalSessions">0</span>
+              <span class="stat-label">Total Sessions</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-info">
+              <span class="stat-number" id="totalHours">0</span>
+              <span class="stat-label">Total Hours</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+              <span class="stat-number" id="thisWeek">0</span>
+              <span class="stat-label">This Week</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-info">
+              <span class="stat-number" id="avgRating">0</span>
+              <span class="stat-label">Avg Rating</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Training Content Sections -->
+        <div class="training-content">
+          <!-- Session Logging Form -->
+          <div id="sessionForm" class="training-section" style="display: none">
+            <div class="section-card">
+              <h2>Log Training Session</h2>
+              <form id="trainingSessionForm" class="session-form">
+                <!-- Basic Information -->
+                <div class="form-section">
+                  <h3>Session Details</h3>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="sessionDate">Date</label>
+                      <input
+                        type="date"
+                        id="sessionDate"
+                        name="date"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="sessionDuration">Duration (minutes)</label>
+                      <input
+                        type="number"
+                        id="sessionDuration"
+                        name="duration"
+                        min="5"
+                        max="480"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="sessionLocation">Location</label>
+                      <input
+                        type="text"
+                        id="sessionLocation"
+                        name="location"
+                        placeholder="e.g., City Sports Center"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="sessionType">Session Type</label>
+                      <select id="sessionType" name="type" required>
+                        <option value="">Select type</option>
+                        <option value="individual">Individual Training</option>
+                        <option value="group">Group Training</option>
+                        <option value="coaching">Coaching Session</option>
+                        <option value="self-practice">Self Practice</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Focus Areas -->
+                <div class="form-section">
+                  <h3>Focus Areas</h3>
+                  <div class="focus-areas-grid">
+                    <label class="focus-area-item">
+                      <input
+                        type="checkbox"
+                        name="focusAreas"
+                        value="footwork"
+                      />
+                      <span class="focus-icon">🦵</span>
+                      <span class="focus-label">Footwork Drills</span>
+                    </label>
+                    <label class="focus-area-item">
+                      <input
+                        type="checkbox"
+                        name="focusAreas"
+                        value="backhand"
+                      />
+                      <span class="focus-icon">🏸</span>
+                      <span class="focus-label">Backhand Techniques</span>
+                    </label>
+                    <label class="focus-area-item">
+                      <input
+                        type="checkbox"
+                        name="focusAreas"
+                        value="forehand"
+                      />
+                      <span class="focus-icon">💪</span>
+                      <span class="focus-label">Forehand Shots</span>
+                    </label>
+                    <label class="focus-area-item">
+                      <input type="checkbox" name="focusAreas" value="serve" />
+                      <span class="focus-icon">🎯</span>
+                      <span class="focus-label">Serving Practice</span>
+                    </label>
+                    <label class="focus-area-item">
+                      <input type="checkbox" name="focusAreas" value="smash" />
+                      <span class="focus-icon">⚡</span>
+                      <span class="focus-label">Smash Technique</span>
+                    </label>
+                    <label class="focus-area-item">
+                      <input
+                        type="checkbox"
+                        name="focusAreas"
+                        value="defense"
+                      />
+                      <span class="focus-icon">🛡️</span>
+                      <span class="focus-label">Defensive Play</span>
+                    </label>
+                    <label class="focus-area-item">
+                      <input
+                        type="checkbox"
+                        name="focusAreas"
+                        value="doubles"
+                      />
+                      <span class="focus-icon">👥</span>
+                      <span class="focus-label">Doubles Strategy</span>
+                    </label>
+                    <label class="focus-area-item">
+                      <input
+                        type="checkbox"
+                        name="focusAreas"
+                        value="conditioning"
+                      />
+                      <span class="focus-icon">💪</span>
+                      <span class="focus-label">Physical Conditioning</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Performance Rating -->
+                <div class="form-section">
+                  <h3>Performance Assessment</h3>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="overallRating">Overall Performance</label>
+                      <div class="rating-input">
+                        <input
+                          type="range"
+                          id="overallRating"
+                          name="rating"
+                          min="1"
+                          max="10"
+                          value="5"
+                        />
+                        <div class="rating-display">
+                          <span id="ratingValue">5</span>/10
+                        </div>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label for="effortLevel">Effort Level</label>
+                      <div class="rating-input">
+                        <input
+                          type="range"
+                          id="effortLevel"
+                          name="effort"
+                          min="1"
+                          max="10"
+                          value="5"
+                        />
+                        <div class="rating-display">
+                          <span id="effortValue">5</span>/10
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="form-section">
+                  <h3>Session Notes</h3>
+                  <div class="form-group">
+                    <label for="sessionNotes"
+                      >What went well? What needs improvement?</label
+                    >
+                    <textarea
+                      id="sessionNotes"
+                      name="notes"
+                      rows="4"
+                      placeholder="Describe your training session, achievements, challenges, and areas for improvement..."
+                    ></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="nextGoals">Goals for Next Session</label>
+                    <textarea
+                      id="nextGoals"
+                      name="nextGoals"
+                      rows="2"
+                      placeholder="What do you want to focus on in your next training session?"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="cancelSessionBtn"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    Save Session
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Training History -->
+          <div id="trainingHistory" class="training-section">
+            <div class="section-card">
+              <div class="section-header">
+                <h2>Recent Training Sessions</h2>
+                <div class="filter-controls">
+                  <select id="filterFocus" class="filter-select">
+                    <option value="">All Focus Areas</option>
+                    <option value="footwork">Footwork</option>
+                    <option value="backhand">Backhand</option>
+                    <option value="forehand">Forehand</option>
+                    <option value="serve">Serving</option>
+                    <option value="smash">Smash</option>
+                    <option value="defense">Defense</option>
+                    <option value="doubles">Doubles</option>
+                    <option value="conditioning">Conditioning</option>
+                  </select>
+                  <select id="filterPeriod" class="filter-select">
+                    <option value="all">All Time</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="3months">Last 3 Months</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="sessionsList" class="sessions-list">
+                <div class="no-sessions">
+                  <div class="empty-state">
+                    <span class="empty-icon">🏸</span>
+                    <h3>No training sessions yet</h3>
+                    <p>
+                      Start logging your training sessions to track your
+                      progress!
+                    </p>
+                    <button class="btn btn-primary" onclick="showSessionForm()">
+                      Log Your First Session
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div id="quickStats" class="training-section">
+            <div class="section-card">
+              <h2>Training Insights</h2>
+              <div class="insights-grid">
+                <div class="insight-item">
+                  <h4>Most Practiced Area</h4>
+                  <div class="insight-value" id="topFocusArea">-</div>
+                </div>
+                <div class="insight-item">
+                  <h4>Average Session Length</h4>
+                  <div class="insight-value" id="avgSessionLength">-</div>
+                </div>
+                <div class="insight-item">
+                  <h4>Training Streak</h4>
+                  <div class="insight-value" id="trainingStreak">0 days</div>
+                </div>
+                <div class="insight-item">
+                  <h4>This Month</h4>
+                  <div class="insight-value" id="monthlyTotal">0 sessions</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container"></div>
+
+    <script src="js/app.js"></script>
+    <script src="js/training.js"></script>
+    <script>
+      // Initialize training page
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set current date
+        const today = new Date();
+        document.getElementById("currentDate").textContent =
+          today.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+
+        // Set default date for session form
+        document.getElementById("sessionDate").value = today
+          .toISOString()
+          .split("T")[0];
+
+        // Setup user info
+        const userEmail =
+          localStorage.getItem("userEmail") || "practice@gmail.com";
+        const userRole = localStorage.getItem("userRole") || "player";
+        document.getElementById("userName").textContent = `Welcome back, ${
+          userEmail.split("@")[0]
+        }!`;
+
+        // Show appropriate sidebar sections
+        if (userRole === "coach") {
+          document.getElementById("playerSection").style.display = "none";
+          document.getElementById("coachSection").style.display = "block";
+        }
+
+        // Initialize training functionality
+        if (typeof TrainingManager !== "undefined") {
+          window.trainingManager = new TrainingManager();
+        }
+
+        // Setup dropdown and sidebar
+        setupDropdown();
+        setupSidebar();
+      });
+
+      // Dropdown and sidebar functions (reused from dashboard)
+      function setupDropdown() {
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+
+        if (!dropdownToggle || !dropdownMenu) return;
+
+        const newToggle = dropdownToggle.cloneNode(true);
+        const newMenu = dropdownMenu.cloneNode(true);
+        dropdownToggle.parentNode.replaceChild(newToggle, dropdownToggle);
+        dropdownMenu.parentNode.replaceChild(newMenu, dropdownMenu);
+
+        const toggle = document.querySelector(".dropdown-toggle");
+        const menu = document.querySelector(".dropdown-menu");
+
+        toggle.addEventListener("click", function (e) {
+          e.stopPropagation();
+          menu.classList.toggle("show");
+        });
+
+        document.addEventListener("click", function (e) {
+          if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+            menu.classList.remove("show");
+          }
+        });
+      }
+
+      function setupSidebar() {
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.getElementById("sidebar");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+        function toggleSidebar() {
+          sidebar.classList.toggle("active");
+          sidebarOverlay.classList.toggle("active");
+          sidebarToggle.classList.toggle("active");
+        }
+
+        function closeSidebar() {
+          sidebar.classList.remove("active");
+          sidebarOverlay.classList.remove("active");
+          sidebarToggle.classList.remove("active");
+        }
+
+        sidebarToggle.addEventListener("click", toggleSidebar);
+        sidebarOverlay.addEventListener("click", closeSidebar);
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && sidebar.classList.contains("active")) {
+            closeSidebar();
+          }
+        });
+      }
+
+      function logout() {
+        if (confirm("Are you sure you want to logout?")) {
+          localStorage.removeItem("userRole");
+          localStorage.removeItem("userEmail");
+          localStorage.removeItem("shuttlestats-user");
+          window.location.href = "index.html";
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Schedule - ShuttleStats</title>
+    <link rel="stylesheet" href="css/dashboard-style.css" />
+    <link rel="stylesheet" href="css/schedule.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <span class="logo-icon">🏸</span>
+          <span class="logo-text"
+            ><span class="logo-shuttle">Shuttle</span
+            ><span class="logo-stats">Stats</span></span
+          >
+        </div>
+        <div class="nav-right">
+          <div class="user-info">
+            <span class="user-name" id="userName">Welcome back!</span>
+            <div class="user-dropdown">
+              <button class="dropdown-toggle">⚙️</button>
+              <div class="dropdown-menu">
+                <a href="#profile">Profile</a>
+                <a href="#settings">Settings</a>
+                <a href="#" onclick="logout()">Logout</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Schedule Content -->
+    <main class="dashboard-main">
+      <!-- Sidebar Toggle Button -->
+      <button class="sidebar-toggle" id="sidebarToggle">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
+      <!-- Sidebar Overlay -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-menu">
+          <div class="menu-section">
+            <h3>Overview</h3>
+            <ul>
+              <li>
+                <a href="dashboard.html" class="menu-item">📊 Dashboard</a>
+              </li>
+              <li><a href="training.html" class="menu-item">🏃‍♂️ Training</a></li>
+              <li><a href="matches.html" class="menu-item">🏆 Matches</a></li>
+              <li>
+                <a href="schedule.html" class="menu-item active">📅 Schedule</a>
+              </li>
+            </ul>
+          </div>
+          <div class="menu-section" id="playerSection">
+            <h3>Player Tools</h3>
+            <ul>
+              <li><a href="#progress" class="menu-item">📈 Progress</a></li>
+              <li>
+                <a href="#achievements" class="menu-item">🎯 Achievements</a>
+              </li>
+              <li><a href="#goals" class="menu-item">⭐ Goals</a></li>
+            </ul>
+          </div>
+          <div class="menu-section" id="coachSection" style="display: none">
+            <h3>Coach Tools</h3>
+            <ul>
+              <li><a href="#players" class="menu-item">👥 My Players</a></li>
+              <li><a href="#plans" class="menu-item">📋 Training Plans</a></li>
+              <li><a href="#feedback" class="menu-item">💬 Feedback</a></li>
+              <li><a href="#reports" class="menu-item">📊 Reports</a></li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Schedule Header -->
+        <div class="content-header">
+          <h1>Training Schedule</h1>
+          <p class="current-date" id="currentDate"></p>
+        </div>
+
+        <!-- Schedule Actions -->
+        <div class="schedule-actions">
+          <button class="btn btn-primary" id="newSessionBtn">
+            <span class="btn-icon">➕</span>
+            Schedule Session
+          </button>
+          <button class="btn btn-secondary" id="viewCalendarBtn">
+            <span class="btn-icon">📅</span>
+            Calendar View
+          </button>
+          <button class="btn btn-secondary" id="upcomingBtn">
+            <span class="btn-icon">⏰</span>
+            Upcoming Sessions
+          </button>
+          <button class="btn btn-secondary" id="remindersBtn">
+            <span class="btn-icon">🔔</span>
+            Reminder Settings
+          </button>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="schedule-stats">
+          <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+              <span class="stat-number" id="totalSessions">0</span>
+              <span class="stat-label">Total Sessions</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-info">
+              <span class="stat-number" id="upcomingSessions">0</span>
+              <span class="stat-label">Upcoming This Week</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <span class="stat-number" id="completedSessions">0</span>
+              <span class="stat-label">Completed Sessions</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔄</div>
+            <div class="stat-info">
+              <span class="stat-number" id="consistencyRate">0%</span>
+              <span class="stat-label">Consistency Rate</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Sections -->
+        <div class="schedule-content">
+          <!-- Calendar View -->
+          <div id="calendarView" class="schedule-section">
+            <div class="section-card">
+              <div class="section-header">
+                <h2>Training Calendar</h2>
+                <div class="calendar-controls">
+                  <button class="calendar-nav" id="prevMonth">‹</button>
+                  <span class="current-month" id="currentMonth"
+                    >August 2025</span
+                  >
+                  <button class="calendar-nav" id="nextMonth">›</button>
+                  <button class="btn btn-small" id="todayBtn">Today</button>
+                </div>
+              </div>
+
+              <div class="calendar-container">
+                <div class="calendar-grid">
+                  <div class="calendar-header">
+                    <div class="day-header">Sun</div>
+                    <div class="day-header">Mon</div>
+                    <div class="day-header">Tue</div>
+                    <div class="day-header">Wed</div>
+                    <div class="day-header">Thu</div>
+                    <div class="day-header">Fri</div>
+                    <div class="day-header">Sat</div>
+                  </div>
+                  <div class="calendar-body" id="calendarBody">
+                    <!-- Calendar days will be generated by JavaScript -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Session Form -->
+          <div id="sessionForm" class="schedule-section" style="display: none">
+            <div class="section-card">
+              <h2>Schedule Training Session</h2>
+              <form id="sessionScheduleForm" class="session-form">
+                <!-- Basic Session Info -->
+                <div class="form-section">
+                  <h3>Session Details</h3>
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="sessionTitle">Session Title</label>
+                      <input
+                        type="text"
+                        id="sessionTitle"
+                        name="sessionTitle"
+                        placeholder="e.g., Footwork Drills"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="sessionType">Session Type</label>
+                      <select id="sessionType" name="sessionType" required>
+                        <option value="">Select type</option>
+                        <option value="training">Training Session</option>
+                        <option value="match">Match</option>
+                        <option value="tournament">Tournament</option>
+                        <option value="coaching">Coaching Session</option>
+                        <option value="fitness">Fitness Training</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="sessionDate">Date</label>
+                      <input
+                        type="date"
+                        id="sessionDate"
+                        name="sessionDate"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="sessionTime">Start Time</label>
+                      <input
+                        type="time"
+                        id="sessionTime"
+                        name="sessionTime"
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="sessionDuration">Duration (hours)</label>
+                      <select id="sessionDuration" name="duration" required>
+                        <option value="">Select duration</option>
+                        <option value="0.5">30 minutes</option>
+                        <option value="1">1 hour</option>
+                        <option value="1.5">1.5 hours</option>
+                        <option value="2">2 hours</option>
+                        <option value="2.5">2.5 hours</option>
+                        <option value="3">3 hours</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="sessionVenue">Venue</label>
+                      <input
+                        type="text"
+                        id="sessionVenue"
+                        name="location"
+                        placeholder="e.g., Sports Center Court 1"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label for="sessionPartner">Training Partner</label>
+                      <input
+                        type="text"
+                        id="sessionPartner"
+                        name="opponent"
+                        placeholder="Optional: Partner name"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label for="sessionDescription"
+                        >Session Description</label
+                      >
+                      <textarea
+                        id="sessionDescription"
+                        name="description"
+                        placeholder="Optional: Describe the session focus, goals, or notes"
+                        rows="3"
+                      ></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="sessionIntensity">Intensity Level</label>
+                      <select id="sessionIntensity" name="intensity">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Recurring Sessions -->
+                <div class="form-section">
+                  <h3>Recurring Schedule</h3>
+                  <div class="form-group">
+                    <label class="checkbox-container">
+                      <input
+                        type="checkbox"
+                        id="isRecurring"
+                        name="isRecurring"
+                      />
+                      <span class="checkmark"></span>
+                      Make this a recurring session
+                    </label>
+                  </div>
+
+                  <div
+                    id="recurringOptions"
+                    class="recurring-options"
+                    style="display: none"
+                  >
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="recurringFreq">Frequency</label>
+                        <select id="recurringFreq" name="recurringType">
+                          <option value="daily">Daily</option>
+                          <option value="weekly">Weekly</option>
+                          <option value="biweekly">Bi-weekly</option>
+                          <option value="monthly">Monthly</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="recurringEnd">End Date</label>
+                        <input
+                          type="date"
+                          id="recurringEnd"
+                          name="recurringEnd"
+                        />
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label>Repeat on (for weekly sessions):</label>
+                      <div class="day-selector">
+                        <label class="day-option">
+                          <input
+                            type="checkbox"
+                            name="recurringDays"
+                            value="0"
+                          />
+                          <span>Sun</span>
+                        </label>
+                        <label class="day-option">
+                          <input
+                            type="checkbox"
+                            name="recurringDays"
+                            value="1"
+                          />
+                          <span>Mon</span>
+                        </label>
+                        <label class="day-option">
+                          <input
+                            type="checkbox"
+                            name="recurringDays"
+                            value="2"
+                          />
+                          <span>Tue</span>
+                        </label>
+                        <label class="day-option">
+                          <input
+                            type="checkbox"
+                            name="recurringDays"
+                            value="3"
+                          />
+                          <span>Wed</span>
+                        </label>
+                        <label class="day-option">
+                          <input
+                            type="checkbox"
+                            name="recurringDays"
+                            value="4"
+                          />
+                          <span>Thu</span>
+                        </label>
+                        <label class="day-option">
+                          <input
+                            type="checkbox"
+                            name="recurringDays"
+                            value="5"
+                          />
+                          <span>Fri</span>
+                        </label>
+                        <label class="day-option">
+                          <input
+                            type="checkbox"
+                            name="recurringDays"
+                            value="6"
+                          />
+                          <span>Sat</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Reminders -->
+                <div class="form-section">
+                  <h3>Reminder Settings</h3>
+                  <div class="form-group">
+                    <label class="checkbox-container">
+                      <input
+                        type="checkbox"
+                        id="enableReminders"
+                        name="enableReminders"
+                        checked
+                      />
+                      <span class="checkmark"></span>
+                      Enable reminders for this session
+                    </label>
+                  </div>
+
+                  <div id="reminderOptions" class="reminder-options">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="reminderTime">Reminder Time</label>
+                        <select id="reminderTime" name="reminderTime">
+                          <option value="5">5 minutes before</option>
+                          <option value="15">15 minutes before</option>
+                          <option value="30" selected>30 minutes before</option>
+                          <option value="60">1 hour before</option>
+                          <option value="120">2 hours before</option>
+                          <option value="1440">1 day before</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <label class="checkbox-container">
+                      <input type="checkbox" name="reminderEmail" checked />
+                      <span class="checkmark"></span>
+                      Email reminder
+                    </label>
+                    <label class="checkbox-container">
+                      <input type="checkbox" name="reminderPush" checked />
+                      <span class="checkmark"></span>
+                      Push notification
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Session Notes -->
+                <div class="form-section">
+                  <h3>Session Notes</h3>
+                  <div class="form-group">
+                    <label for="sessionNotes">Notes & Objectives</label>
+                    <textarea
+                      id="sessionNotes"
+                      name="notes"
+                      rows="3"
+                      placeholder="What do you want to focus on in this session?"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="cancelSessionBtn"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    Schedule Session
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Upcoming Sessions -->
+          <div id="upcomingView" class="schedule-section">
+            <div class="section-card">
+              <div class="section-header">
+                <h2>Upcoming Sessions</h2>
+                <div class="view-controls">
+                  <button class="view-btn active" data-view="upcoming">
+                    Next 10
+                  </button>
+                  <button class="view-btn" data-view="week">This Week</button>
+                  <button class="view-btn" data-view="month">This Month</button>
+                </div>
+              </div>
+
+              <div id="sessionsList" class="sessions-list">
+                <div class="no-sessions">
+                  <div class="empty-state">
+                    <span class="empty-icon">📅</span>
+                    <h3>No upcoming sessions</h3>
+                    <p>Schedule your first training session to get started!</p>
+                    <button
+                      class="btn btn-primary"
+                      onclick="scheduleManager.showSessionForm()"
+                    >
+                      Schedule Session
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reminder Settings -->
+          <div
+            id="reminderSettings"
+            class="schedule-section"
+            style="display: none"
+          >
+            <div class="section-card">
+              <h2>Reminder Settings</h2>
+              <div class="settings-content">
+                <div class="setting-group">
+                  <h3>Default Reminders</h3>
+                  <div class="setting-item">
+                    <label class="checkbox-container">
+                      <input
+                        type="checkbox"
+                        id="defaultEmailReminders"
+                        checked
+                      />
+                      <span class="checkmark"></span>
+                      Enable email reminders by default
+                    </label>
+                  </div>
+                  <div class="setting-item">
+                    <label class="checkbox-container">
+                      <input
+                        type="checkbox"
+                        id="defaultPushReminders"
+                        checked
+                      />
+                      <span class="checkmark"></span>
+                      Enable push notifications by default
+                    </label>
+                  </div>
+                </div>
+
+                <div class="setting-group">
+                  <h3>Consistency Tracking</h3>
+                  <div class="setting-item">
+                    <label class="checkbox-container">
+                      <input
+                        type="checkbox"
+                        id="consistencyReminders"
+                        checked
+                      />
+                      <span class="checkmark"></span>
+                      Send consistency reminders if no sessions scheduled
+                    </label>
+                  </div>
+                  <div class="setting-item">
+                    <label for="consistencyDays">Remind me after</label>
+                    <select id="consistencyDays">
+                      <option value="3">3 days</option>
+                      <option value="5" selected>5 days</option>
+                      <option value="7">1 week</option>
+                      <option value="14">2 weeks</option>
+                    </select>
+                    <span>without training</span>
+                  </div>
+                </div>
+
+                <div class="setting-group">
+                  <h3>Email Preferences</h3>
+                  <div class="form-group">
+                    <label for="emailAddress">Email Address</label>
+                    <input
+                      type="email"
+                      id="emailAddress"
+                      placeholder="your.email@example.com"
+                    />
+                  </div>
+                </div>
+
+                <div class="form-actions">
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="saveSettingsBtn"
+                  >
+                    Save Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Session Detail Modal -->
+    <div id="sessionModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeSessionModal">&times;</span>
+        <div class="session-details">
+          <h2 id="modalSessionTitle">Session Details</h2>
+          <div class="session-info" id="modalSessionInfo">
+            <!-- Session details will be populated here -->
+          </div>
+          <div class="session-actions">
+            <button class="btn btn-secondary" id="editSessionBtn">Edit</button>
+            <button class="btn btn-danger" id="deleteSessionBtn">Delete</button>
+            <button class="btn btn-primary" id="markCompleteBtn">
+              Mark Complete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Session Details Modal (for viewing details) -->
+    <div id="sessionDetailsModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div class="session-details">
+          <!-- Content will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container"></div>
+
+    <script src="js/app.js"></script>
+    <script src="js/schedule.js"></script>
+    <script>
+      // Initialize schedule page
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set current date
+        const today = new Date();
+        document.getElementById("currentDate").textContent =
+          today.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+
+        // Set default date for session form
+        document.getElementById("sessionDate").value = today
+          .toISOString()
+          .split("T")[0];
+
+        // Setup user info
+        const userEmail =
+          localStorage.getItem("userEmail") || "practice@gmail.com";
+        const userRole = localStorage.getItem("userRole") || "player";
+        document.getElementById("userName").textContent = `Welcome back, ${
+          userEmail.split("@")[0]
+        }!`;
+
+        // Show appropriate sidebar sections
+        if (userRole === "coach") {
+          document.getElementById("playerSection").style.display = "none";
+          document.getElementById("coachSection").style.display = "block";
+        }
+
+        // Initialize schedule functionality
+        if (typeof ScheduleManager !== "undefined") {
+          window.scheduleManager = new ScheduleManager();
+        }
+
+        // Setup dropdown and sidebar
+        setupDropdown();
+        setupSidebar();
+      });
+
+      // Dropdown and sidebar functions
+      function setupDropdown() {
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+
+        if (!dropdownToggle || !dropdownMenu) return;
+
+        const newToggle = dropdownToggle.cloneNode(true);
+        const newMenu = dropdownMenu.cloneNode(true);
+        dropdownToggle.parentNode.replaceChild(newToggle, dropdownToggle);
+        dropdownMenu.parentNode.replaceChild(newMenu, dropdownMenu);
+
+        const toggle = document.querySelector(".dropdown-toggle");
+        const menu = document.querySelector(".dropdown-menu");
+
+        toggle.addEventListener("click", function (e) {
+          e.stopPropagation();
+          menu.classList.toggle("show");
+        });
+
+        document.addEventListener("click", function (e) {
+          if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+            menu.classList.remove("show");
+          }
+        });
+      }
+
+      function setupSidebar() {
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.getElementById("sidebar");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+        function toggleSidebar() {
+          sidebar.classList.toggle("active");
+          sidebarOverlay.classList.toggle("active");
+          sidebarToggle.classList.toggle("active");
+        }
+
+        function closeSidebar() {
+          sidebar.classList.remove("active");
+          sidebarOverlay.classList.remove("active");
+          sidebarToggle.classList.remove("active");
+        }
+
+        sidebarToggle.addEventListener("click", toggleSidebar);
+        sidebarOverlay.addEventListener("click", closeSidebar);
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && sidebar.classList.contains("active")) {
+            closeSidebar();
+          }
+        });
+      }
+
+      function logout() {
+        if (confirm("Are you sure you want to logout?")) {
+          localStorage.removeItem("userRole");
+          localStorage.removeItem("userEmail");
+          localStorage.removeItem("shuttlestats-user");
+          window.location.href = "index.html";
+        }
+      }
+    </script>
+  </body>
+</html>

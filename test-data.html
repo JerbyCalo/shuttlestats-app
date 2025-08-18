@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test Data Setup</title>
+  </head>
+  <body>
+    <h1>Test Data Setup</h1>
+    <button onclick="addTestData()">Add Test Training Sessions</button>
+    <button onclick="addTestMatches()">Add Test Matches</button>
+    <button onclick="addTestSchedule()">Add Test Scheduled Sessions</button>
+    <button onclick="clearAllData()">Clear All Data</button>
+    <button onclick="showData()">Show Current Data</button>
+
+    <div id="output"></div>
+
+    <script>
+      const userEmail =
+        localStorage.getItem("userEmail") || "practice@gmail.com";
+
+      function addTestData() {
+        const testTrainingSessions = [
+          {
+            id: "1",
+            date: "2025-08-10",
+            duration: 60,
+            type: "practice",
+            focusAreas: ["footwork", "serve"],
+            rating: 8,
+            effort: 7,
+            notes: "Great footwork session",
+            createdAt: new Date().toISOString(),
+          },
+          {
+            id: "2",
+            date: "2025-08-12",
+            duration: 90,
+            type: "practice",
+            focusAreas: ["backhand", "smash"],
+            rating: 7,
+            effort: 8,
+            notes: "Improved backhand technique",
+            createdAt: new Date().toISOString(),
+          },
+        ];
+
+        localStorage.setItem(
+          `trainingSessions_${userEmail}`,
+          JSON.stringify(testTrainingSessions)
+        );
+        document.getElementById("output").innerHTML =
+          "<p>✅ Test training sessions added!</p>";
+      }
+
+      function addTestMatches() {
+        const testMatches = [
+          {
+            id: "1",
+            date: "2025-08-09",
+            type: "singles",
+            opponent: "John Doe",
+            result: "win",
+            scores: {
+              yourSets: 2,
+              oppSets: 1,
+              sets: [
+                { you: 21, opp: 18 },
+                { you: 19, opp: 21 },
+                { you: 21, opp: 16 },
+              ],
+            },
+            ratings: {
+              forehand: 8,
+              backhand: 7,
+              serving: 8,
+              footwork: 7,
+              strategy: 8,
+              mental: 9,
+            },
+            errors: {
+              netErrors: 3,
+              outErrors: 5,
+              liftErrors: 2,
+              serviceFaults: 1,
+              doubleFaults: 0,
+            },
+            winners: { smashWinners: 8, dropWinners: 3, serviceAces: 2 },
+            createdAt: new Date().toISOString(),
+          },
+          {
+            id: "2",
+            date: "2025-08-11",
+            type: "singles",
+            opponent: "Jane Smith",
+            result: "loss",
+            scores: {
+              yourSets: 1,
+              oppSets: 2,
+              sets: [
+                { you: 21, opp: 19 },
+                { you: 15, opp: 21 },
+                { you: 18, opp: 21 },
+              ],
+            },
+            ratings: {
+              forehand: 6,
+              backhand: 7,
+              serving: 5,
+              footwork: 6,
+              strategy: 7,
+              mental: 5,
+            },
+            errors: {
+              netErrors: 5,
+              outErrors: 7,
+              liftErrors: 3,
+              serviceFaults: 4,
+              doubleFaults: 1,
+            },
+            winners: { smashWinners: 5, dropWinners: 2, serviceAces: 1 },
+            createdAt: new Date().toISOString(),
+          },
+        ];
+
+        localStorage.setItem(
+          `matches_${userEmail}`,
+          JSON.stringify(testMatches)
+        );
+        document.getElementById("output").innerHTML =
+          "<p>✅ Test matches added!</p>";
+      }
+
+      function addTestSchedule() {
+        const testScheduledSessions = [
+          {
+            id: "1",
+            title: "Morning Training",
+            type: "training",
+            date: "2025-08-14",
+            time: "09:00",
+            duration: 120,
+            location: "Sports Center Court 1",
+            intensity: "medium",
+            reminderEnabled: true,
+            createdAt: new Date().toISOString(),
+          },
+          {
+            id: "2",
+            title: "Match Practice",
+            type: "match",
+            date: "2025-08-16",
+            time: "18:00",
+            duration: 90,
+            location: "Local Club",
+            opponent: "Alex Chen",
+            intensity: "high",
+            reminderEnabled: true,
+            createdAt: new Date().toISOString(),
+          },
+        ];
+
+        localStorage.setItem(
+          "shuttleStats_sessions",
+          JSON.stringify(testScheduledSessions)
+        );
+        document.getElementById("output").innerHTML =
+          "<p>✅ Test scheduled sessions added!</p>";
+      }
+
+      function clearAllData() {
+        localStorage.removeItem(`trainingSessions_${userEmail}`);
+        localStorage.removeItem(`matches_${userEmail}`);
+        localStorage.removeItem("shuttleStats_sessions");
+        localStorage.removeItem(`goals_${userEmail}`);
+        document.getElementById("output").innerHTML =
+          "<p>🗑️ All test data cleared!</p>";
+      }
+
+      function showData() {
+        const trainingSessions = JSON.parse(
+          localStorage.getItem(`trainingSessions_${userEmail}`) || "[]"
+        );
+        const matches = JSON.parse(
+          localStorage.getItem(`matches_${userEmail}`) || "[]"
+        );
+        const scheduledSessions = JSON.parse(
+          localStorage.getItem("shuttleStats_sessions") || "[]"
+        );
+
+        document.getElementById("output").innerHTML = `
+                <h3>Current Data:</h3>
+                <p><strong>Training Sessions:</strong> ${
+                  trainingSessions.length
+                }</p>
+                <p><strong>Matches:</strong> ${matches.length}</p>
+                <p><strong>Scheduled Sessions:</strong> ${
+                  scheduledSessions.length
+                }</p>
+                <p><strong>User Email:</strong> ${userEmail}</p>
+                <details>
+                    <summary>Training Sessions Details</summary>
+                    <pre>${JSON.stringify(trainingSessions, null, 2)}</pre>
+                </details>
+                <details>
+                    <summary>Matches Details</summary>
+                    <pre>${JSON.stringify(matches, null, 2)}</pre>
+                </details>
+                <details>
+                    <summary>Scheduled Sessions Details</summary>
+                    <pre>${JSON.stringify(scheduledSessions, null, 2)}</pre>
+                </details>
+            `;
+      }
+    </script>
+  </body>
+</html>

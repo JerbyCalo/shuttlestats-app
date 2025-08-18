@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShuttleStats – Force Clear Local Data</title>
+    <link rel="stylesheet" href="css/dashboard-style.css" />
+    <style>
+      body {
+        padding: 2rem;
+      }
+      .panel {
+        max-width: 720px;
+        margin: 5rem auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+      }
+      h1 {
+        color: #2c5282;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        color: #4a5568;
+        margin: 0.5rem 0 1rem;
+      }
+      .danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: #fff;
+        border: none;
+        padding: 0.9rem 1.2rem;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .muted {
+        color: #718096;
+        font-size: 0.9rem;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+        margin: 0.75rem 0 1.25rem;
+      }
+      input[type="email"] {
+        padding: 0.6rem 0.8rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        min-width: 260px;
+      }
+      .btn {
+        background: #e2e8f0;
+        color: #2d3748;
+        border: none;
+        padding: 0.7rem 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .ok {
+        background: linear-gradient(135deg, #2c5282, #2d3748);
+        color: #fff;
+      }
+      .sp {
+        height: 12px;
+        width: 12px;
+        border: 2px solid #fff;
+        border-top-color: transparent;
+        border-radius: 50%;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 6px;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .msg {
+        margin-top: 1rem;
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <h1>Force Clear Local Data</h1>
+      <p>
+        Use this utility to clear locally stored ShuttleStats data for a given
+        email. Your login state can be preserved.
+      </p>
+
+      <div class="row">
+        <label for="email"><strong>User Email</strong></label>
+        <input id="email" type="email" placeholder="practice@gmail.com" />
+        <button class="btn" id="useStored">Use stored</button>
+      </div>
+
+      <div class="row">
+        <label
+          ><input type="checkbox" id="preserveLogin" checked /> Preserve login
+          (role, email, shuttlestats-user)</label
+        >
+      </div>
+
+      <div class="row">
+        <button class="danger" id="clear">Clear Data</button>
+        <button class="btn ok" id="back">Back to Dashboard</button>
+      </div>
+
+      <div id="out" class="muted"></div>
+    </div>
+
+    <script>
+      const emailInput = document.getElementById("email");
+      const out = document.getElementById("out");
+
+      document.getElementById("useStored").onclick = () => {
+        const stored =
+          localStorage.getItem("userEmail") || "practice@gmail.com";
+        emailInput.value = stored;
+        out.textContent = `Using stored email: ${stored}`;
+      };
+
+      document.getElementById("back").onclick = () => {
+        window.location.href = "dashboard.html";
+      };
+
+      document.getElementById("clear").onclick = () => {
+        const email =
+          emailInput.value.trim() ||
+          localStorage.getItem("userEmail") ||
+          "practice@gmail.com";
+        const preserve = document.getElementById("preserveLogin").checked;
+        if (!confirm(`This will remove local data for ${email}. Continue?`))
+          return;
+
+        const saved = preserve
+          ? {
+              role: localStorage.getItem("userRole"),
+              email: localStorage.getItem("userEmail"),
+              user: localStorage.getItem("shuttlestats-user"),
+            }
+          : null;
+
+        const keys = [
+          `trainingSessions_${email}`,
+          `matches_${email}`,
+          `goals_${email}`,
+          "shuttleStats_sessions",
+          "shuttleStats_reminderSettings",
+        ];
+
+        out.innerHTML = '<span class="sp"></span> Clearing...';
+        setTimeout(() => {
+          keys.forEach((k) => localStorage.removeItem(k));
+
+          if (!preserve) {
+            localStorage.removeItem("userRole");
+            localStorage.removeItem("userEmail");
+            localStorage.removeItem("shuttlestats-user");
+          } else if (saved) {
+            if (saved.role) localStorage.setItem("userRole", saved.role);
+            if (saved.email) localStorage.setItem("userEmail", saved.email);
+            if (saved.user)
+              localStorage.setItem("shuttlestats-user", saved.user);
+          }
+
+          out.textContent = "✅ Local data cleared.";
+        }, 350);
+      };
+    </script>
+  </body>
+</html>

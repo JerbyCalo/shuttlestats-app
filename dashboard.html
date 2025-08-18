@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Dashboard - ShuttleStats</title>
+    <link rel="stylesheet" href="css/dashboard-style.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <span class="logo-icon">🏸</span>
+          <span class="logo-text"
+            ><span class="logo-shuttle">Shuttle</span
+            ><span class="logo-stats">Stats</span></span
+          >
+        </div>
+        <div class="nav-right">
+          <div class="user-info">
+            <span class="user-name" data-user-name>Welcome back!</span>
+            <div class="user-dropdown">
+              <button class="dropdown-toggle">⚙️</button>
+              <div class="dropdown-menu">
+                <a href="#profile">Profile</a>
+                <a href="#settings">Settings</a>
+                <a href="#" id="signOutBtn">Sign Out</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Dashboard Content -->
+    <main class="dashboard-main">
+      <!-- Sidebar Toggle Button -->
+      <button class="sidebar-toggle" id="sidebarToggle">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
+      <!-- Sidebar Overlay -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-menu">
+          <div class="menu-section">
+            <h3>Overview</h3>
+            <ul>
+              <li>
+                <a href="#dashboard" class="menu-item active">📊 Dashboard</a>
+              </li>
+              <li><a href="training.html" class="menu-item">🏃‍♂️ Training</a></li>
+              <li><a href="matches.html" class="menu-item">🏆 Matches</a></li>
+              <li><a href="schedule.html" class="menu-item">📅 Schedule</a></li>
+            </ul>
+          </div>
+          <div class="menu-section" id="playerSection">
+            <h3>Player Tools</h3>
+            <ul>
+              <li><a href="#progress" class="menu-item">📈 Progress</a></li>
+              <li>
+                <a href="#achievements" class="menu-item">🎯 Achievements</a>
+              </li>
+              <li><a href="#goals" class="menu-item">⭐ Goals</a></li>
+            </ul>
+          </div>
+          <div class="menu-section" id="coachSection" style="display: none">
+            <h3>Coach Tools</h3>
+            <ul>
+              <li><a href="#players" class="menu-item">👥 My Players</a></li>
+              <li><a href="#plans" class="menu-item">📋 Training Plans</a></li>
+              <li><a href="#feedback" class="menu-item">💬 Feedback</a></li>
+              <li><a href="#reports" class="menu-item">📊 Reports</a></li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Dashboard Overview -->
+        <div id="dashboard-content" class="content-section active">
+          <div class="content-header">
+            <h1>Dashboard Overview</h1>
+            <p class="current-date" id="currentDate"></p>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon">🏃‍♂️</div>
+              <div class="stat-info">
+                <span class="stat-number" id="trainingSessions">0</span>
+                <span class="stat-label">Training Sessions</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">🏆</div>
+              <div class="stat-info">
+                <span class="stat-number" id="matchesPlayed">0</span>
+                <span class="stat-label">Matches Played</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">📈</div>
+              <div class="stat-info">
+                <span class="stat-number" id="improvementRate">0</span>
+                <span class="stat-label">Improvement Rate</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">⭐</div>
+              <div class="stat-info">
+                <span class="stat-number" id="goalsAchieved">0</span>
+                <span class="stat-label">Goals Achieved</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activities & Quick Actions -->
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <h3>Recent Activities</h3>
+              <div class="activity-list">
+                <!-- Activities will be populated by JavaScript -->
+                <div class="activity-item">
+                  <div class="activity-icon">📝</div>
+                  <div class="activity-details">
+                    <span class="activity-title"
+                      >Loading recent activities...</span
+                    >
+                    <span class="activity-time">Please wait</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <h3>Quick Actions</h3>
+              <div class="quick-actions">
+                <button class="action-btn" onclick="logTraining()">
+                  <span class="btn-icon">🏃‍♂️</span>
+                  Log Training Session
+                </button>
+                <button class="action-btn" onclick="recordMatch()">
+                  <span class="btn-icon">🏆</span>
+                  Record Match
+                </button>
+                <button class="action-btn" onclick="viewSchedule()">
+                  <span class="btn-icon">📅</span>
+                  View Schedule
+                </button>
+                <button class="action-btn" onclick="setGoal()">
+                  <span class="btn-icon">🎯</span>
+                  Set New Goal
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Performance Chart -->
+          <div class="dashboard-card">
+            <h3>Performance Trend</h3>
+            <div class="chart-container">
+              <div class="performance-chart">
+                <div class="chart-header">
+                  <span class="chart-metric">Average Rating</span>
+                  <span class="chart-period">Last 6 Weeks</span>
+                </div>
+                <div class="chart-canvas" id="performanceCanvas">
+                  <div class="chart-grid">
+                    <div class="grid-line" style="bottom: 0%"></div>
+                    <div class="grid-line" style="bottom: 25%"></div>
+                    <div class="grid-line" style="bottom: 50%"></div>
+                    <div class="grid-line" style="bottom: 75%"></div>
+                    <div class="grid-line" style="bottom: 100%"></div>
+                  </div>
+                  <div class="chart-y-labels">
+                    <span style="bottom: 0%">0</span>
+                    <span style="bottom: 25%">2.5</span>
+                    <span style="bottom: 50%">5.0</span>
+                    <span style="bottom: 75%">7.5</span>
+                    <span style="bottom: 100%">10</span>
+                  </div>
+                  <div class="chart-line" id="performanceLine"></div>
+                  <div class="chart-points" id="performancePoints"></div>
+                </div>
+                <div class="chart-x-axis" id="performanceLabels"></div>
+              </div>
+              <p class="chart-caption">
+                Training performance based on session ratings
+              </p>
+            </div>
+          </div>
+
+          <!-- Upcoming Events -->
+          <div class="dashboard-card">
+            <h3>Upcoming Events</h3>
+            <div class="events-list">
+              <!-- Events will be populated by JavaScript -->
+              <div class="event-item">
+                <div class="event-date">
+                  <span class="day">0</span>
+                  <span class="month">0</span>
+                </div>
+                <div class="event-details">
+                  <span class="event-title">Loading upcoming events...</span>
+                  <span class="event-time">Please wait</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Optional: Reset local data if ?reset=1 is present in the URL -->
+    <script>
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const shouldReset = params.get("reset") === "1";
+        if (!shouldReset) return;
+
+        // Preserve login data
+        const userRole = localStorage.getItem("userRole");
+        const userEmail = localStorage.getItem("userEmail");
+        const shuttlestatsUser = localStorage.getItem("shuttlestats-user");
+
+        console.log("Reset flag detected. Clearing ShuttleStats data...");
+
+        // Clear user-scoped keys based on current user (fallback to demo)
+        const email = userEmail || "practice@gmail.com";
+        const keysToRemove = [
+          `trainingSessions_${email}`,
+          `matches_${email}`,
+          `goals_${email}`,
+          "shuttleStats_sessions",
+          "shuttleStats_reminderSettings",
+        ];
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
+
+        // Restore login data
+        if (userRole) localStorage.setItem("userRole", userRole);
+        if (userEmail) localStorage.setItem("userEmail", userEmail);
+        if (shuttlestatsUser)
+          localStorage.setItem("shuttlestats-user", shuttlestatsUser);
+
+        console.log("Data reset complete.");
+      })();
+    </script>
+
+    <script>
+      // Dashboard Data Manager
+    </script>
+
+    <script type="module">
+      import { authService } from "./js/auth-service.js";
+      import { dataService } from "./js/data-service.js";
+
+      // Check authentication on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        if (!authService.isAuthenticated()) {
+          setTimeout(() => {
+            if (!authService.isAuthenticated()) {
+              window.location.href = "login.html";
+            }
+          }, 1000);
+        } else {
+          // Set up data service for the authenticated user
+          const user = authService.getCurrentUser();
+          if (user) {
+            dataService.setCurrentUser(user.uid);
+          }
+        }
+
+        // Handle sign out
+        document
+          .getElementById("signOutBtn")
+          .addEventListener("click", async (e) => {
+            e.preventDefault();
+            const result = await authService.signOut();
+            if (result.success) {
+              window.location.href = "login.html";
+            }
+          });
+      });
+    </script>
+
+    <script>
+      // Update the DashboardManager to use Firebase instead of localStorage
+      class DashboardManager {
+        constructor() {
+          this.userEmail =
+            localStorage.getItem("userEmail") || "practice@gmail.com";
+          this.userRole = localStorage.getItem("userRole") || "player";
+
+          // Immediately set zeros before any other initialization
+          this.setZerosImmediately();
+
+          this.init();
+        }
+
+        setZerosImmediately() {
+          // Force set zeros immediately to prevent flash
+          const elements = {
+            trainingSessions: "0",
+            matchesPlayed: "0",
+            improvementRate: "0%",
+            goalsAchieved: "0",
+          };
+
+          Object.keys(elements).forEach((id) => {
+            const element = document.getElementById(id);
+            if (element) {
+              element.textContent = elements[id];
+            }
+          });
+        }
+
+        init() {
+          this.loadAllData();
+          this.updateStats();
+          this.updateRecentActivities();
+          this.updateUpcomingEvents();
+          this.updatePerformanceChart();
+        }
+
+        loadAllData() {
+          // Load training sessions
+          const trainingSessions = localStorage.getItem(
+            `trainingSessions_${this.userEmail}`
+          );
+          this.trainingSessions = trainingSessions
+            ? JSON.parse(trainingSessions)
+            : [];
+
+          // Load scheduled sessions
+          const scheduledSessions = localStorage.getItem(
+            "shuttleStats_sessions"
+          );
+          this.scheduledSessions = scheduledSessions
+            ? JSON.parse(scheduledSessions)
+            : [];
+
+          // Load matches
+          const matches = localStorage.getItem(`matches_${this.userEmail}`);
+          this.matches = matches ? JSON.parse(matches) : [];
+
+          // Load goals (placeholder for future implementation)
+          const goals = localStorage.getItem(`goals_${this.userEmail}`);
+          this.goals = goals ? JSON.parse(goals) : [];
+
+          // Debug logging
+          console.log("Dashboard Data Loaded:", {
+            userEmail: this.userEmail,
+            trainingSessions: this.trainingSessions.length,
+            scheduledSessions: this.scheduledSessions.length,
+            matches: this.matches.length,
+            goals: this.goals.length,
+          });
+        }
+
+        updateStats() {
+          // Compute stats from loaded data
+          const trainingCount = this.trainingSessions?.length || 0;
+          const matchesCount = this.matches?.length || 0;
+          const improvement = this.calculateImprovementRate();
+          const goalsCount = this.goals?.length || 0;
+
+          const setText = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+          };
+
+          setText("trainingSessions", String(trainingCount));
+          setText("matchesPlayed", String(matchesCount));
+          setText("improvementRate", `${improvement}%`);
+          setText("goalsAchieved", String(goalsCount));
+        }
+
+        calculateImprovementRate() {
+          if (this.trainingSessions.length < 2) return 0;
+
+          // Get recent sessions (last 5)
+          const recentSessions = this.trainingSessions.slice(0, 5);
+          const olderSessions = this.trainingSessions.slice(-5);
+
+          if (recentSessions.length === 0 || olderSessions.length === 0)
+            return 0;
+
+          // Calculate average ratings
+          const recentAvg =
+            recentSessions.reduce(
+              (sum, session) => sum + (session.rating || 5),
+              0
+            ) / recentSessions.length;
+          const olderAvg =
+            olderSessions.reduce(
+              (sum, session) => sum + (session.rating || 5),
+              0
+            ) / olderSessions.length;
+
+          // Calculate improvement percentage
+          const improvement = ((recentAvg - olderAvg) / olderAvg) * 100;
+          return Math.max(0, Math.round(improvement));
+        }
+
+        updateRecentActivities() {
+          const activitiesList = document.querySelector(".activity-list");
+          if (!activitiesList) return;
+
+          const allActivities = [];
+
+          // Add recent training sessions
+          this.trainingSessions.slice(0, 3).forEach((session) => {
+            allActivities.push({
+              icon: "🏃‍♂️",
+              title: `Training Session - ${this.getFocusAreasText(
+                session.focusAreas
+              )}`,
+              time: this.getTimeAgo(session.date),
+              date: new Date(session.date),
+            });
+          });
+
+          // Add recent matches
+          this.matches.slice(0, 2).forEach((match) => {
+            const result = match.result === "win" ? "Won" : "Lost";
+            allActivities.push({
+              icon: "🏆",
+              title: `Match vs ${match.opponent} - ${result}`,
+              time: this.getTimeAgo(match.date),
+              date: new Date(match.date),
+            });
+          });
+
+          // Add upcoming scheduled sessions
+          const upcomingSessions = this.scheduledSessions
+            .filter((session) => {
+              const sessionDate = new Date(session.date + "T" + session.time);
+              return sessionDate > new Date();
+            })
+            .slice(0, 2);
+
+          upcomingSessions.forEach((session) => {
+            allActivities.push({
+              icon: "📅",
+              title: `Upcoming: ${session.title}`,
+              time: this.getTimeUntil(session.date, session.time),
+              date: new Date(session.date + "T" + session.time),
+            });
+          });
+
+          // Sort by date (most recent first)
+          allActivities.sort((a, b) => b.date - a.date);
+
+          // Update HTML
+          const activitiesHTML = allActivities
+            .slice(0, 4)
+            .map(
+              (activity) => `
+            <div class="activity-item">
+              <div class="activity-icon">${activity.icon}</div>
+              <div class="activity-details">
+                <span class="activity-title">${activity.title}</span>
+                <span class="activity-time">${activity.time}</span>
+              </div>
+            </div>
+          `
+            )
+            .join("");
+
+          activitiesList.innerHTML = activitiesHTML;
+        }
+
+        updateUpcomingEvents() {
+          const eventsList = document.querySelector(".events-list");
+          if (!eventsList) return;
+
+          const upcomingSessions = this.scheduledSessions
+            .filter((session) => {
+              const sessionDate = new Date(session.date + "T" + session.time);
+              return sessionDate > new Date();
+            })
+            .sort(
+              (a, b) =>
+                new Date(a.date + "T" + a.time) -
+                new Date(b.date + "T" + b.time)
+            )
+            .slice(0, 3);
+
+          if (upcomingSessions.length === 0) {
+            eventsList.innerHTML = `
+              <div class="event-item">
+                <div class="event-date">
+                  <span class="day">0</span>
+                  <span class="month">0</span>
+                </div>
+                <div class="event-details">
+                  <span class="event-title">No upcoming events</span>
+                  <span class="event-time">Schedule your next session!</span>
+                </div>
+              </div>
+            `;
+            return;
+          }
+
+          const eventsHTML = upcomingSessions
+            .map((session) => {
+              const sessionDate = new Date(session.date);
+              const day = sessionDate.getDate();
+              const month = sessionDate.toLocaleDateString("en-US", {
+                month: "short",
+              });
+              const time = this.formatTime(session.time);
+
+              return `
+              <div class="event-item">
+                <div class="event-date">
+                  <span class="day">${day}</span>
+                  <span class="month">${month}</span>
+                </div>
+                <div class="event-details">
+                  <span class="event-title">${session.title}</span>
+                  <span class="event-time">${time}</span>
+                </div>
+              </div>
+            `;
+            })
+            .join("");
+
+          eventsList.innerHTML = eventsHTML;
+        }
+
+        updatePerformanceChart() {
+          const performanceLine = document.getElementById("performanceLine");
+          const performancePoints =
+            document.getElementById("performancePoints");
+          const performanceLabels =
+            document.getElementById("performanceLabels");
+
+          if (!performanceLine || !performancePoints || !performanceLabels)
+            return;
+
+          // Get last 6 weeks of training sessions
+          const weeks = [];
+          const now = new Date();
+
+          for (let i = 5; i >= 0; i--) {
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - i * 7 - now.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            weekEnd.setHours(23, 59, 59, 999);
+
+            const weekSessions = this.trainingSessions.filter((session) => {
+              const sessionDate = new Date(session.date);
+              return sessionDate >= weekStart && sessionDate <= weekEnd;
+            });
+
+            const avgRating =
+              weekSessions.length > 0
+                ? weekSessions.reduce(
+                    (sum, session) => sum + (session.rating || 5),
+                    0
+                  ) / weekSessions.length
+                : 0;
+
+            // Create friendly week labels
+            let weekLabel;
+            if (i === 0) {
+              weekLabel = "This week";
+            } else if (i === 1) {
+              weekLabel = "Last week";
+            } else {
+              // Show actual date range for older weeks
+              const startDate = weekStart.getDate();
+              const endDate = weekEnd.getDate();
+              const month = weekStart.toLocaleDateString("en-US", {
+                month: "short",
+              });
+              weekLabel = `${month} ${startDate}-${endDate}`;
+            }
+
+            weeks.push({
+              label: weekLabel,
+              rating: avgRating,
+              sessions: weekSessions.length,
+              hasData: weekSessions.length > 0,
+            });
+          }
+
+          // Create SVG line chart
+          const chartWidth = 100; // percentage
+          const chartHeight = 160; // px for calculations
+          const pointSpacing = chartWidth / (weeks.length - 1);
+
+          // Generate SVG path for the line
+          let pathData = "";
+          const validPoints = weeks.filter((week) => week.hasData);
+
+          if (validPoints.length > 1) {
+            validPoints.forEach((week, index) => {
+              const weekIndex = weeks.indexOf(week);
+              const x = (weekIndex / (weeks.length - 1)) * 100;
+              const y = 100 - (week.rating / 10) * 100; // Invert Y for SVG coordinate system
+
+              if (index === 0) {
+                pathData += `M ${x}% ${y}%`;
+              } else {
+                pathData += ` L ${x}% ${y}%`;
+              }
+            });
+          }
+
+          // Create SVG element for line
+          performanceLine.innerHTML =
+            validPoints.length > 1
+              ? `
+            <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0;">
+              <path d="${pathData}" class="performance-line-path"/>
+            </svg>
+          `
+              : "";
+
+          // Create points
+          performancePoints.innerHTML = weeks
+            .map((week, index) => {
+              const x = (index / (weeks.length - 1)) * 100;
+              const y = 100 - (week.rating / 10) * 100;
+
+              return `
+              <div class="performance-point ${!week.hasData ? "no-data" : ""}" 
+                   style="left: ${x}%; bottom: ${
+                week.hasData ? (week.rating / 10) * 100 : 50
+              }%"
+                   onmouseenter="showTooltip(event, '${
+                     week.label
+                   }', ${week.rating.toFixed(1)}, ${week.sessions})"
+                   onmouseleave="hideTooltip()">
+              </div>
+            `;
+            })
+            .join("");
+
+          // Create labels
+          performanceLabels.innerHTML = weeks
+            .map((week) => `<div class="x-axis-label">${week.label}</div>`)
+            .join("");
+        }
+
+        // Helper methods
+        getFocusAreasText(focusAreas) {
+          if (!focusAreas || focusAreas.length === 0) return "General Training";
+          const labels = {
+            footwork: "Footwork",
+            backhand: "Backhand",
+            forehand: "Forehand",
+            serve: "Serving",
+            smash: "Smash",
+            defense: "Defense",
+            doubles: "Doubles",
+            conditioning: "Conditioning",
+          };
+          return focusAreas.map((area) => labels[area] || area).join(", ");
+        }
+
+        getTimeAgo(date) {
+          const now = new Date();
+          const sessionDate = new Date(date);
+          const diffTime = Math.abs(now - sessionDate);
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+
+          if (diffDays > 0) {
+            return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+          } else if (diffHours > 0) {
+            return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+          } else {
+            return "Less than an hour ago";
+          }
+        }
+
+        getTimeUntil(date, time) {
+          const now = new Date();
+          const eventDate = new Date(date + "T" + time);
+          const diffTime = eventDate - now;
+          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+          const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+
+          if (diffDays > 0) {
+            return `in ${diffDays} day${diffDays > 1 ? "s" : ""}`;
+          } else if (diffHours > 0) {
+            return `in ${diffHours} hour${diffHours > 1 ? "s" : ""}`;
+          } else {
+            return "Soon";
+          }
+        }
+
+        formatTime(time) {
+          const [hours, minutes] = time.split(":");
+          const hour12 = hours % 12 || 12;
+          const ampm = hours >= 12 ? "PM" : "AM";
+          return `${hour12}:${minutes} ${ampm}`;
+        }
+      }
+
+      // Global functions for testing - defined outside DOMContentLoaded
+      function testSettings() {
+        console.log("Testing settings function...");
+        handleSettingsClick();
+      }
+
+      function handleSettingsClick() {
+        console.log("handleSettingsClick called");
+        const userEmail =
+          localStorage.getItem("userEmail") || "practice@gmail.com";
+        const userRole = localStorage.getItem("userRole") || "player";
+        const userName = userEmail.split("@")[0];
+
+        console.log("User data:", { userEmail, userRole, userName });
+
+        alert(
+          `Settings panel for ${userName} (${userRole}) coming soon!\n\nFeatures will include:\n• Account preferences\n• Notification settings\n• Privacy options\n• Theme selection`
+        );
+      }
+
+      function handleProfileClick() {
+        console.log("handleProfileClick called");
+        const userEmail =
+          localStorage.getItem("userEmail") || "practice@gmail.com";
+        const userRole = localStorage.getItem("userRole") || "player";
+        const userName = userEmail.split("@")[0];
+
+        console.log("User data:", { userEmail, userRole, userName });
+
+        alert(
+          `Profile page for ${userName} coming soon!\n\nFeatures will include:\n• Edit personal information\n• Change password\n• Upload profile picture\n• View account statistics`
+        );
+      }
+
+      // Initialize dashboard
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set current date
+        const today = new Date();
+        document.getElementById("currentDate").textContent =
+          today.toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          });
+
+        // Get user role and email from localStorage or URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const userRole =
+          urlParams.get("role") || localStorage.getItem("userRole") || "player";
+        const userEmail =
+          urlParams.get("email") ||
+          localStorage.getItem("userEmail") ||
+          "practice@gmail.com";
+
+        // Store user data in localStorage if not already there
+        if (!localStorage.getItem("userRole")) {
+          localStorage.setItem("userRole", userRole);
+        }
+        if (!localStorage.getItem("userEmail")) {
+          localStorage.setItem("userEmail", userEmail);
+        }
+
+        // Set user name
+        document.getElementById("userName").textContent = `Welcome back, ${
+          userEmail.split("@")[0]
+        }!`;
+
+        // Show appropriate sidebar sections based on role
+        if (userRole === "coach") {
+          document.getElementById("playerSection").style.display = "none";
+          document.getElementById("coachSection").style.display = "block";
+        }
+
+        // Initialize dashboard data manager
+        window.dashboardManager = new DashboardManager(); // The constructor already calls init()
+
+        // Tooltip functions for performance chart
+        window.showTooltip = function (event, label, rating, sessions) {
+          // Remove existing tooltip
+          const existingTooltip = document.querySelector(".chart-tooltip");
+          if (existingTooltip) {
+            existingTooltip.remove();
+          }
+
+          if (sessions === 0) {
+            return; // Don't show tooltip for weeks with no data
+          }
+
+          const tooltip = document.createElement("div");
+          tooltip.className = "chart-tooltip show";
+          tooltip.innerHTML = `
+            <div><strong>${label}</strong></div>
+            <div>Rating: ${rating}/10</div>
+            <div>Sessions: ${sessions}</div>
+          `;
+
+          const rect = event.target.getBoundingClientRect();
+          const chartRect = document
+            .getElementById("performancePoints")
+            .getBoundingClientRect();
+
+          tooltip.style.left =
+            rect.left - chartRect.left + rect.width / 2 + "px";
+          tooltip.style.top = rect.top - chartRect.top + "px";
+
+          document.getElementById("performancePoints").appendChild(tooltip);
+        };
+
+        window.hideTooltip = function () {
+          const tooltip = document.querySelector(".chart-tooltip");
+          if (tooltip) {
+            tooltip.classList.remove("show");
+            setTimeout(() => tooltip.remove(), 200);
+          }
+        };
+
+        // Add refresh functionality when page becomes visible
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden && window.dashboardManager) {
+            // Refresh dashboard when page becomes visible (useful when returning from other pages)
+            setTimeout(() => {
+              window.dashboardManager.loadAllData();
+              window.dashboardManager.updateStats();
+              window.dashboardManager.updateRecentActivities();
+              window.dashboardManager.updateUpcomingEvents();
+              window.dashboardManager.updatePerformanceChart();
+            }, 500);
+          }
+        });
+
+        // Debug function for testing
+        window.refreshDashboard = function () {
+          if (window.dashboardManager) {
+            window.dashboardManager.loadAllData();
+            window.dashboardManager.updateStats();
+            window.dashboardManager.updateRecentActivities();
+            window.dashboardManager.updateUpcomingEvents();
+            window.dashboardManager.updatePerformanceChart();
+            console.log("Dashboard refreshed!");
+          }
+        };
+
+        // Add keyboard shortcut to refresh dashboard (Ctrl+R or F5)
+        document.addEventListener("keydown", function (e) {
+          if ((e.ctrlKey && e.key === "r") || e.key === "F5") {
+            // Don't prevent default, but also refresh dashboard data
+            setTimeout(() => {
+              if (window.dashboardManager) {
+                window.refreshDashboard();
+              }
+            }, 100);
+          }
+        });
+
+        // Dropdown functionality
+        setupDropdown();
+
+        // Sidebar functionality
+        setupSidebar();
+      });
+
+      function setupDropdown() {
+        console.log("Setting up dropdown...");
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+
+        console.log("Dropdown toggle:", dropdownToggle);
+        console.log("Dropdown menu:", dropdownMenu);
+
+        if (!dropdownToggle || !dropdownMenu) {
+          console.error("Dropdown elements not found!");
+          return;
+        }
+
+        // Remove any existing event listeners by cloning elements
+        const newToggle = dropdownToggle.cloneNode(true);
+        const newMenu = dropdownMenu.cloneNode(true);
+        dropdownToggle.parentNode.replaceChild(newToggle, dropdownToggle);
+        dropdownMenu.parentNode.replaceChild(newMenu, dropdownMenu);
+
+        // Get references to the new elements
+        const toggle = document.querySelector(".dropdown-toggle");
+        const menu = document.querySelector(".dropdown-menu");
+
+        toggle.addEventListener("click", function (e) {
+          console.log("Dropdown toggle clicked");
+          e.stopPropagation();
+          menu.classList.toggle("show");
+          console.log("Dropdown menu classes:", menu.className);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", function (e) {
+          if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+            menu.classList.remove("show");
+          }
+        });
+
+        // Add click handlers for dropdown menu items
+        const settingsBtn = menu.querySelector('a[href="#settings"]');
+        const profileBtn = menu.querySelector('a[href="#profile"]');
+
+        console.log("Settings button:", settingsBtn);
+        console.log("Profile button:", profileBtn);
+
+        if (settingsBtn) {
+          settingsBtn.addEventListener("click", function (e) {
+            console.log("Settings clicked");
+            e.preventDefault();
+            handleSettingsClick();
+            menu.classList.remove("show");
+          });
+        }
+
+        if (profileBtn) {
+          profileBtn.addEventListener("click", function (e) {
+            console.log("Profile clicked");
+            e.preventDefault();
+            handleProfileClick();
+            menu.classList.remove("show");
+          });
+        }
+      }
+
+      // Quick action functions
+      function logTraining() {
+        window.location.href = "training.html";
+      }
+
+      function recordMatch() {
+        window.location.href = "matches.html";
+      }
+
+      function viewSchedule() {
+        window.location.href = "schedule.html";
+      }
+
+      function setGoal() {
+        alert(
+          "Goal setting feature coming soon! This will allow you to set and track training goals."
+        );
+      }
+
+      function logout() {
+        if (confirm("Are you sure you want to logout?")) {
+          // Clear any stored user data
+          localStorage.removeItem("userRole");
+          localStorage.removeItem("userEmail");
+
+          // Redirect to main page
+          window.location.href = "index.html";
+        }
+      }
+
+      // Sidebar toggle functionality
+      function setupSidebar() {
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        const sidebar = document.getElementById("sidebar");
+        const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+        function toggleSidebar() {
+          sidebar.classList.toggle("active");
+          sidebarOverlay.classList.toggle("active");
+          sidebarToggle.classList.toggle("active");
+        }
+
+        function closeSidebar() {
+          sidebar.classList.remove("active");
+          sidebarOverlay.classList.remove("active");
+          sidebarToggle.classList.remove("active");
+        }
+
+        // Toggle sidebar on button click
+        sidebarToggle.addEventListener("click", toggleSidebar);
+
+        // Close sidebar when clicking overlay
+        sidebarOverlay.addEventListener("click", closeSidebar);
+
+        // Close sidebar on escape key
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && sidebar.classList.contains("active")) {
+            closeSidebar();
+          }
+        });
+
+        // Auto-close sidebar on menu item click (mobile behavior)
+        document.querySelectorAll(".menu-item").forEach((item) => {
+          item.addEventListener("click", function () {
+            if (window.innerWidth <= 768) {
+              closeSidebar();
+            }
+          });
+        });
+      }
+
+      // Menu navigation
+      document.querySelectorAll(".menu-item").forEach((item) => {
+        item.addEventListener("click", function (e) {
+          const href = this.getAttribute("href");
+
+          // Allow navigation to actual HTML pages
+          if (
+            href === "training.html" ||
+            href === "matches.html" ||
+            href === "schedule.html"
+          ) {
+            return; // Let the browser handle the navigation
+          }
+
+          // For dashboard link, just remove active from others and add to this one
+          if (href === "#dashboard") {
+            e.preventDefault();
+            document
+              .querySelectorAll(".menu-item")
+              .forEach((i) => i.classList.remove("active"));
+            this.classList.add("active");
+            return;
+          }
+
+          // For other hash links or features not yet implemented
+          e.preventDefault();
+
+          // Remove active class from all menu items
+          document
+            .querySelectorAll(".menu-item")
+            .forEach((i) => i.classList.remove("active"));
+
+          // Add active class to clicked item
+          this.classList.add("active");
+
+          // For demo purposes, show alert for unimplemented features
+          const featureName = this.textContent.trim();
+          alert(`${featureName} feature coming soon! 🚀`);
+        });
+      });
+    </script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

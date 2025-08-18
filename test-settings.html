@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Settings Button</title>
+    <link rel="stylesheet" href="css/dashboard-style.css" />
+  </head>
+  <body>
+    <!-- Minimal test for the dropdown -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <span class="logo-icon">🏸</span>
+          <span class="logo-text">ShuttleStats</span>
+        </div>
+        <div class="nav-right">
+          <div class="user-info">
+            <span class="user-name">Welcome back!</span>
+            <div class="user-dropdown">
+              <button class="dropdown-toggle">⚙️</button>
+              <div class="dropdown-menu">
+                <a href="#profile">Profile</a>
+                <a href="#settings">Settings</a>
+                <a href="#" onclick="logout()">Logout</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div style="margin-top: 150px; padding: 20px">
+      <h1>Test Page</h1>
+      <p>Click the gear icon (⚙️) in the top right to test the dropdown.</p>
+      <button onclick="testSettings()" style="padding: 10px 20px; margin: 10px">
+        Test Settings Function Directly
+      </button>
+      <button onclick="testDropdown()" style="padding: 10px 20px; margin: 10px">
+        Test Dropdown Toggle
+      </button>
+    </div>
+
+    <script>
+      // Copy the functions from dashboard.html
+      function testSettings() {
+        console.log("Testing settings function...");
+        handleSettingsClick();
+      }
+
+      function testDropdown() {
+        const menu = document.querySelector(".dropdown-menu");
+        menu.classList.toggle("show");
+        console.log("Dropdown toggled, classes:", menu.className);
+      }
+
+      function handleSettingsClick() {
+        console.log("handleSettingsClick called");
+        const userEmail =
+          localStorage.getItem("userEmail") || "practice@gmail.com";
+        const userRole = localStorage.getItem("userRole") || "player";
+        const userName = userEmail.split("@")[0];
+
+        console.log("User data:", { userEmail, userRole, userName });
+
+        alert(
+          `Settings panel for ${userName} (${userRole}) coming soon!\n\nFeatures will include:\n• Account preferences\n• Notification settings\n• Privacy options\n• Theme selection`
+        );
+      }
+
+      function handleProfileClick() {
+        console.log("handleProfileClick called");
+        const userEmail =
+          localStorage.getItem("userEmail") || "practice@gmail.com";
+        const userRole = localStorage.getItem("userRole") || "player";
+        const userName = userEmail.split("@")[0];
+
+        console.log("User data:", { userEmail, userRole, userName });
+
+        alert(
+          `Profile page for ${userName} coming soon!\n\nFeatures will include:\n• Edit personal information\n• Change password\n• Upload profile picture\n• View account statistics`
+        );
+      }
+
+      function logout() {
+        if (confirm("Are you sure you want to logout?")) {
+          localStorage.removeItem("userRole");
+          localStorage.removeItem("userEmail");
+          window.location.href = "index.html";
+        }
+      }
+
+      // Setup dropdown when page loads
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("Setting up test dropdown...");
+
+        const dropdownToggle = document.querySelector(".dropdown-toggle");
+        const dropdownMenu = document.querySelector(".dropdown-menu");
+
+        if (!dropdownToggle || !dropdownMenu) {
+          console.error("Dropdown elements not found!");
+          return;
+        }
+
+        dropdownToggle.addEventListener("click", function (e) {
+          console.log("Dropdown toggle clicked");
+          e.stopPropagation();
+          dropdownMenu.classList.toggle("show");
+          console.log("Dropdown menu classes:", dropdownMenu.className);
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", function (e) {
+          if (
+            !dropdownMenu.contains(e.target) &&
+            !dropdownToggle.contains(e.target)
+          ) {
+            dropdownMenu.classList.remove("show");
+          }
+        });
+
+        // Add click handlers for dropdown menu items
+        const settingsBtn = dropdownMenu.querySelector('a[href="#settings"]');
+        const profileBtn = dropdownMenu.querySelector('a[href="#profile"]');
+
+        if (settingsBtn) {
+          settingsBtn.addEventListener("click", function (e) {
+            console.log("Settings clicked in dropdown");
+            e.preventDefault();
+            handleSettingsClick();
+            dropdownMenu.classList.remove("show");
+          });
+        }
+
+        if (profileBtn) {
+          profileBtn.addEventListener("click", function (e) {
+            console.log("Profile clicked in dropdown");
+            e.preventDefault();
+            handleProfileClick();
+            dropdownMenu.classList.remove("show");
+          });
+        }
+
+        console.log("Dropdown setup complete");
+      });
+    </script>
+  </body>
+</html>
