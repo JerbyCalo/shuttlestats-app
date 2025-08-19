@@ -1,7 +1,7 @@
 // Shared data persistence utilities
 export class DataPersistence {
   static getUserEmail() {
-    return localStorage.getItem('userEmail') || 'practice@gmail.com';
+    return localStorage.getItem("userEmail") || "practice@gmail.com";
   }
 
   static loadUserData(dataType) {
@@ -25,7 +25,11 @@ export class DataPersistence {
 
   // Common remote vs local data handling pattern
   static async handleDataOperation(remote, operation, localFallback) {
-    if (remote && window.dataService && typeof window.dataService[operation] === 'function') {
+    if (
+      remote &&
+      window.dataService &&
+      typeof window.dataService[operation] === "function"
+    ) {
       try {
         return await window.dataService[operation]();
       } catch (err) {

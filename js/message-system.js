@@ -1,15 +1,15 @@
 // Shared message display system
 export class MessageSystem {
-  static showMessage(text, type = 'info', duration = 4000) {
-    let messageContainer = document.getElementById('messageContainer');
-    
+  static showMessage(text, type = "info", duration = 4000) {
+    let messageContainer = document.getElementById("messageContainer");
+
     // Create message container if it doesn't exist
     if (!messageContainer) {
       messageContainer = this.createMessageContainer();
     }
 
     const messageId = Date.now().toString();
-    const messageElement = document.createElement('div');
+    const messageElement = document.createElement("div");
     messageElement.className = `message ${type}`;
     messageElement.id = messageId;
     messageElement.textContent = text;
@@ -20,10 +20,10 @@ export class MessageSystem {
     setTimeout(() => {
       const element = document.getElementById(messageId);
       if (element) {
-        element.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        element.style.opacity = '0';
-        element.style.transform = 'translateY(-10px)';
-        
+        element.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+        element.style.opacity = "0";
+        element.style.transform = "translateY(-10px)";
+
         setTimeout(() => {
           if (element.parentNode) {
             element.remove();
@@ -36,11 +36,11 @@ export class MessageSystem {
   }
 
   static createMessageContainer() {
-    let messageContainer = document.getElementById('messageContainer');
+    let messageContainer = document.getElementById("messageContainer");
     if (messageContainer) return messageContainer;
 
-    messageContainer = document.createElement('div');
-    messageContainer.id = 'messageContainer';
+    messageContainer = document.createElement("div");
+    messageContainer.id = "messageContainer";
     messageContainer.style.cssText = `
       position: fixed;
       top: 20px;
@@ -50,9 +50,9 @@ export class MessageSystem {
     `;
 
     // Add message styles to document if not already present
-    if (!document.getElementById('messageStyles')) {
-      const style = document.createElement('style');
-      style.id = 'messageStyles';
+    if (!document.getElementById("messageStyles")) {
+      const style = document.createElement("style");
+      style.id = "messageStyles";
       style.textContent = `
         .message {
           background: white;
@@ -104,9 +104,14 @@ export class MessageSystem {
   }
 
   static clearMessages() {
-    const messageContainer = document.getElementById('messageContainer');
+    const messageContainer = document.getElementById("messageContainer");
     if (messageContainer) {
-      messageContainer.innerHTML = '';
+      messageContainer.innerHTML = "";
     }
   }
+}
+
+// Also make it available globally for non-module scripts
+if (typeof window !== "undefined") {
+  window.MessageSystem = MessageSystem;
 }

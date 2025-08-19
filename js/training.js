@@ -137,31 +137,48 @@ export class TrainingManager {
   }
 
   showSessionForm() {
-    FormAnimations.showForm('sessionForm', 'trainingHistory', 'newSessionBtn', '⬅️ Back to History');
-    
+    FormAnimations.showForm(
+      "sessionForm",
+      "trainingHistory",
+      "newSessionBtn",
+      "⬅️ Back to History"
+    );
+
     // Hide quick stats
-    document.getElementById('quickStats').style.display = 'none';
-    
+    document.getElementById("quickStats").style.display = "none";
+
     // Update button handler
-    FormAnimations.replaceButtonListener('newSessionBtn', () => this.hideSessionForm());
+    FormAnimations.replaceButtonListener("newSessionBtn", () =>
+      this.hideSessionForm()
+    );
   }
 
   hideSessionForm() {
-    FormAnimations.hideForm('sessionForm', 'trainingHistory', 'newSessionBtn', 'Log New Session', '➕');
-    
+    FormAnimations.hideForm(
+      "sessionForm",
+      "trainingHistory",
+      "newSessionBtn",
+      "Log New Session",
+      "➕"
+    );
+
     // Show quick stats
-    document.getElementById('quickStats').style.display = 'block';
-    
+    document.getElementById("quickStats").style.display = "block";
+
     // Update button handler and reset form
-    FormAnimations.replaceButtonListener('newSessionBtn', () => this.showSessionForm());
+    FormAnimations.replaceButtonListener("newSessionBtn", () =>
+      this.showSessionForm()
+    );
     this.resetForm();
   }
 
   resetForm() {
-    document.getElementById('trainingSessionForm').reset();
-    document.getElementById('sessionDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('ratingValue').textContent = '5';
-    document.getElementById('effortValue').textContent = '5';
+    document.getElementById("trainingSessionForm").reset();
+    document.getElementById("sessionDate").value = new Date()
+      .toISOString()
+      .split("T")[0];
+    document.getElementById("ratingValue").textContent = "5";
+    document.getElementById("effortValue").textContent = "5";
   }
 
   showHistory() {
@@ -222,11 +239,11 @@ export class TrainingManager {
   }
 
   loadSessions() {
-    this.sessions = DataPersistence.loadUserData('trainingSessions');
+    this.sessions = DataPersistence.loadUserData("trainingSessions");
   }
 
   saveSessions() {
-    DataPersistence.saveUserData('trainingSessions', this.sessions);
+    DataPersistence.saveUserData("trainingSessions", this.sessions);
   }
 
   updateStats() {
@@ -265,13 +282,13 @@ export class TrainingManager {
     const sessionsList = document.getElementById("sessionsList");
 
     if (this.sessions.length === 0) {
-      EmptyStateRenderer.renderEmptyState('sessionsList', {
-        icon: '🏸',
-        title: 'No training sessions yet',
-        message: 'Start logging your training sessions to track your progress!',
-        buttonText: 'Log Your First Session',
-        buttonId: 'logFirstSessionBtn',
-        onButtonClick: () => this.showSessionForm()
+      EmptyStateRenderer.renderEmptyState("sessionsList", {
+        icon: "🏸",
+        title: "No training sessions yet",
+        message: "Start logging your training sessions to track your progress!",
+        buttonText: "Log Your First Session",
+        buttonId: "logFirstSessionBtn",
+        onButtonClick: () => this.showSessionForm(),
       });
       return;
     }
@@ -378,7 +395,7 @@ export class TrainingManager {
     // Render filtered sessions
     const sessionsList = document.getElementById("sessionsList");
     if (filteredSessions.length === 0) {
-      EmptyStateRenderer.renderFilteredEmptyState('sessionsList', 'filter');
+      EmptyStateRenderer.renderFilteredEmptyState("sessionsList", "filter");
       return;
     }
 

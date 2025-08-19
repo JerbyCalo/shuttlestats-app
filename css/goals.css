@@ -1,63 +1,6 @@
-/* Goals Page Styles */
+/* Goals Page Styles - Compatible with dashboard structure */
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #e0e7ff;
-}
-
-.header-content {
-  flex: 1;
-}
-
-.breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.breadcrumb-link {
-  color: #4f46e5;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.breadcrumb-link:hover {
-  color: #3730a3;
-}
-
-.breadcrumb-separator {
-  color: #9ca3af;
-}
-
-.breadcrumb-current {
-  color: #374151;
-  font-weight: 500;
-}
-
-.page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
-}
-
-.page-subtitle {
-  color: #6b7280;
-  font-size: 1.125rem;
-  margin: 0;
-}
-
-.header-actions {
-  display: flex;
-  gap: 1rem;
-}
+/* Remove custom page header styles, use dashboard content-header */
 
 /* Stats Row */
 .stats-row {

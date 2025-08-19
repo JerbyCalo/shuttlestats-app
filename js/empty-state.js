@@ -5,12 +5,12 @@ export class EmptyStateRenderer {
     if (!container) return;
 
     const {
-      icon = '📝',
-      title = 'No data yet',
-      message = 'Start adding data to see it here!',
-      buttonText = 'Add First Item',
-      buttonId = 'addFirstBtn',
-      onButtonClick = null
+      icon = "📝",
+      title = "No data yet",
+      message = "Start adding data to see it here!",
+      buttonText = "Add First Item",
+      buttonId = "addFirstBtn",
+      onButtonClick = null,
     } = config;
 
     container.innerHTML = `
@@ -19,7 +19,11 @@ export class EmptyStateRenderer {
           <span class="empty-icon">${icon}</span>
           <h3>${title}</h3>
           <p>${message}</p>
-          ${buttonText ? `<button class="btn btn-primary" id="${buttonId}">${buttonText}</button>` : ''}
+          ${
+            buttonText
+              ? `<button class="btn btn-primary" id="${buttonId}">${buttonText}</button>`
+              : ""
+          }
         </div>
       </div>
     `;
@@ -28,34 +32,34 @@ export class EmptyStateRenderer {
     if (buttonText && onButtonClick) {
       const button = document.getElementById(buttonId);
       if (button) {
-        button.addEventListener('click', onButtonClick);
+        button.addEventListener("click", onButtonClick);
       }
     }
   }
 
-  static renderFilteredEmptyState(containerId, filterType = 'search') {
+  static renderFilteredEmptyState(containerId, filterType = "search") {
     const container = document.getElementById(containerId);
     if (!container) return;
 
     const configs = {
       search: {
-        icon: '🔍',
-        title: 'No results found',
-        message: 'Try adjusting your filters or search terms.',
-        buttonText: null
+        icon: "🔍",
+        title: "No results found",
+        message: "Try adjusting your filters or search terms.",
+        buttonText: null,
       },
       filter: {
-        icon: '🔍',
-        title: 'No items match your filters',
-        message: 'Try adjusting your filters to see more results.',
-        buttonText: null
+        icon: "🔍",
+        title: "No items match your filters",
+        message: "Try adjusting your filters to see more results.",
+        buttonText: null,
       },
       date: {
-        icon: '📅',
-        title: 'No data for this period',
-        message: 'Try selecting a different date range.',
-        buttonText: null
-      }
+        icon: "📅",
+        title: "No data for this period",
+        message: "Try selecting a different date range.",
+        buttonText: null,
+      },
     };
 
     const config = configs[filterType] || configs.search;
@@ -63,10 +67,10 @@ export class EmptyStateRenderer {
   }
 
   static addEmptyStateStyles() {
-    if (document.getElementById('emptyStateStyles')) return;
+    if (document.getElementById("emptyStateStyles")) return;
 
-    const style = document.createElement('style');
-    style.id = 'emptyStateStyles';
+    const style = document.createElement("style");
+    style.id = "emptyStateStyles";
     style.textContent = `
       .no-data {
         display: flex;
@@ -113,7 +117,12 @@ export class EmptyStateRenderer {
   }
 }
 
+// Also make it available globally for non-module scripts
+if (typeof window !== "undefined") {
+  window.EmptyStateRenderer = EmptyStateRenderer;
+}
+
 // Auto-add styles when imported
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   EmptyStateRenderer.addEmptyStateStyles();
 });
