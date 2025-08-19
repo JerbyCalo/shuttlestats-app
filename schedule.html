@@ -117,28 +117,28 @@
           <div class="stat-card">
             <div class="stat-icon">📅</div>
             <div class="stat-info">
-              <span class="stat-number" id="totalSessions">0</span>
+              <span class="stat-number loading" id="totalSessions">...</span>
               <span class="stat-label">Total Sessions</span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">⏰</div>
             <div class="stat-info">
-              <span class="stat-number" id="upcomingSessions">0</span>
+              <span class="stat-number loading" id="upcomingSessions">...</span>
               <span class="stat-label">Upcoming This Week</span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">✅</div>
             <div class="stat-info">
-              <span class="stat-number" id="completedSessions">0</span>
+              <span class="stat-number loading" id="completedSessions">...</span>
               <span class="stat-label">Completed Sessions</span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">🔄</div>
             <div class="stat-info">
-              <span class="stat-number" id="consistencyRate">0%</span>
+              <span class="stat-number loading" id="consistencyRate">...</span>
               <span class="stat-label">Consistency Rate</span>
             </div>
           </div>
@@ -483,16 +483,14 @@
               </div>
 
               <div id="sessionsList" class="sessions-list">
-                <div class="no-sessions">
-                  <div class="empty-state">
-                    <span class="empty-icon">📅</span>
-                    <h3>No upcoming sessions</h3>
-                    <p>Schedule your first training session to get started!</p>
-                    <button class="btn btn-primary" id="scheduleFirstBtn">
-                      Schedule Session
-                    </button>
+                <div class="loading-state">
+                  <div class="loading-content">
+                    <span class="loading-icon">📅</span>
+                    <h3>Loading scheduled sessions...</h3>
+                    <p>Please wait while we fetch your schedule</p>
                   </div>
                 </div>
+              </div>
               </div>
             </div>
           </div>

@@ -117,28 +117,28 @@
           <div class="stat-card win">
             <div class="stat-icon">🏆</div>
             <div class="stat-info">
-              <span class="stat-number" id="totalWins">0</span>
+              <span class="stat-number loading" id="totalWins">...</span>
               <span class="stat-label">Wins</span>
             </div>
           </div>
           <div class="stat-card loss">
             <div class="stat-icon">😞</div>
             <div class="stat-info">
-              <span class="stat-number" id="totalLosses">0</span>
+              <span class="stat-number loading" id="totalLosses">...</span>
               <span class="stat-label">Losses</span>
             </div>
           </div>
           <div class="stat-card ratio">
             <div class="stat-icon">📊</div>
             <div class="stat-info">
-              <span class="stat-number" id="winRatio">0%</span>
+              <span class="stat-number loading" id="winRatio">...</span>
               <span class="stat-label">Win Rate</span>
             </div>
           </div>
           <div class="stat-card streak">
             <div class="stat-icon">🔥</div>
             <div class="stat-info">
-              <span class="stat-number" id="currentStreak">0</span>
+              <span class="stat-number loading" id="currentStreak">...</span>
               <span class="stat-label">Current Streak</span>
             </div>
           </div>
@@ -558,16 +558,14 @@
               </div>
 
               <div id="matchesList" class="matches-list">
-                <div class="no-matches">
-                  <div class="empty-state">
-                    <span class="empty-icon">🏸</span>
-                    <h3>No matches recorded yet</h3>
-                    <p>Start recording your matches to track your progress!</p>
-                    <button class="btn btn-primary" id="recordFirstMatchBtn">
-                      Record Your First Match
-                    </button>
+                <div class="loading-state">
+                  <div class="loading-content">
+                    <span class="loading-icon">�</span>
+                    <h3>Loading match history...</h3>
+                    <p>Please wait while we fetch your match data</p>
                   </div>
                 </div>
+              </div>
               </div>
             </div>
           </div>

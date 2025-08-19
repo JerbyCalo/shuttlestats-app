@@ -517,9 +517,16 @@ export class MatchManager {
     const currentStreak = this.calculateCurrentStreak();
 
     document.getElementById("totalWins").textContent = wins;
+    document.getElementById("totalWins").classList.remove("loading");
+
     document.getElementById("totalLosses").textContent = losses;
+    document.getElementById("totalLosses").classList.remove("loading");
+
     document.getElementById("winRatio").textContent = `${winRate}%`;
+    document.getElementById("winRatio").classList.remove("loading");
+
     document.getElementById("currentStreak").textContent = currentStreak;
+    document.getElementById("currentStreak").classList.remove("loading");
   }
 
   calculateCurrentStreak() {

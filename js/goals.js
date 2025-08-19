@@ -19,33 +19,6 @@ class GoalsManager {
     // Load existing goals
     await this.loadGoals();
 
-    // Subscribe to real-time goal updates if supported
-    if (
-      this.dataService &&
-      typeof this.dataService.subscribeToGoals === "function"
-    ) {
-      try {
-        this._unsubscribeGoals = this.dataService.subscribeToGoals((goals) => {
-          this.goals = goals || [];
-          this.renderGoals();
-          this.updateStats();
-        });
-        // Clean up on page unload
-        window.addEventListener("beforeunload", () => {
-          if (typeof this._unsubscribeGoals === "function") {
-            try {
-              this._unsubscribeGoals();
-            } catch (_) {}
-          }
-        });
-      } catch (err) {
-        console.warn(
-          "Goals subscription failed; continuing without live updates.",
-          err
-        );
-      }
-    }
-
     // Setup event listeners
     this.setupEventListeners();
 
@@ -57,17 +30,31 @@ class GoalsManager {
   }
 
   async loadGoals() {
+    console.log("loadGoals method called");
+    console.log("dataService:", this.dataService);
+    console.log("authService:", this.authService);
+
     try {
       if (this.dataService && typeof this.dataService.getGoals === "function") {
+        console.log("Using Firebase dataService to load goals");
         this.goals = (await this.dataService.getGoals()) || [];
-        console.log(`Loaded ${this.goals.length} goals from Firebase`);
+        console.log(
+          `Loaded ${this.goals.length} goals from Firebase:`,
+          this.goals
+        );
       } else {
+        console.log("Using localStorage fallback to load goals");
         // Fallback to localStorage
         const userEmail =
           localStorage.getItem("userEmail") || "practice@gmail.com";
+        console.log("User email:", userEmail);
         const savedGoals = localStorage.getItem(`goals_${userEmail}`);
+        console.log("Raw saved goals:", savedGoals);
         this.goals = savedGoals ? JSON.parse(savedGoals) : [];
-        console.log(`Loaded ${this.goals.length} goals from localStorage`);
+        console.log(
+          `Loaded ${this.goals.length} goals from localStorage:`,
+          this.goals
+        );
       }
     } catch (error) {
       console.error("Error loading goals:", error);
@@ -97,33 +84,58 @@ class GoalsManager {
   setupEventListeners() {
     console.log("Setting up goals event listeners...");
 
-    // New goal button
-    const newGoalBtn = document.getElementById("newGoalBtn");
-    if (newGoalBtn) {
-      newGoalBtn.addEventListener("click", () => {
-        console.log("New goal button clicked!");
-        this.showGoalForm();
-      });
-      console.log("New goal button listener added");
-    } else {
-      console.error("newGoalBtn element not found!");
+    // New goal button - wait for it to be available
+    const setupNewGoalButton = () => {
+      const newGoalBtn = document.getElementById("newGoalBtn");
+      if (newGoalBtn) {
+        newGoalBtn.addEventListener("click", (e) => {
+          console.log("New goal button clicked!", e);
+          e.preventDefault();
+          try {
+            this.showGoalForm();
+          } catch (error) {
+            console.error("Error in showGoalForm:", error);
+          }
+        });
+        console.log("New goal button listener added successfully");
+        return true;
+      } else {
+        console.error("newGoalBtn element not found!");
+        return false;
+      }
+    };
+
+    // Try to setup the button, if it fails, wait and try again
+    if (!setupNewGoalButton()) {
+      setTimeout(() => {
+        setupNewGoalButton();
+      }, 100);
     }
 
     // Close form button
-    document.getElementById("closeFormBtn").addEventListener("click", () => {
-      this.hideGoalForm();
-    });
+    const closeFormBtn = document.getElementById("closeFormBtn");
+    if (closeFormBtn) {
+      closeFormBtn.addEventListener("click", () => {
+        this.hideGoalForm();
+      });
+    }
 
     // Cancel button
-    document.getElementById("cancelBtn").addEventListener("click", () => {
-      this.hideGoalForm();
-    });
+    const cancelBtn = document.getElementById("cancelBtn");
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", () => {
+        this.hideGoalForm();
+      });
+    }
 
     // Form submission
-    document.getElementById("goalFormData").addEventListener("submit", (e) => {
-      e.preventDefault();
-      this.handleFormSubmit();
-    });
+    const goalFormData = document.getElementById("goalFormData");
+    if (goalFormData) {
+      goalFormData.addEventListener("submit", (e) => {
+        e.preventDefault();
+        this.handleFormSubmit();
+      });
+    }
 
     // Filter tabs
     document.querySelectorAll(".filter-tab").forEach((tab) => {
@@ -138,17 +150,23 @@ class GoalsManager {
     });
 
     // Sort dropdown
-    document.getElementById("sortGoals").addEventListener("change", (e) => {
-      this.currentSort = e.target.value;
-      this.renderGoals();
-    });
+    const sortGoals = document.getElementById("sortGoals");
+    if (sortGoals) {
+      sortGoals.addEventListener("change", (e) => {
+        this.currentSort = e.target.value;
+        this.renderGoals();
+      });
+    }
 
     // Close form on background click
-    document.getElementById("goalForm").addEventListener("click", (e) => {
-      if (e.target.id === "goalForm") {
-        this.hideGoalForm();
-      }
-    });
+    const goalForm = document.getElementById("goalForm");
+    if (goalForm) {
+      goalForm.addEventListener("click", (e) => {
+        if (e.target.id === "goalForm") {
+          this.hideGoalForm();
+        }
+      });
+    }
 
     // Escape key to close form
     document.addEventListener("keydown", (e) => {
@@ -162,11 +180,17 @@ class GoalsManager {
   }
 
   showGoalForm(goal = null) {
+    console.log("showGoalForm called", goal);
+
     this.editingGoal = goal;
-    const overlay = document.getElementById("goalForm");
-    const panel = document.querySelector("#goalForm .goal-form");
+    const form = document.getElementById("goalForm");
     const formTitle = document.getElementById("formTitle");
     const submitText = document.getElementById("submitText");
+
+    if (!form || !formTitle || !submitText) {
+      console.error("Goal form elements not found!");
+      return;
+    }
 
     if (goal) {
       // Edit mode
@@ -180,43 +204,71 @@ class GoalsManager {
       this.resetForm();
     }
 
-    // Show the overlay as flex to enable centering, animate the inner panel
-    if (overlay) {
-      overlay.style.display = "flex"; // keep flex centering from CSS
-      if (panel) {
-        panel.style.opacity = "0";
-        panel.style.transform = "translateY(20px)";
-        requestAnimationFrame(() => {
-          panel.style.transition = "all 0.2s ease";
-          panel.style.opacity = "1";
-          panel.style.transform = "translateY(0)";
-        });
-      }
+    try {
+      // Use simple animation instead of FormAnimations
+      console.log("Showing form with simple animation");
+      form.style.display = "flex";
+      form.style.opacity = "0";
+      form.style.transform = "scale(0.95)";
+
+      // Trigger animation after display is set
+      setTimeout(() => {
+        form.style.transition = "all 0.3s ease";
+        form.style.opacity = "1";
+        form.style.transform = "scale(1)";
+      }, 10);
+    } catch (error) {
+      console.error("Error showing goal form:", error);
+      // Fallback to simple display
+      form.style.display = "flex";
     }
   }
 
-  hideGoalForm() {
-    const overlay = document.getElementById("goalForm");
-    const panel = document.querySelector("#goalForm .goal-form");
-    if (overlay) {
-      // Animate panel out, then hide overlay
-      if (panel) {
-        panel.style.transition = "all 0.2s ease";
-        panel.style.opacity = "0";
-        panel.style.transform = "translateY(-10px)";
-      }
-      setTimeout(() => {
-        overlay.style.display = "none";
-        // Reset inline styles
-        if (panel) {
-          panel.style.opacity = "";
-          panel.style.transform = "";
-          panel.style.transition = "";
-        }
-      }, 200);
+  hideGoalForm(immediate = false) {
+    console.log("hideGoalForm called", { immediate });
+    const form = document.getElementById("goalForm");
+
+    if (!form) {
+      console.error("Goal form element not found!");
+      return;
     }
+
+    if (immediate) {
+      // Hide instantly without animation
+      form.style.display = "none";
+      form.style.opacity = "";
+      form.style.transform = "";
+      form.style.transition = "";
+      this.editingGoal = null;
+      this.resetForm();
+      console.log("Form hidden immediately");
+      return;
+    }
+
+    try {
+      // Use simple animation instead of FormAnimations
+      console.log("Hiding form with simple animation");
+      form.style.transition = "all 0.3s ease";
+      form.style.opacity = "0";
+      form.style.transform = "scale(0.95)";
+
+      setTimeout(() => {
+        form.style.display = "none";
+        // Reset styles for next time
+        form.style.opacity = "";
+        form.style.transform = "";
+        form.style.transition = "";
+        console.log("Form hidden successfully");
+      }, 300);
+    } catch (error) {
+      console.error("Error hiding goal form:", error);
+      // Fallback to immediate hide
+      form.style.display = "none";
+    }
+
     this.editingGoal = null;
     this.resetForm();
+    console.log("hideGoalForm completed");
   }
 
   resetForm() {
@@ -242,7 +294,12 @@ class GoalsManager {
   }
 
   async handleFormSubmit() {
+    console.log("handleFormSubmit called");
+
     try {
+      const formData = new FormData(document.getElementById("goalFormData"));
+      console.log("Form data created");
+
       const goalData = {
         title: document.getElementById("goalTitle").value.trim(),
         description: document.getElementById("goalDescription").value.trim(),
@@ -259,13 +316,25 @@ class GoalsManager {
         updatedAt: new Date().toISOString(),
       };
 
+      console.log("Goal data prepared:", goalData);
+
       // Validation
       if (!goalData.title) {
+        console.log("Validation failed: no title");
         MessageSystem.showMessage("Goal title is required", "error");
         return;
       }
 
+      console.log("Validation passed");
+
+      // Optimistically close the form immediately to guarantee auto-exit UX
+      // even if subsequent async operations are slow.
+      this.hideGoalForm(true);
+      // Show loading on the goals list while we save and refresh
+      this.setGoalsLoading(true);
+
       if (this.editingGoal) {
+        console.log("Updating existing goal");
         // Update existing goal
         goalData.id = this.editingGoal.id;
         goalData.current = this.editingGoal.current;
@@ -275,7 +344,21 @@ class GoalsManager {
           this.dataService &&
           typeof this.dataService.updateGoal === "function"
         ) {
-          await this.dataService.updateGoal(goalData.id, goalData);
+          try {
+            await this.withTimeout(
+              this.dataService.updateGoal(goalData.id, goalData),
+              8000
+            );
+          } catch (e) {
+            if (e?.name === "TimeoutError") {
+              MessageSystem.showMessage(
+                "Network is slow. Changes will sync in the background.",
+                "info"
+              );
+            } else {
+              throw e;
+            }
+          }
         }
 
         const index = this.goals.findIndex((g) => g.id === goalData.id);
@@ -286,27 +369,40 @@ class GoalsManager {
         MessageSystem.showMessage("Goal updated successfully!", "success");
       } else {
         // Create new goal
-        // Use server timestamps in Firestore; keep a local createdAt for UI
-        const localCreatedAt = new Date().toISOString();
-        goalData.createdAt = localCreatedAt;
-        // Prepare payload without createdAt/updatedAt so Firestore sets them
-        const savePayload = { ...goalData };
-        delete savePayload.createdAt;
-        delete savePayload.updatedAt;
-
         if (
           this.dataService &&
           typeof this.dataService.saveGoal === "function"
         ) {
-          const saved = await this.dataService.saveGoal(savePayload);
-          // Prefer Firestore id
+          console.log("Saving goal to Firebase");
+          let saved = null;
+          try {
+            saved = await this.withTimeout(
+              this.dataService.saveGoal(goalData),
+              8000
+            );
+          } catch (e) {
+            if (e?.name === "TimeoutError") {
+              MessageSystem.showMessage(
+                "Network is slow. Your goal will appear once synced.",
+                "info"
+              );
+            } else {
+              throw e;
+            }
+          }
+          // Prefer Firestore-generated ID to keep future updates/deletes consistent
           if (saved && saved.id) {
             goalData.id = saved.id;
+          } else if (!goalData.id) {
+            // Fallback local ID if something unexpected happens
+            goalData.id =
+              "goal_" +
+              Date.now() +
+              "_" +
+              Math.random().toString(36).substr(2, 9);
           }
-        }
-
-        // If Firestore didn't return an id (unlikely), fall back to a client id
-        if (!goalData.id) {
+        } else {
+          // Local storage fallback: generate a client ID
           goalData.id =
             "goal_" +
             Date.now() +
@@ -315,19 +411,105 @@ class GoalsManager {
         }
 
         this.goals.push(goalData);
+        console.log("Goal added to local array");
         MessageSystem.showMessage("Goal created successfully!", "success");
       }
 
+      console.log("Saving goals...");
       await this.saveGoals();
-      this.hideGoalForm();
+
+      console.log("Goal form already hidden after validation");
+
+      // Reload goals from backend to reflect server-side fields/order
+      try {
+        await this.withTimeout(this.loadGoals(), 8000);
+      } catch (e) {
+        if (e?.name === "TimeoutError") {
+          // Keep local list and inform user
+          MessageSystem.showMessage(
+            "Still syncing… showing local data for now.",
+            "info"
+          );
+        } else {
+          throw e;
+        }
+      }
+
+      console.log("Rendering goals...");
       this.renderGoals();
+
+      console.log("Updating stats...");
       this.updateStats();
+
+      console.log("Goal creation process completed successfully");
     } catch (error) {
       console.error("Error saving goal:", error);
       MessageSystem.showMessage(
         "Failed to save goal. Please try again.",
         "error"
       );
+    } finally {
+      // Always clear loading state
+      this.setGoalsLoading(false);
+      // Ensure UI refresh happens even if an error occurred earlier
+      try {
+        this.renderGoals();
+        this.updateStats();
+      } catch (_) {}
+    }
+  }
+
+  // Wrap a promise with a timeout to prevent UI hangs
+  withTimeout(promise, ms = 8000) {
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => {
+        const err = new Error("Operation timed out");
+        err.name = "TimeoutError";
+        reject(err);
+      }, ms);
+    });
+    return Promise.race([promise.finally(() => clearTimeout(timer)), timeout]);
+  }
+
+  // Show/hide loading state in goals list and mark stats as loading
+  setGoalsLoading(isLoading) {
+    const goalsList = document.getElementById("goalsList");
+    if (isLoading) {
+      if (goalsList) {
+        goalsList.innerHTML = `
+          <div class="loading-state">
+            <div class="loading-content">
+              <span class="loading-icon">🎯</span>
+              <h3>Saving your goal...</h3>
+              <p>Fetching updated goals</p>
+            </div>
+          </div>
+        `;
+      }
+      ["totalGoals", "completedGoals", "activeGoals", "completionRate"].forEach(
+        (id) => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add("loading");
+        }
+      );
+    } else {
+      ["totalGoals", "completedGoals", "activeGoals", "completionRate"].forEach(
+        (id) => {
+          const el = document.getElementById(id);
+          if (el) el.classList.remove("loading");
+        }
+      );
+      // If the list still shows the loading placeholder, clear and re-render
+      if (goalsList && goalsList.querySelector(".loading-state")) {
+        goalsList.innerHTML = "";
+        try {
+          this.renderGoals();
+          this.updateStats();
+        } catch (e) {
+          // swallow render errors here; they will surface elsewhere if needed
+        }
+      }
     }
   }
 
@@ -476,14 +658,22 @@ class GoalsManager {
   }
 
   renderGoals() {
+    console.log("renderGoals called");
+    console.log("Current goals:", this.goals);
+
     const goalsList = document.getElementById("goalsList");
+    console.log("goalsList element:", goalsList);
+
     const goals = this.getFilteredAndSortedGoals();
+    console.log("Filtered and sorted goals:", goals);
 
     if (goals.length === 0) {
+      console.log("No goals to render, showing empty state");
       this.renderEmptyState();
       return;
     }
 
+    console.log("Rendering", goals.length, "goals");
     goalsList.innerHTML = goals
       .map((goal) => this.createGoalHTML(goal))
       .join("");
@@ -683,18 +873,35 @@ class GoalsManager {
   }
 
   updateStats() {
+    console.log("updateStats called");
+    console.log("Goals for stats:", this.goals);
+
     const totalGoals = this.goals.length;
     const completedGoals = this.goals.filter((g) => g.completed).length;
     const activeGoals = totalGoals - completedGoals;
     const completionRate =
       totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
 
+    console.log("Stats calculated:", {
+      totalGoals,
+      completedGoals,
+      activeGoals,
+      completionRate,
+    });
+
     document.getElementById("totalGoals").textContent = totalGoals;
+    document.getElementById("totalGoals").classList.remove("loading");
+
     document.getElementById("completedGoals").textContent = completedGoals;
+    document.getElementById("completedGoals").classList.remove("loading");
+
     document.getElementById("activeGoals").textContent = activeGoals;
+    document.getElementById("activeGoals").classList.remove("loading");
+
     document.getElementById(
       "completionRate"
     ).textContent = `${completionRate}%`;
+    document.getElementById("completionRate").classList.remove("loading");
   }
 
   formatDate(dateString) {

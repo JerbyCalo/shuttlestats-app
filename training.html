@@ -113,28 +113,28 @@
           <div class="stat-card">
             <div class="stat-icon">🏃‍♂️</div>
             <div class="stat-info">
-              <span class="stat-number" id="totalSessions">0</span>
+              <span class="stat-number loading" id="totalSessions">...</span>
               <span class="stat-label">Total Sessions</span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">⏱️</div>
             <div class="stat-info">
-              <span class="stat-number" id="totalHours">0</span>
+              <span class="stat-number loading" id="totalHours">...</span>
               <span class="stat-label">Total Hours</span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">📅</div>
             <div class="stat-info">
-              <span class="stat-number" id="thisWeek">0</span>
+              <span class="stat-number loading" id="thisWeek">...</span>
               <span class="stat-label">This Week</span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-icon">🎯</div>
             <div class="stat-info">
-              <span class="stat-number" id="avgRating">0</span>
+              <span class="stat-number loading" id="avgRating">...</span>
               <span class="stat-label">Avg Rating</span>
             </div>
           </div>
@@ -374,17 +374,11 @@
               </div>
 
               <div id="sessionsList" class="sessions-list">
-                <div class="no-sessions">
-                  <div class="empty-state">
-                    <span class="empty-icon">🏸</span>
-                    <h3>No training sessions yet</h3>
-                    <p>
-                      Start logging your training sessions to track your
-                      progress!
-                    </p>
-                    <button class="btn btn-primary" onclick="showSessionForm()">
-                      Log Your First Session
-                    </button>
+                <div class="loading-state">
+                  <div class="loading-content">
+                    <span class="loading-icon">🏸</span>
+                    <h3>Loading training sessions...</h3>
+                    <p>Please wait while we fetch your data</p>
                   </div>
                 </div>
               </div>

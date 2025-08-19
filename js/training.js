@@ -273,9 +273,16 @@ export class TrainingManager {
         : 0;
 
     document.getElementById("totalSessions").textContent = totalSessions;
+    document.getElementById("totalSessions").classList.remove("loading");
+
     document.getElementById("totalHours").textContent = totalHours;
+    document.getElementById("totalHours").classList.remove("loading");
+
     document.getElementById("thisWeek").textContent = thisWeek;
+    document.getElementById("thisWeek").classList.remove("loading");
+
     document.getElementById("avgRating").textContent = avgRating;
+    document.getElementById("avgRating").classList.remove("loading");
   }
 
   renderSessions() {

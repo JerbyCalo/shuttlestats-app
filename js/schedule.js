@@ -848,19 +848,28 @@ export class ScheduleManager {
 
     // Update DOM
     const totalSessionsEl = document.getElementById("totalSessions");
-    if (totalSessionsEl) totalSessionsEl.textContent = totalSessions;
+    if (totalSessionsEl) {
+      totalSessionsEl.textContent = totalSessions;
+      totalSessionsEl.classList.remove("loading");
+    }
 
     const upcomingSessionsEl = document.getElementById("upcomingSessions");
-    if (upcomingSessionsEl)
+    if (upcomingSessionsEl) {
       upcomingSessionsEl.textContent = weekUpcomingSessions;
+      upcomingSessionsEl.classList.remove("loading");
+    }
 
     const completedSessionsEl = document.getElementById("completedSessions");
-    if (completedSessionsEl)
+    if (completedSessionsEl) {
       completedSessionsEl.textContent = completedSessions;
+      completedSessionsEl.classList.remove("loading");
+    }
 
     const consistencyRateEl = document.getElementById("consistencyRate");
-    if (consistencyRateEl)
+    if (consistencyRateEl) {
       consistencyRateEl.textContent = consistencyRate + "%";
+      consistencyRateEl.classList.remove("loading");
+    }
   }
 
   getWeekRange(date) {
