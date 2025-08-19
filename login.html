@@ -1237,21 +1237,26 @@
             try {
               let result;
 
-            if (this.isSignUp) {
-              const role = this.selectedRole;
-              const firstName = document.getElementById("firstName").value.trim();
-              const middleName = document.getElementById("middleName").value.trim();
-              const surname = document.getElementById("surname").value.trim();
-              
-              const userData = {
-                role: role,
-                firstName: firstName,
-                middleName: middleName || null,
-                surname: surname,
-                fullName: middleName
-                  ? `${firstName} ${middleName} ${surname}`
-                  : `${firstName} ${surname}`,
-              };                if (role === "player") {
+              if (this.isSignUp) {
+                const role = this.selectedRole;
+                const firstName = document
+                  .getElementById("firstName")
+                  .value.trim();
+                const middleName = document
+                  .getElementById("middleName")
+                  .value.trim();
+                const surname = document.getElementById("surname").value.trim();
+
+                const userData = {
+                  role: role,
+                  firstName: firstName,
+                  middleName: middleName || null,
+                  surname: surname,
+                  fullName: middleName
+                    ? `${firstName} ${middleName} ${surname}`
+                    : `${firstName} ${surname}`,
+                };
+                if (role === "player" && this.hasCoach) {
                   userData.coachName = document
                     .getElementById("coachName")
                     .value.trim();
@@ -1645,8 +1650,8 @@
                 isValid = false;
               }
 
-              // Validate coach name if player role is selected
-              if (role === "player") {
+              // Validate coach name only if player selected AND has a coach
+              if (role === "player" && this.hasCoach) {
                 const coachNameValidation = this.validateCoachName(coachName);
                 if (!coachNameValidation.valid) {
                   this.showFieldError("coachName", coachNameValidation.message);
