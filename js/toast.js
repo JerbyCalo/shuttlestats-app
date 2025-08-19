@@ -97,4 +97,4 @@ window.showWarning = (message, duration) =>
   toastManager.warning(message, duration);
 window.showInfo = (message, duration) => toastManager.info(message, duration);
 
-export { toastManager };
+export { ToastManager, toastManager };
