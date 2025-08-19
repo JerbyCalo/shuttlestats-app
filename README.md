@@ -1,5 +1,7 @@
 # 🏸 ShuttleStats
 
+https://shuttlestats-app.vercel.app/
+
 A modern badminton training tracker built with Firebase and deployed on Vercel.
 
 ## Features
