@@ -4,6 +4,7 @@ export class ScheduleManager {
   constructor() {
     this.sessions = this.loadSessions();
     this.remote = typeof window !== "undefined" && !!window.dataService;
+    this.remoteReady = false; // becomes true after first server snapshot
     this.unsubscribe = null;
     this.currentDate = new Date();
     this.currentView = "upcoming"; // Default to upcoming view for better UX
@@ -22,6 +23,8 @@ export class ScheduleManager {
       try {
         this.unsubscribe = window.dataService.subscribeToScheduleSessions(
           (sessions) => {
+            // Mark that remote data is flowing
+            this.remoteReady = true;
             this.sessions = (sessions || []).map((s) => ({
               id: s.id,
               title: s.title,
@@ -401,7 +404,15 @@ export class ScheduleManager {
         typeof window.dataService.addScheduleSession === "function"
       ) {
         await window.dataService.addScheduleSession(sessionData);
-        // UI will refresh via subscription
+        // Optimistically update UI if remote subscription hasn't delivered yet
+        if (!this.remoteReady) {
+          this.sessions.push(sessionData);
+          // Update views immediately
+          this.renderCalendar();
+          this.renderSessions();
+          this.updateScheduleStats();
+        }
+        // When subscription fires, it will replace this.sessions with server data
       } else {
         this.sessions.push(sessionData);
         this.saveSessions();
@@ -708,7 +719,9 @@ export class ScheduleManager {
     form.sessionType.value = session.type;
     form.sessionDate.value = session.date;
     form.sessionTime.value = session.time;
-    form.duration.value = session.duration;
+    // Duration select expects hours (e.g., 0.5, 1, 1.5), session stores minutes
+    const durationHours = (parseFloat(session.duration) || 60) / 60;
+    form.duration.value = String(durationHours);
     form.location.value = session.location;
     form.description.value = session.description || "";
     form.opponent.value = session.opponent || "";

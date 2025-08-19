@@ -84,22 +84,26 @@
       if (!user) return;
 
       const userProfile = await window.authService.getUserProfile(user.uid);
-      const nameElement = document.querySelector(selector) || document.querySelector("[data-user-name]");
-      
+      const nameElement =
+        document.querySelector(selector) ||
+        document.querySelector("[data-user-name]");
+
       if (!nameElement) return;
 
       if (userProfile && userProfile.firstName) {
         nameElement.textContent = `Welcome back, ${userProfile.firstName}!`;
       } else {
         // Fallback to display name or email-based name
-        const fallbackName = user.displayName || 
-          (user.email ? user.email.split("@")[0] : "User");
+        const fallbackName =
+          user.displayName || (user.email ? user.email.split("@")[0] : "User");
         nameElement.textContent = `Welcome back, ${fallbackName}!`;
       }
     } catch (error) {
       console.error("Error loading user name:", error);
       // Keep existing text or set default on error
-      const nameElement = document.querySelector(selector) || document.querySelector("[data-user-name]");
+      const nameElement =
+        document.querySelector(selector) ||
+        document.querySelector("[data-user-name]");
       if (nameElement && !nameElement.textContent.includes("Welcome")) {
         nameElement.textContent = "Welcome back!";
       }
