@@ -906,6 +906,23 @@
             }, 100);
           }
         });
+
+        // Keep dashboard bound to the current auth user without reload
+        window.addEventListener("auth:changed", (e) => {
+          const u = e.detail?.user;
+          if (!u) return;
+          if (window.dataService && typeof window.dataService.setCurrentUser === "function") {
+            window.dataService.setCurrentUser(u.uid);
+          }
+          // Refresh dashboard datasets
+          if (window.dashboardManager) {
+            window.dashboardManager.loadAllData();
+            window.dashboardManager.updateStats();
+            window.dashboardManager.updateRecentActivities();
+            window.dashboardManager.updateUpcomingEvents();
+            window.dashboardManager.updatePerformanceChart();
+          }
+        });
       }
 
       // setupDropdown now provided by common-ui.js
@@ -1000,6 +1017,6 @@
           alert(`${featureName} feature coming soon! 🚀`);
         });
       });
-  </script>
+    </script>
   </body>
 </html>

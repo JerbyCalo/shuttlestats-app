@@ -492,6 +492,17 @@
             window.location.href = "login.html";
           }
         };
+
+        // Re-bind data on auth changes without reload
+        window.addEventListener("auth:changed", (e) => {
+          const u = e.detail?.user;
+          if (!u) return;
+          dataService.setCurrentUser(u.uid);
+          // Re-initialize manager if needed
+          if (window.trainingManager && typeof window.trainingManager.initialize === "function") {
+            try { window.trainingManager.initialize(); } catch (_) {}
+          }
+        });
       });
     </script>
   </body>

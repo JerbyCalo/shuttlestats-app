@@ -1,5 +1,7 @@
 // Firebase Authentication Service
 import { auth } from "./firebase-config.js";
+// Keep data service in sync with auth state
+import { dataService } from "./data-service.js";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -21,6 +23,32 @@ class AuthService {
     onAuthStateChanged(auth, (user) => {
       this.currentUser = user;
       this.updateUI(user);
+
+      // Propagate auth changes to data layer and app
+      try {
+        if (user && user.uid) {
+          // Set current user for Firestore queries
+          if (dataService && typeof dataService.setCurrentUser === "function") {
+            dataService.setCurrentUser(user.uid);
+          }
+        } else {
+          // Clear any active listeners and unset user on sign-out
+          if (dataService && typeof dataService.unsubscribeAll === "function") {
+            dataService.unsubscribeAll();
+          }
+          if (dataService && typeof dataService.setCurrentUser === "function") {
+            dataService.setCurrentUser(null);
+          }
+        }
+      } catch (e) {
+        console.warn("Auth->DataService sync issue:", e);
+      }
+
+      // Emit a global event for non-module listeners
+      try {
+        const evt = new CustomEvent("auth:changed", { detail: { user } });
+        window.dispatchEvent(evt);
+      } catch (_) {}
     });
   }
 

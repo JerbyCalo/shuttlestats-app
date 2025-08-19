@@ -692,6 +692,16 @@
             window.matchManager.showMatchForm();
           }
         };
+
+        // Re-bind on auth change without requiring hard reload
+        window.addEventListener("auth:changed", (e) => {
+          const u = e.detail?.user;
+          if (!u) return;
+          dataService.setCurrentUser(u.uid);
+          if (window.matchManager && typeof window.matchManager.initialize === "function") {
+            try { window.matchManager.initialize(); } catch (_) {}
+          }
+        });
       });
     </script>
   </body>

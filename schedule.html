@@ -689,6 +689,16 @@
             window.location.href = "login.html";
           }
         };
+
+        // Handle auth changes in-place
+        window.addEventListener("auth:changed", (e) => {
+          const u = e.detail?.user;
+          if (!u) return;
+          dataService.setCurrentUser(u.uid);
+          if (window.scheduleManager && typeof window.scheduleManager.initialize === "function") {
+            try { window.scheduleManager.initialize(); } catch (_) {}
+          }
+        });
       });
     </script>
   </body>

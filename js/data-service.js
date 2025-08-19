@@ -22,7 +22,17 @@ class DataService {
 
   // Set current user ID
   setCurrentUser(userId) {
-    this.currentUserId = userId;
+    // If switching users, clear any existing listeners
+    if (this.currentUserId && this.currentUserId !== userId) {
+      this.unsubscribeAll();
+    }
+    this.currentUserId = userId || null;
+  }
+
+  // Explicitly clear the current user
+  clearCurrentUser() {
+    this.unsubscribeAll();
+    this.currentUserId = null;
   }
 
   // Training Sessions
