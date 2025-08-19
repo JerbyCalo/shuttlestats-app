@@ -96,14 +96,29 @@ class AuthService {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
 
-      // Save user profile if it's first time
-      await this.saveUserProfile(result.user.uid, {
+      // Save user profile: only set default role/createdAt if first-time
+      const uid = result.user.uid;
+      let existingProfile = null;
+      try {
+        existingProfile = await this.getUserProfile(uid);
+      } catch (_) {}
+
+      const baseData = {
         email: result.user.email,
         displayName: result.user.displayName,
         photoURL: result.user.photoURL,
-        createdAt: new Date(),
-        role: "player",
-      });
+      };
+
+      if (existingProfile) {
+        // Update basic fields without touching role/createdAt
+        await this.saveUserProfile(uid, baseData);
+      } else {
+        await this.saveUserProfile(uid, {
+          ...baseData,
+          createdAt: new Date(),
+          role: "player",
+        });
+      }
 
       return { success: true, user: result.user };
     } catch (error) {
