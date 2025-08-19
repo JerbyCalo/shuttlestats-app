@@ -252,6 +252,148 @@
         background: #1211ca;
         color: white;
       }
+
+      /* Enhanced Loading and Toast Styles */
+      .auth-btn {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .auth-btn.loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      .auth-btn.loading .btn-text {
+        opacity: 0;
+      }
+
+      .auth-btn.loading::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Form Validation */
+      .form-group input.error {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+      }
+
+      .form-group input.success {
+        border-color: #10b981;
+        background-color: #f0fdf4;
+      }
+
+      .field-error {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+      }
+
+      .field-error.show {
+        display: block;
+      }
+
+      /* Mobile Responsiveness */
+      @media (max-width: 768px) {
+        .auth-container {
+          padding: 10px;
+          min-height: 100vh;
+        }
+
+        .auth-card {
+          padding: 30px 20px;
+          margin: 10px;
+          border-radius: 12px;
+          max-width: none;
+          width: calc(100% - 20px);
+        }
+
+        .auth-header h1 {
+          font-size: 2rem;
+        }
+
+        .auth-header p {
+          font-size: 0.9rem;
+        }
+
+        .form-group {
+          margin-bottom: 18px;
+        }
+
+        .form-group input {
+          padding: 14px 16px;
+          font-size: 16px; /* Prevents zoom on iOS */
+        }
+
+        .auth-btn {
+          padding: 14px;
+          font-size: 16px;
+        }
+
+        .role-selection {
+          gap: 12px;
+        }
+
+        .role-option {
+          padding: 15px;
+        }
+
+        .role-option h3 {
+          font-size: 1rem;
+        }
+
+        .role-option p {
+          font-size: 0.8rem;
+        }
+
+        /* Toast notifications adjustment for mobile */
+        .toast-container {
+          padding: 10px;
+        }
+
+        .toast {
+          margin-bottom: 8px;
+          padding: 12px 16px;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .auth-card {
+          padding: 25px 15px;
+          margin: 5px;
+        }
+
+        .role-selection {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .role-option {
+          width: 100%;
+        }
+      }
     </style>
   </head>
   <body>
@@ -280,11 +422,13 @@
           <div class="form-group">
             <label for="email">Email Address</label>
             <input type="email" id="email" name="email" required />
+            <div class="field-error" id="emailError"></div>
           </div>
 
           <div class="form-group">
             <label for="password">Password</label>
             <input type="password" id="password" name="password" required />
+            <div class="field-error" id="passwordError"></div>
           </div>
 
           <div
@@ -298,6 +442,7 @@
               id="confirmPassword"
               name="confirmPassword"
             />
+            <div class="field-error" id="confirmPasswordError"></div>
           </div>
 
           <!-- Role Selection for Signup -->
@@ -336,14 +481,15 @@
                 name="coachName"
                 placeholder="Enter your coach's name"
               />
+              <div class="field-error" id="coachNameError"></div>
             </div>
           </div>
 
           <button type="submit" id="authSubmitBtn" class="auth-btn">
-            <span id="authBtnText">Sign In</span>
+            <span id="authBtnText" class="btn-text">Sign In</span>
             <span
               id="authBtnLoading"
-              class="loading"
+              class="loading-spinner"
               style="display: none"
             ></span>
           </button>
@@ -419,6 +565,89 @@
             document
               .getElementById("authSwitchLink")
               .addEventListener("click", this.toggleMode.bind(this));
+
+            // Add real-time validation
+            this.setupRealTimeValidation();
+          }
+
+          setupRealTimeValidation() {
+            const emailField = document.getElementById("email");
+            const passwordField = document.getElementById("password");
+            const confirmPasswordField =
+              document.getElementById("confirmPassword");
+            const coachNameField = document.getElementById("coachName");
+
+            // Email validation on blur
+            emailField.addEventListener("blur", () => {
+              const validation = this.validateEmail(emailField.value.trim());
+              if (emailField.value.trim()) {
+                if (validation.valid) {
+                  this.showFieldSuccess("email");
+                } else {
+                  this.showFieldError("email", validation.message);
+                }
+              }
+            });
+
+            // Password validation on input
+            passwordField.addEventListener("input", () => {
+              if (passwordField.value) {
+                const validation = this.validatePassword(
+                  passwordField.value,
+                  this.isSignUp
+                );
+                if (validation.valid) {
+                  this.showFieldSuccess("password");
+                } else {
+                  this.showFieldError("password", validation.message);
+                }
+
+                // Also validate confirm password if it has a value
+                if (this.isSignUp && confirmPasswordField.value) {
+                  const confirmValidation = this.validateConfirmPassword(
+                    passwordField.value,
+                    confirmPasswordField.value
+                  );
+                  if (confirmValidation.valid) {
+                    this.showFieldSuccess("confirmPassword");
+                  } else {
+                    this.showFieldError(
+                      "confirmPassword",
+                      confirmValidation.message
+                    );
+                  }
+                }
+              }
+            });
+
+            // Confirm password validation
+            confirmPasswordField.addEventListener("input", () => {
+              if (confirmPasswordField.value) {
+                const validation = this.validateConfirmPassword(
+                  passwordField.value,
+                  confirmPasswordField.value
+                );
+                if (validation.valid) {
+                  this.showFieldSuccess("confirmPassword");
+                } else {
+                  this.showFieldError("confirmPassword", validation.message);
+                }
+              }
+            });
+
+            // Coach name validation
+            coachNameField.addEventListener("blur", () => {
+              if (coachNameField.value.trim()) {
+                const validation = this.validateCoachName(
+                  coachNameField.value.trim()
+                );
+                if (validation.valid) {
+                  this.showFieldSuccess("coachName");
+                } else {
+                  this.showFieldError("coachName", validation.message);
+                }
+              }
+            });
           }
 
           initRoleSelection() {
@@ -499,59 +728,31 @@
 
           async handleSubmit(e) {
             e.preventDefault();
+            this.hideMessages();
 
-            const email = document.getElementById("email").value;
+            // Validate form using comprehensive validation
+            if (!this.validateForm()) {
+              return;
+            }
+
+            const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
-            const confirmPassword =
-              document.getElementById("confirmPassword").value;
-
-            // Validate form
-            if (this.isSignUp && password !== confirmPassword) {
-              this.showError("Passwords do not match");
-              return;
-            }
-
-            if (password.length < 6) {
-              this.showError("Password must be at least 6 characters");
-              return;
-            }
-
-            // Validate signup-specific fields
-            if (this.isSignUp) {
-              if (!this.selectedRole) {
-                this.showError("Please select if you are a player or coach");
-                return;
-              }
-
-              if (
-                this.selectedRole === "player" &&
-                this.hasCoach &&
-                !document.getElementById("coachName").value.trim()
-              ) {
-                this.showError("Please enter your coach's name");
-                return;
-              }
-            }
 
             this.setLoading(true);
-            this.hideMessages();
 
             try {
               let result;
 
               if (this.isSignUp) {
-                // Collect additional signup data
-                const userData = {
-                  role: this.selectedRole,
-                };
+                const role = document.querySelector(
+                  'input[name="role"]:checked'
+                )?.value;
+                const userData = { role: role };
 
-                if (this.selectedRole === "player") {
-                  userData.hasCoach = this.hasCoach;
-                  if (this.hasCoach) {
-                    userData.coachName = document
-                      .getElementById("coachName")
-                      .value.trim();
-                  }
+                if (role === "player") {
+                  userData.coachName = document
+                    .getElementById("coachName")
+                    .value.trim();
                 }
 
                 result = await authService.signUp(email, password, userData);
@@ -565,21 +766,24 @@
                   dataService.setCurrentUser(result.user.uid);
                 }
 
-                this.showSuccess(
+                window.toastManager.success(
                   this.isSignUp
-                    ? "Account created successfully!"
-                    : "Signed in successfully!"
+                    ? "Account created successfully! Redirecting..."
+                    : "Welcome back! Redirecting..."
                 );
 
                 // Redirect to dashboard after a short delay
                 setTimeout(() => {
                   window.location.href = "dashboard.html";
-                }, 1000);
+                }, 1500);
               } else {
-                this.showError(result.error);
+                window.toastManager.error(result.error);
               }
             } catch (error) {
-              this.showError("An unexpected error occurred. Please try again.");
+              console.error("Authentication error:", error);
+              window.toastManager.error(
+                "An unexpected error occurred. Please try again."
+              );
             } finally {
               this.setLoading(false);
             }
@@ -661,6 +865,166 @@
                 });
               document.getElementById("coachNameGroup").style.display = "none";
             }
+          }
+
+          // Comprehensive Form Validation
+          validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) {
+              return { valid: false, message: "Email is required" };
+            }
+            if (!emailRegex.test(email)) {
+              return {
+                valid: false,
+                message: "Please enter a valid email address",
+              };
+            }
+            return { valid: true, message: "" };
+          }
+
+          validatePassword(password, isSignup = false) {
+            if (!password) {
+              return { valid: false, message: "Password is required" };
+            }
+            if (isSignup && password.length < 6) {
+              return {
+                valid: false,
+                message: "Password must be at least 6 characters long",
+              };
+            }
+            return { valid: true, message: "" };
+          }
+
+          validateConfirmPassword(password, confirmPassword) {
+            if (!confirmPassword) {
+              return { valid: false, message: "Please confirm your password" };
+            }
+            if (password !== confirmPassword) {
+              return { valid: false, message: "Passwords do not match" };
+            }
+            return { valid: true, message: "" };
+          }
+
+          validateCoachName(coachName) {
+            if (!coachName || coachName.trim() === "") {
+              return { valid: false, message: "Coach name is required" };
+            }
+            if (coachName.trim().length < 2) {
+              return {
+                valid: false,
+                message: "Coach name must be at least 2 characters",
+              };
+            }
+            return { valid: true, message: "" };
+          }
+
+          showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = document.getElementById(fieldId + "Error");
+
+            if (field && errorDiv) {
+              field.classList.add("error");
+              field.classList.remove("success");
+              errorDiv.textContent = message;
+              errorDiv.classList.add("show");
+            }
+          }
+
+          showFieldSuccess(fieldId) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = document.getElementById(fieldId + "Error");
+
+            if (field && errorDiv) {
+              field.classList.remove("error");
+              field.classList.add("success");
+              errorDiv.classList.remove("show");
+            }
+          }
+
+          clearFieldErrors() {
+            const errorDivs = document.querySelectorAll(".field-error");
+            const inputFields = document.querySelectorAll(".form-group input");
+
+            errorDivs.forEach((div) => div.classList.remove("show"));
+            inputFields.forEach((input) => {
+              input.classList.remove("error", "success");
+            });
+          }
+
+          validateForm() {
+            this.clearFieldErrors();
+            let isValid = true;
+            const isSignupMode = this.isSignUp;
+
+            // Get form values
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+            const confirmPassword =
+              document.getElementById("confirmPassword").value;
+            const role = document.querySelector(
+              'input[name="role"]:checked'
+            )?.value;
+            const coachName = document.getElementById("coachName").value.trim();
+
+            // Validate email
+            const emailValidation = this.validateEmail(email);
+            if (!emailValidation.valid) {
+              this.showFieldError("email", emailValidation.message);
+              isValid = false;
+            } else {
+              this.showFieldSuccess("email");
+            }
+
+            // Validate password
+            const passwordValidation = this.validatePassword(
+              password,
+              isSignupMode
+            );
+            if (!passwordValidation.valid) {
+              this.showFieldError("password", passwordValidation.message);
+              isValid = false;
+            } else {
+              this.showFieldSuccess("password");
+            }
+
+            // Validate signup-specific fields
+            if (isSignupMode) {
+              // Validate confirm password
+              const confirmPasswordValidation = this.validateConfirmPassword(
+                password,
+                confirmPassword
+              );
+              if (!confirmPasswordValidation.valid) {
+                this.showFieldError(
+                  "confirmPassword",
+                  confirmPasswordValidation.message
+                );
+                isValid = false;
+              } else {
+                this.showFieldSuccess("confirmPassword");
+              }
+
+              // Validate role selection
+              if (!role) {
+                window.toastManager.error(
+                  "Please select your role (Player or Coach)"
+                );
+                isValid = false;
+              }
+
+              // Validate coach name if player role is selected
+              if (role === "player") {
+                const coachNameValidation = this.validateCoachName(coachName);
+                if (!coachNameValidation.valid) {
+                  this.showFieldError("coachName", coachNameValidation.message);
+                  isValid = false;
+                } else {
+                  this.showFieldSuccess("coachName");
+                }
+              }
+            }
+
+            return isValid;
           }
 
           setLoading(loading) {
