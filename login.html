@@ -535,12 +535,21 @@
     <script type="module">
       try {
         const { authService } = await import("./js/auth-service.js");
+        const { ToastManager } = await import("./js/toast.js");
+
+        // Initialize toast manager and make authService globally available
+        window.toastManager = new ToastManager();
+        window.authService = authService;
+
+        console.log("Auth service loaded:", !!window.authService);
+        console.log("Toast manager loaded:", !!window.toastManager);
 
         // Try to import data service, but don't fail if it's not available
         let dataService = null;
         try {
           const dataServiceModule = await import("./js/data-service.js");
           dataService = dataServiceModule.dataService;
+          window.dataService = dataService;
         } catch (dataServiceError) {
           console.warn("Data service not available:", dataServiceError);
         }
@@ -721,7 +730,7 @@
 
           async checkAuthState() {
             // If user is already authenticated, redirect to dashboard
-            if (authService.isAuthenticated()) {
+            if (window.authService.isAuthenticated()) {
               window.location.href = "dashboard.html";
             }
           }
@@ -730,13 +739,20 @@
             e.preventDefault();
             this.hideMessages();
 
+            console.log("Form submitted, starting validation...");
+
             // Validate form using comprehensive validation
             if (!this.validateForm()) {
+              console.log("Form validation failed");
               return;
             }
 
+            console.log("Form validation passed");
+
             const email = document.getElementById("email").value.trim();
             const password = document.getElementById("password").value;
+
+            console.log("Email:", email, "Password length:", password.length);
 
             this.setLoading(true);
 
@@ -755,15 +771,19 @@
                     .value.trim();
                 }
 
-                result = await authService.signUp(email, password, userData);
+                result = await window.authService.signUp(
+                  email,
+                  password,
+                  userData
+                );
               } else {
-                result = await authService.signIn(email, password);
+                result = await window.authService.signIn(email, password);
               }
 
               if (result.success) {
                 // Set up data service for the user if available
-                if (dataService) {
-                  dataService.setCurrentUser(result.user.uid);
+                if (window.dataService) {
+                  window.dataService.setCurrentUser(result.user.uid);
                 }
 
                 window.toastManager.success(
@@ -794,7 +814,7 @@
             this.hideMessages();
 
             try {
-              const result = await authService.signInWithGoogle();
+              const result = await window.authService.signInWithGoogle();
 
               if (result.success) {
                 // Set up data service for the user if available
@@ -1065,11 +1085,12 @@
         }
 
         // Initialize auth page
+        console.log("Initializing AuthPage...");
         new AuthPage();
       } catch (error) {
         console.error("Failed to load authentication modules:", error);
-        document.getElementById("errorMessage").textContent =
-          "Failed to load authentication system. Please refresh the page.";
+        const errorMsg = `Failed to load authentication system: ${error.message}. Please refresh the page.`;
+        document.getElementById("errorMessage").textContent = errorMsg;
         document.getElementById("errorMessage").style.display = "block";
       }
     </script>
