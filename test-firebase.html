@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Firebase Test</title>
+  </head>
+  <body>
+    <h1>Firebase Connection Test</h1>
+    <div id="status">Testing...</div>
+
+    <script type="module">
+      try {
+        const { auth } = await import("./js/firebase-config.js");
+        document.getElementById("status").innerHTML =
+          "✅ Firebase loaded successfully!<br>Auth object: " +
+          (auth ? "Available" : "Not available");
+      } catch (error) {
+        document.getElementById("status").innerHTML =
+          "❌ Firebase failed to load: " + error.message;
+        console.error("Firebase error:", error);
+      }
+    </script>
+  </body>
+</html>

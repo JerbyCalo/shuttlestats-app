@@ -21,7 +21,7 @@
           <li><a href="#features">Features</a></li>
           <li><a href="#about">About</a></li>
           <li><a href="#contact">Contact</a></li>
-          <li><a href="#login" class="nav-cta">Login</a></li>
+          <li><a href="login.html" class="nav-cta">Login</a></li>
         </ul>
       </div>
     </nav>
@@ -36,7 +36,7 @@
         </p>
         <div class="hero-buttons">
           <a href="#features" class="btn btn-primary">Explore Features</a>
-          <a href="#login" class="btn btn-secondary">Get Started</a>
+          <a href="login.html" class="btn btn-secondary">Get Started</a>
         </div>
       </div>
       <div class="hero-visual">
@@ -189,7 +189,9 @@
           Join thousands of players and coaches who are already using
           ShuttleStats to improve their game.
         </p>
-        <a href="#login" class="btn btn-primary btn-large">Get Started Today</a>
+        <a href="login.html" class="btn btn-primary btn-large"
+          >Get Started Today</a
+        >
       </div>
     </section>
 
@@ -364,20 +366,113 @@
       });
     </script>
     <script type="module">
-      import { authService } from "./js/auth-service.js";
+      try {
+        const { authService } = await import("./js/auth-service.js");
 
-      // Check authentication on page load
-      document.addEventListener("DOMContentLoaded", () => {
-        // If not authenticated, redirect to login
-        if (!authService.isAuthenticated()) {
-          // Give a small delay to check auth state
-          setTimeout(() => {
-            if (!authService.isAuthenticated()) {
-              window.location.href = "login.html";
-            }
-          }, 1000);
-        }
-      });
+        // Modal handling
+        const loginModal = document.getElementById("loginModal");
+        const signupModal = document.getElementById("signupModal");
+        const loginForm = document.getElementById("loginForm");
+        const signupForm = document.getElementById("signupForm");
+        const signupLink = document.getElementById("signupLink");
+        const loginFromSignupLink = document.getElementById(
+          "loginFromSignupLink"
+        );
+        const closeBtns = document.querySelectorAll(".close");
+
+        // Open modals
+        signupLink?.addEventListener("click", (e) => {
+          e.preventDefault();
+          loginModal.style.display = "none";
+          signupModal.style.display = "flex";
+        });
+
+        loginFromSignupLink?.addEventListener("click", (e) => {
+          e.preventDefault();
+          signupModal.style.display = "none";
+          loginModal.style.display = "flex";
+        });
+
+        // Close modals
+        closeBtns.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            loginModal.style.display = "none";
+            signupModal.style.display = "none";
+          });
+        });
+
+        // Close modals when clicking outside
+        window.addEventListener("click", (e) => {
+          if (e.target === loginModal) {
+            loginModal.style.display = "none";
+          }
+          if (e.target === signupModal) {
+            signupModal.style.display = "none";
+          }
+        });
+
+        // Handle login form submission
+        loginForm?.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
+          const result = await authService.signIn(email, password);
+          if (result.success) {
+            window.location.href = "dashboard.html";
+          } else {
+            alert("Login failed: " + result.error);
+          }
+        });
+
+        // Handle signup form submission
+        signupForm?.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const name = document.getElementById("signup-name").value;
+          const email = document.getElementById("signup-email").value;
+          const password = document.getElementById("signup-password").value;
+          const confirmPassword =
+            document.getElementById("confirm-password").value;
+          const role = document.getElementById("signup-role").value;
+          const terms = document.getElementById("terms").checked;
+
+          if (password !== confirmPassword) {
+            alert("Passwords do not match");
+            return;
+          }
+
+          if (!terms) {
+            alert("Please accept the terms and conditions");
+            return;
+          }
+
+          const result = await authService.signUp(email, password, {
+            displayName: name,
+            role: role,
+          });
+
+          if (result.success) {
+            window.location.href = "dashboard.html";
+          } else {
+            alert("Signup failed: " + result.error);
+          }
+        });
+
+        // Check if user is already authenticated and update UI
+        document.addEventListener("DOMContentLoaded", () => {
+          if (authService.isAuthenticated()) {
+            // Update login buttons to show "Go to Dashboard" for authenticated users
+            const loginBtns = document.querySelectorAll('a[href="login.html"]');
+            loginBtns.forEach((btn) => {
+              btn.textContent = "Go to Dashboard";
+              btn.href = "dashboard.html";
+            });
+          }
+        });
+      } catch (error) {
+        console.error("Failed to load authentication modules:", error);
+        // Gracefully handle the error - the page will still work without auth features
+      }
     </script>
   </body>
 </html>

@@ -268,185 +268,206 @@
     </div>
 
     <script type="module">
-      import { authService } from "./js/auth-service.js";
-      import { dataService } from "./js/data-service.js";
+      try {
+        const { authService } = await import("./js/auth-service.js");
 
-      class AuthPage {
-        constructor() {
-          this.isSignUp = false;
-          this.initEventListeners();
-          this.checkAuthState();
+        // Try to import data service, but don't fail if it's not available
+        let dataService = null;
+        try {
+          const dataServiceModule = await import("./js/data-service.js");
+          dataService = dataServiceModule.dataService;
+        } catch (dataServiceError) {
+          console.warn("Data service not available:", dataServiceError);
         }
 
-        initEventListeners() {
-          document
-            .getElementById("authForm")
-            .addEventListener("submit", this.handleSubmit.bind(this));
-          document
-            .getElementById("googleSignInBtn")
-            .addEventListener("click", this.handleGoogleSignIn.bind(this));
-          document
-            .getElementById("authSwitchLink")
-            .addEventListener("click", this.toggleMode.bind(this));
-        }
-
-        async checkAuthState() {
-          // If user is already authenticated, redirect to dashboard
-          if (authService.isAuthenticated()) {
-            window.location.href = "dashboard.html";
-          }
-        }
-
-        async handleSubmit(e) {
-          e.preventDefault();
-
-          const email = document.getElementById("email").value;
-          const password = document.getElementById("password").value;
-          const confirmPassword =
-            document.getElementById("confirmPassword").value;
-
-          // Validate form
-          if (this.isSignUp && password !== confirmPassword) {
-            this.showError("Passwords do not match");
-            return;
+        class AuthPage {
+          constructor() {
+            this.isSignUp = false;
+            this.initEventListeners();
+            this.checkAuthState();
           }
 
-          if (password.length < 6) {
-            this.showError("Password must be at least 6 characters");
-            return;
+          initEventListeners() {
+            document
+              .getElementById("authForm")
+              .addEventListener("submit", this.handleSubmit.bind(this));
+            document
+              .getElementById("googleSignInBtn")
+              .addEventListener("click", this.handleGoogleSignIn.bind(this));
+            document
+              .getElementById("authSwitchLink")
+              .addEventListener("click", this.toggleMode.bind(this));
           }
 
-          this.setLoading(true);
-          this.hideMessages();
+          async checkAuthState() {
+            // If user is already authenticated, redirect to dashboard
+            if (authService.isAuthenticated()) {
+              window.location.href = "dashboard.html";
+            }
+          }
 
-          try {
-            let result;
+          async handleSubmit(e) {
+            e.preventDefault();
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const confirmPassword =
+              document.getElementById("confirmPassword").value;
+
+            // Validate form
+            if (this.isSignUp && password !== confirmPassword) {
+              this.showError("Passwords do not match");
+              return;
+            }
+
+            if (password.length < 6) {
+              this.showError("Password must be at least 6 characters");
+              return;
+            }
+
+            this.setLoading(true);
+            this.hideMessages();
+
+            try {
+              let result;
+
+              if (this.isSignUp) {
+                result = await authService.signUp(email, password);
+              } else {
+                result = await authService.signIn(email, password);
+              }
+
+              if (result.success) {
+                // Set up data service for the user if available
+                if (dataService) {
+                  dataService.setCurrentUser(result.user.uid);
+                }
+
+                this.showSuccess(
+                  this.isSignUp
+                    ? "Account created successfully!"
+                    : "Signed in successfully!"
+                );
+
+                // Redirect to dashboard after a short delay
+                setTimeout(() => {
+                  window.location.href = "dashboard.html";
+                }, 1000);
+              } else {
+                this.showError(result.error);
+              }
+            } catch (error) {
+              this.showError("An unexpected error occurred. Please try again.");
+            } finally {
+              this.setLoading(false);
+            }
+          }
+
+          async handleGoogleSignIn() {
+            this.setLoading(true);
+            this.hideMessages();
+
+            try {
+              const result = await authService.signInWithGoogle();
+
+              if (result.success) {
+                // Set up data service for the user if available
+                if (dataService) {
+                  dataService.setCurrentUser(result.user.uid);
+                }
+
+                this.showSuccess("Signed in with Google successfully!");
+
+                // Redirect to dashboard after a short delay
+                setTimeout(() => {
+                  window.location.href = "dashboard.html";
+                }, 1000);
+              } else {
+                this.showError(result.error);
+              }
+            } catch (error) {
+              this.showError("Google sign-in failed. Please try again.");
+            } finally {
+              this.setLoading(false);
+            }
+          }
+
+          toggleMode(e) {
+            e.preventDefault();
+            this.isSignUp = !this.isSignUp;
+            this.updateUI();
+            this.hideMessages();
+          }
+
+          updateUI() {
+            const subtitle = document.getElementById("authSubtitle");
+            const confirmGroup = document.getElementById(
+              "confirmPasswordGroup"
+            );
+            const submitBtn = document.getElementById("authBtnText");
+            const switchText = document.getElementById("authSwitchText");
+            const switchLink = document.getElementById("authSwitchLink");
 
             if (this.isSignUp) {
-              result = await authService.signUp(email, password);
+              subtitle.textContent = "Create your account";
+              confirmGroup.style.display = "flex";
+              submitBtn.textContent = "Sign Up";
+              switchText.textContent = "Already have an account?";
+              switchLink.textContent = "Sign in";
             } else {
-              result = await authService.signIn(email, password);
+              subtitle.textContent = "Sign in to your account";
+              confirmGroup.style.display = "none";
+              submitBtn.textContent = "Sign In";
+              switchText.textContent = "Don't have an account?";
+              switchLink.textContent = "Sign up";
             }
+          }
 
-            if (result.success) {
-              // Set up data service for the user
-              dataService.setCurrentUser(result.user.uid);
+          setLoading(loading) {
+            const submitBtn = document.getElementById("authSubmitBtn");
+            const btnText = document.getElementById("authBtnText");
+            const btnLoading = document.getElementById("authBtnLoading");
+            const googleBtn = document.getElementById("googleSignInBtn");
 
-              this.showSuccess(
-                this.isSignUp
-                  ? "Account created successfully!"
-                  : "Signed in successfully!"
-              );
-
-              // Redirect to dashboard after a short delay
-              setTimeout(() => {
-                window.location.href = "dashboard.html";
-              }, 1000);
+            if (loading) {
+              submitBtn.disabled = true;
+              googleBtn.disabled = true;
+              btnText.style.display = "none";
+              btnLoading.style.display = "inline-block";
             } else {
-              this.showError(result.error);
+              submitBtn.disabled = false;
+              googleBtn.disabled = false;
+              btnText.style.display = "inline";
+              btnLoading.style.display = "none";
             }
-          } catch (error) {
-            this.showError("An unexpected error occurred. Please try again.");
-          } finally {
-            this.setLoading(false);
+          }
+
+          showError(message) {
+            const errorDiv = document.getElementById("errorMessage");
+            errorDiv.textContent = message;
+            errorDiv.style.display = "block";
+          }
+
+          showSuccess(message) {
+            const successDiv = document.getElementById("successMessage");
+            successDiv.textContent = message;
+            successDiv.style.display = "block";
+          }
+
+          hideMessages() {
+            document.getElementById("errorMessage").style.display = "none";
+            document.getElementById("successMessage").style.display = "none";
           }
         }
 
-        async handleGoogleSignIn() {
-          this.setLoading(true);
-          this.hideMessages();
-
-          try {
-            const result = await authService.signInWithGoogle();
-
-            if (result.success) {
-              // Set up data service for the user
-              dataService.setCurrentUser(result.user.uid);
-
-              this.showSuccess("Signed in with Google successfully!");
-
-              // Redirect to dashboard after a short delay
-              setTimeout(() => {
-                window.location.href = "dashboard.html";
-              }, 1000);
-            } else {
-              this.showError(result.error);
-            }
-          } catch (error) {
-            this.showError("Google sign-in failed. Please try again.");
-          } finally {
-            this.setLoading(false);
-          }
-        }
-
-        toggleMode(e) {
-          e.preventDefault();
-          this.isSignUp = !this.isSignUp;
-          this.updateUI();
-          this.hideMessages();
-        }
-
-        updateUI() {
-          const subtitle = document.getElementById("authSubtitle");
-          const confirmGroup = document.getElementById("confirmPasswordGroup");
-          const submitBtn = document.getElementById("authBtnText");
-          const switchText = document.getElementById("authSwitchText");
-          const switchLink = document.getElementById("authSwitchLink");
-
-          if (this.isSignUp) {
-            subtitle.textContent = "Create your account";
-            confirmGroup.style.display = "flex";
-            submitBtn.textContent = "Sign Up";
-            switchText.textContent = "Already have an account?";
-            switchLink.textContent = "Sign in";
-          } else {
-            subtitle.textContent = "Sign in to your account";
-            confirmGroup.style.display = "none";
-            submitBtn.textContent = "Sign In";
-            switchText.textContent = "Don't have an account?";
-            switchLink.textContent = "Sign up";
-          }
-        }
-
-        setLoading(loading) {
-          const submitBtn = document.getElementById("authSubmitBtn");
-          const btnText = document.getElementById("authBtnText");
-          const btnLoading = document.getElementById("authBtnLoading");
-          const googleBtn = document.getElementById("googleSignInBtn");
-
-          if (loading) {
-            submitBtn.disabled = true;
-            googleBtn.disabled = true;
-            btnText.style.display = "none";
-            btnLoading.style.display = "inline-block";
-          } else {
-            submitBtn.disabled = false;
-            googleBtn.disabled = false;
-            btnText.style.display = "inline";
-            btnLoading.style.display = "none";
-          }
-        }
-
-        showError(message) {
-          const errorDiv = document.getElementById("errorMessage");
-          errorDiv.textContent = message;
-          errorDiv.style.display = "block";
-        }
-
-        showSuccess(message) {
-          const successDiv = document.getElementById("successMessage");
-          successDiv.textContent = message;
-          successDiv.style.display = "block";
-        }
-
-        hideMessages() {
-          document.getElementById("errorMessage").style.display = "none";
-          document.getElementById("successMessage").style.display = "none";
-        }
+        // Initialize auth page
+        new AuthPage();
+      } catch (error) {
+        console.error("Failed to load authentication modules:", error);
+        document.getElementById("errorMessage").textContent =
+          "Failed to load authentication system. Please refresh the page.";
+        document.getElementById("errorMessage").style.display = "block";
       }
-
-      // Initialize auth page
-      new AuthPage();
     </script>
   </body>
 </html>
