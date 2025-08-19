@@ -13,6 +13,7 @@ import {
   orderBy,
   onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 class DataService {
   constructor() {
@@ -77,7 +78,7 @@ class DataService {
       const docRef = await addDoc(collection(db, "training_sessions"), {
         ...sessionData,
         userId: this.currentUserId,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       });
 
       return { id: docRef.id, ...sessionData };
@@ -92,7 +93,7 @@ class DataService {
       const sessionRef = doc(db, "training_sessions", sessionId);
       await updateDoc(sessionRef, {
         ...updates,
-        updatedAt: new Date(),
+        updatedAt: serverTimestamp(),
       });
 
       return true;
@@ -152,7 +153,7 @@ class DataService {
       const docRef = await addDoc(collection(db, "matches"), {
         ...matchData,
         userId: this.currentUserId,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       });
 
       return { id: docRef.id, ...matchData };
@@ -167,7 +168,7 @@ class DataService {
       const matchRef = doc(db, "matches", matchId);
       await updateDoc(matchRef, {
         ...updates,
-        updatedAt: new Date(),
+        updatedAt: serverTimestamp(),
       });
 
       return true;
@@ -227,7 +228,7 @@ class DataService {
       const docRef = await addDoc(collection(db, "schedule_sessions"), {
         ...sessionData,
         userId: this.currentUserId,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       });
 
       return { id: docRef.id, ...sessionData };
@@ -242,7 +243,7 @@ class DataService {
       const sessionRef = doc(db, "schedule_sessions", sessionId);
       await updateDoc(sessionRef, {
         ...updates,
-        updatedAt: new Date(),
+        updatedAt: serverTimestamp(),
       });
 
       return true;
@@ -313,7 +314,7 @@ class DataService {
         targetDate: goalData.targetDate || null,
         completed: !!goalData.completed,
         userId: this.currentUserId,
-        createdAt: new Date(),
+        createdAt: serverTimestamp(),
       };
       const docRef = await addDoc(collection(db, "goals"), payload);
       return { id: docRef.id, ...payload };
@@ -326,7 +327,7 @@ class DataService {
   async updateGoal(goalId, updates) {
     try {
       const goalRef = doc(db, "goals", goalId);
-      await updateDoc(goalRef, { ...updates, updatedAt: new Date() });
+  await updateDoc(goalRef, { ...updates, updatedAt: serverTimestamp() });
       return true;
     } catch (error) {
       console.error("Error updating goal:", error);
@@ -551,7 +552,7 @@ class DataService {
       const userRef = doc(db, "users", this.currentUserId);
       await updateDoc(userRef, {
         preferences: preferences,
-        updatedAt: new Date(),
+        updatedAt: serverTimestamp(),
       });
 
       return true;
