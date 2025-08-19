@@ -1,148 +1,51 @@
 // ShuttleStats Web Application - Main JavaScript File
 
 // ==================== AUTHENTICATION ====================
+// Note: Authentication is now handled by auth-service.js
+// This class is kept for backward compatibility but delegates to auth-service
 
 class AuthManager {
   constructor() {
+    console.warn("AuthManager is deprecated. Use authService from auth-service.js instead");
     this.currentUser = null;
-    this.init();
   }
 
-  init() {
-    // Check if user is already logged in
-    const storedUser = localStorage.getItem("shuttlestats-user");
-    if (storedUser) {
-      this.currentUser = JSON.parse(storedUser);
-    }
-  }
-
-  // Demo accounts
-  getDemoAccounts() {
-    return [
-      { email: "practice@gmail.com", password: "password123", role: "player" },
-      {
-        email: "coachpractice@gmail.com",
-        password: "password123",
-        role: "coach",
-      },
-    ];
-  }
-
-  // Login functionality
-  async login(credentials) {
-    const { email, password } = credentials;
-
-    // Check demo accounts
-    const demoAccount = this.getDemoAccounts().find(
-      (account) => account.email === email && account.password === password
-    );
-
-    if (demoAccount) {
-      const user = {
-        id: demoAccount.email === "practice@gmail.com" ? "1" : "2",
-        email: demoAccount.email,
-        name: demoAccount.email.split("@")[0],
-        role: demoAccount.role,
-        createdAt: new Date().toISOString(),
-      };
-
-      this.currentUser = user;
-      localStorage.setItem("shuttlestats-user", JSON.stringify(user));
-      return { success: true, user };
-    }
-
-    // Check registered users
-    const registeredUsers = JSON.parse(
-      localStorage.getItem("shuttleStatsUsers") || "[]"
-    );
-    const user = registeredUsers.find(
-      (u) => u.email === email && u.password === password
-    );
-
-    if (user) {
-      const loginUser = {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        createdAt: user.createdAt,
-      };
-
-      this.currentUser = loginUser;
-      localStorage.setItem("shuttlestats-user", JSON.stringify(loginUser));
-      return { success: true, user: loginUser };
-    }
-
-    return { success: false, error: "Invalid credentials" };
-  }
-
-  // Sign up functionality
-  async signUp(userData) {
-    const { name, email, password, confirmPassword, role, terms } = userData;
-
-    // Validation
-    if (password !== confirmPassword) {
-      return { success: false, error: "Passwords do not match" };
-    }
-
-    if (!terms) {
-      return {
-        success: false,
-        error: "Please accept the terms and conditions",
-      };
-    }
-
-    // Check if user already exists
-    const existingUsers = JSON.parse(
-      localStorage.getItem("shuttleStatsUsers") || "[]"
-    );
-    const demoEmails = this.getDemoAccounts().map((account) => account.email);
-
-    if (
-      existingUsers.some((u) => u.email === email) ||
-      demoEmails.includes(email)
-    ) {
-      return { success: false, error: "User with this email already exists" };
-    }
-
-    // Create new user
-    const newUser = {
-      id: Date.now().toString(),
-      name,
-      email,
-      password,
-      role,
-      createdAt: new Date().toISOString(),
-    };
-
-    existingUsers.push(newUser);
-    localStorage.setItem("shuttleStatsUsers", JSON.stringify(existingUsers));
-
-    return { success: true, message: "Account created successfully!" };
-  }
-
-  // Logout functionality
-  logout() {
-    this.currentUser = null;
-    localStorage.removeItem("shuttlestats-user");
-    window.location.href = "index.html";
-  }
-
-  // Check if user is authenticated
+  // Delegate to auth service if available
   isAuthenticated() {
-    return this.currentUser !== null;
+    if (window.authService) {
+      return window.authService.isAuthenticated();
+    }
+    // Fallback for backward compatibility
+    const storedUser = localStorage.getItem("shuttlestats-user");
+    return !!storedUser;
   }
 
-  // Get current user
   getCurrentUser() {
-    return this.currentUser;
+    if (window.authService) {
+      return window.authService.getCurrentUser();
+    }
+    // Fallback for backward compatibility
+    const storedUser = localStorage.getItem("shuttlestats-user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  }
+
+  logout() {
+    if (window.authService) {
+      window.authService.signOut();
+    } else {
+      // Fallback
+      localStorage.removeItem("shuttlestats-user");
+      window.location.href = "index.html";
+    }
   }
 }
 
 // ==================== UI COMPONENTS ====================
+// Note: UI components have been moved to common-ui.js for better organization
 
 class ModalManager {
   constructor() {
+    console.warn("ModalManager is deprecated. Use specific modal implementations in service files");
     this.setupModalListeners();
   }
 
@@ -187,99 +90,23 @@ class ModalManager {
   }
 }
 
+// Simplified managers - actual functionality moved to common-ui.js
 class SidebarManager {
   constructor() {
-    this.isOpen = false;
-    this.setupSidebar();
-  }
-
-  setupSidebar() {
-    const toggleBtn = document.getElementById("sidebarToggle");
-    const overlay = document.getElementById("sidebarOverlay");
-    const sidebar = document.getElementById("sidebar");
-
-    if (toggleBtn && overlay && sidebar) {
-      toggleBtn.addEventListener("click", () => this.toggle());
-      overlay.addEventListener("click", () => this.close());
-
-      // Close on escape key
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && this.isOpen) {
-          this.close();
-        }
-      });
-
-      // Auto-close on menu item click for mobile
-      const menuItems = document.querySelectorAll(".menu-item");
-      menuItems.forEach((item) => {
-        item.addEventListener("click", () => {
-          if (window.innerWidth <= 768) {
-            this.close();
-          }
-        });
-      });
+    console.warn("SidebarManager is deprecated. Use setupSidebar() from common-ui.js");
+    // Delegate to common-ui.js implementation
+    if (window.setupSidebar) {
+      window.setupSidebar();
     }
-  }
-
-  toggle() {
-    if (this.isOpen) {
-      this.close();
-    } else {
-      this.open();
-    }
-  }
-
-  open() {
-    const toggleBtn = document.getElementById("sidebarToggle");
-    const overlay = document.getElementById("sidebarOverlay");
-    const sidebar = document.getElementById("sidebar");
-
-    if (sidebar) sidebar.classList.add("active");
-    if (overlay) overlay.classList.add("active");
-    if (toggleBtn) toggleBtn.classList.add("active");
-
-    this.isOpen = true;
-  }
-
-  close() {
-    const toggleBtn = document.getElementById("sidebarToggle");
-    const overlay = document.getElementById("sidebarOverlay");
-    const sidebar = document.getElementById("sidebar");
-
-    if (sidebar) sidebar.classList.remove("active");
-    if (overlay) overlay.classList.remove("active");
-    if (toggleBtn) toggleBtn.classList.remove("active");
-
-    this.isOpen = false;
   }
 }
 
 class DropdownManager {
   constructor() {
-    // Only setup dropdowns if we're on the landing page
-    // Dashboard has its own dropdown handling
-    const path = window.location.pathname;
-    const page = path.substring(path.lastIndexOf("/") + 1);
-
-    if (page !== "dashboard.html") {
-      this.setupDropdowns();
-    }
-  }
-
-  setupDropdowns() {
-    const dropdownToggle = document.querySelector(".dropdown-toggle");
-    const dropdownMenu = document.querySelector(".dropdown-menu");
-
-    if (dropdownToggle && dropdownMenu) {
-      dropdownToggle.addEventListener("click", (e) => {
-        e.stopPropagation();
-        dropdownMenu.classList.toggle("show");
-      });
-
-      // Close dropdown when clicking outside
-      document.addEventListener("click", () => {
-        dropdownMenu.classList.remove("show");
-      });
+    console.warn("DropdownManager is deprecated. Use setupDropdown() from common-ui.js");
+    // Delegate to common-ui.js implementation  
+    if (window.setupDropdown) {
+      window.setupDropdown();
     }
   }
 }
@@ -597,9 +424,11 @@ class DashboardPage {
 }
 
 // ==================== APPLICATION INITIALIZATION ====================
+// Note: Modern authentication now handled by auth-service.js
 
 class ShuttleStatsApp {
   constructor() {
+    console.log("ShuttleStatsApp initializing...");
     this.authManager = new AuthManager();
     this.modalManager = new ModalManager();
     this.sidebarManager = null;
@@ -610,16 +439,23 @@ class ShuttleStatsApp {
   }
 
   init() {
+    // Initialize common UI components
+    if (window.setupSidebar) window.setupSidebar();
+    if (window.setupDropdown) window.setupDropdown();
+    
     // Determine which page we're on
     const path = window.location.pathname;
     const page = path.substring(path.lastIndexOf("/") + 1);
+    console.log("Current page:", page);
 
     // Let dashboard.html own its logic via its inline script to avoid duplication
     if (page === "dashboard.html") {
+      console.log("Dashboard page - delegating to dashboard.html inline scripts");
       return;
     }
 
     // Landing page (index.html or served root)
+    console.log("Initializing landing page");
     this.currentPage = new LandingPage(this.authManager, this.modalManager);
   }
 }

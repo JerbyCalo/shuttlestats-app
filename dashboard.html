@@ -306,6 +306,13 @@
           if (!user) return;
           // Initialize dashboard functionality after services are ready
           initializeDashboard();
+          
+          // Initialize quick actions after dashboard is ready
+          setTimeout(() => {
+            if (window.bindQuickActions) {
+              window.bindQuickActions();
+            }
+          }, 200);
         });
 
         // Handle sign out
@@ -823,11 +830,16 @@
 
       // Initialize dashboard when DOM is ready
       function initializeDashboard() {
+        console.log("Initializing dashboard...");
+        
         // Load and display user's first name
         loadUserName("[data-user-name]");
 
         // Initialize dashboard data manager
         window.dashboardManager = new DashboardManager(); // The constructor already calls init()
+
+        // Setup quick actions with better error handling
+        setupQuickActions();
 
         // Tooltip functions for performance chart
         window.showTooltip = function (event, label, rating, sessions) {
@@ -931,6 +943,67 @@
       // setupDropdown now provided by common-ui.js
 
       // Quick action functions
+      function setupQuickActions() {
+        console.log("Setting up quick actions...");
+        
+        const quickActions = {
+          qaLogTraining: () => {
+            console.log("Navigating to training.html");
+            window.location.href = "training.html";
+          },
+          qaRecordMatch: () => {
+            console.log("Navigating to matches.html");
+            window.location.href = "matches.html";
+          },
+          qaViewSchedule: () => {
+            console.log("Navigating to schedule.html");
+            window.location.href = "schedule.html";
+          },
+          qaSetGoal: async () => {
+            console.log("Setting new goal...");
+            try {
+              if (!window.dataService || !window.authService) {
+                alert("Please log in to set goals.");
+                return;
+              }
+              const title = prompt("What's your new goal? (e.g., 3x training this week)");
+              if (!title) return;
+              
+              const targetDate = prompt("Target date (YYYY-MM-DD), optional:");
+              const payload = { title: title.trim(), completed: false };
+              if (targetDate && /\d{4}-\d{2}-\d{2}/.test(targetDate)) {
+                payload.targetDate = targetDate;
+              }
+              
+              await window.dataService.addGoal(payload);
+              alert("Goal added!");
+              
+              // Refresh dashboard
+              if (window.refreshDashboard) {
+                window.refreshDashboard();
+              }
+            } catch (e) {
+              console.error("Error adding goal:", e);
+              alert("Failed to add goal. Try again.");
+            }
+          }
+        };
+
+        // Bind the actions
+        Object.keys(quickActions).forEach(actionId => {
+          const button = document.getElementById(actionId);
+          if (button) {
+            // Remove any existing listeners
+            button.onclick = null;
+            // Add new listener
+            button.addEventListener("click", quickActions[actionId]);
+            console.log(`Quick action bound: ${actionId}`);
+          } else {
+            console.warn(`Quick action button not found: ${actionId}`);
+          }
+        });
+      }
+
       function logTraining() {
         window.location.href = "training.html";
       }
