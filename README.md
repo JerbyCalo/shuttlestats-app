@@ -150,3 +150,72 @@ Feel free to submit issues, fork the repository, and create pull requests for an
 ---
 
 **ShuttleStats** - Making badminton training more organized, efficient, and data-driven! 🏸
+
+---
+
+## Firebase Setup (Auth + Firestore)
+
+ShuttleStats now uses Firebase for authentication and data.
+
+- Create a Firebase project and enable Email/Password and Google sign-in in Authentication.
+- Add your deployment domains (Vercel preview/prod and localhost) to Authorized domains.
+- Create a Web App and copy config into `js/firebase-config.js` (already populated for this repo).
+- Firestore: start in production mode and add rules similar to below.
+
+Suggested security rules (paste in Firebase Console > Firestore Rules):
+
+```
+rules_version = '2';
+service cloud.firestore {
+	match /databases/{database}/documents {
+		function isSignedIn() { return request.auth != null; }
+		function isOwner() { return request.auth != null && request.auth.uid == resource.data.userId; }
+		function isOwnerWrite() { return request.auth != null && request.auth.uid == request.resource.data.userId; }
+
+		// User profile: users/{uid}
+		match /users/{uid} {
+			allow read, write: if request.auth != null && request.auth.uid == uid;
+		}
+
+		// Collections scoped by userId
+		match /training_sessions/{id} {
+			allow read: if isSignedIn() && isOwner();
+			allow create, update: if isSignedIn() && isOwnerWrite();
+			allow delete: if isSignedIn() && isOwner();
+		}
+
+		match /matches/{id} {
+			allow read: if isSignedIn() && isOwner();
+			allow create, update: if isSignedIn() && isOwnerWrite();
+			allow delete: if isSignedIn() && isOwner();
+		}
+
+		match /schedule_sessions/{id} {
+			allow read: if isSignedIn() && isOwner();
+			allow create, update: if isSignedIn() && isOwnerWrite();
+			allow delete: if isSignedIn() && isOwner();
+		}
+
+		match /goals/{id} {
+			allow read: if isSignedIn() && isOwner();
+			allow create, update: if isSignedIn() && isOwnerWrite();
+			allow delete: if isSignedIn() && isOwner();
+		}
+	}
+}
+```
+
+Notes:
+- Ensure each document has a `userId` field matching the authenticated user.
+- If Firestore asks for an index on first run, follow the link to create it.
+
+## Deployment (Vercel)
+
+- `vercel.json` redirects `/` to `index.html` and sets basic security headers.
+- Add a `404.html` (included) for clean not-found handling.
+- If you later add CSP, externalize inline scripts or use nonces to avoid breaking pages.
+
+## Frontend Structure Update
+
+- Feature pages (`training.html`, `matches.html`, `schedule.html`, `dashboard.html`) are driven by ES modules (`auth-service`, `data-service`, and page-specific managers). The legacy `js/app.js` is no longer included on these pages to prevent duplication.
+- Landing page (`index.html`) links to `login.html` for authentication, removing modal duplication.
