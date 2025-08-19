@@ -545,6 +545,52 @@
         height: 16px;
         accent-color: #1211ca;
       }
+
+      /* Name Fields Layout */
+      .name-fields {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .name-field {
+        flex: 1;
+      }
+
+      .name-field.optional {
+        opacity: 0.8;
+      }
+
+      .name-field label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 500;
+        color: #374151;
+        font-size: 0.875rem;
+      }
+
+      .name-field input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        box-sizing: border-box;
+      }
+
+      .name-field input:focus {
+        outline: none;
+        border-color: #1211ca;
+        box-shadow: 0 0 0 3px rgba(18, 17, 202, 0.1);
+      }
+
+      @media (max-width: 480px) {
+        .name-fields {
+          flex-direction: column;
+          gap: 16px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -570,6 +616,44 @@
         ></div>
 
         <form id="authForm" class="auth-form">
+          <!-- Full Name Fields (only for signup) -->
+          <div class="form-group" id="nameFieldsGroup" style="display: none">
+            <div class="name-fields">
+              <div class="name-field">
+                <label for="firstName">First Name</label>
+                <input 
+                  type="text" 
+                  id="firstName" 
+                  name="firstName" 
+                  placeholder="John"
+                  autocomplete="given-name"
+                />
+                <div class="field-error" id="firstNameError"></div>
+              </div>
+              <div class="name-field optional">
+                <label for="middleName">Middle Name <span style="color: #9ca3af;">(Optional)</span></label>
+                <input 
+                  type="text" 
+                  id="middleName" 
+                  name="middleName" 
+                  placeholder="Michael"
+                  autocomplete="additional-name"
+                />
+              </div>
+              <div class="name-field">
+                <label for="surname">Surname</label>
+                <input 
+                  type="text" 
+                  id="surname" 
+                  name="surname" 
+                  placeholder="Doe"
+                  autocomplete="family-name"
+                />
+                <div class="field-error" id="surnameError"></div>
+              </div>
+            </div>
+          </div>
+
           <div class="form-group">
             <label for="email">Email Address</label>
             <input type="email" id="email" name="email" required />
@@ -858,6 +942,43 @@
                 }
               }
             });
+
+            // Name fields validation
+            const firstNameField = document.getElementById("firstName");
+            firstNameField.addEventListener("blur", () => {
+              if (firstNameField.value.trim()) {
+                const validation = this.validateFirstName(firstNameField.value.trim());
+                if (validation.valid) {
+                  this.showFieldSuccess("firstName");
+                } else {
+                  this.showFieldError("firstName", validation.message);
+                }
+              }
+            });
+
+            const surnameField = document.getElementById("surname");
+            surnameField.addEventListener("blur", () => {
+              if (surnameField.value.trim()) {
+                const validation = this.validateSurname(surnameField.value.trim());
+                if (validation.valid) {
+                  this.showFieldSuccess("surname");
+                } else {
+                  this.showFieldError("surname", validation.message);
+                }
+              }
+            });
+
+            const middleNameField = document.getElementById("middleName");
+            middleNameField.addEventListener("blur", () => {
+              if (middleNameField.value.trim()) {
+                const validation = this.validateMiddleName(middleNameField.value.trim());
+                if (validation.valid) {
+                  this.showFieldSuccess("middleName");
+                } else {
+                  this.showFieldError("middleName", validation.message);
+                }
+              }
+            });
           }
 
           initPasswordSecurity() {
@@ -1108,10 +1229,14 @@
               let result;
 
               if (this.isSignUp) {
-                const role = document.querySelector(
-                  'input[name="role"]:checked'
-                )?.value;
-                const userData = { role: role };
+                const role = this.selectedRole;
+                const userData = { 
+                  role: role,
+                  firstName: firstName,
+                  middleName: middleName || null,
+                  surname: surname,
+                  fullName: middleName ? `${firstName} ${middleName} ${surname}` : `${firstName} ${surname}`
+                };
 
                 if (role === "player") {
                   userData.coachName = document
@@ -1195,6 +1320,7 @@
 
           updateUI() {
             const subtitle = document.getElementById("authSubtitle");
+            const nameFieldsGroup = document.getElementById("nameFieldsGroup");
             const confirmGroup = document.getElementById(
               "confirmPasswordGroup"
             );
@@ -1213,6 +1339,7 @@
 
             if (this.isSignUp) {
               subtitle.textContent = "Create your account";
+              nameFieldsGroup.style.display = "block";
               confirmGroup.style.display = "flex";
               roleSelectionGroup.style.display = "flex";
               rememberMeGroup.style.display = "none";
@@ -1222,6 +1349,7 @@
               switchLink.textContent = "Sign in";
             } else {
               subtitle.textContent = "Sign in to your account";
+              nameFieldsGroup.style.display = "none";
               confirmGroup.style.display = "none";
               roleSelectionGroup.style.display = "none";
               coachSelectionGroup.style.display = "none";
@@ -1319,6 +1447,45 @@
             return { valid: true, message: "" };
           }
 
+          validateFirstName(firstName) {
+            if (!firstName || firstName.trim() === "") {
+              return { valid: false, message: "First name is required" };
+            }
+            if (firstName.trim().length < 2) {
+              return { valid: false, message: "First name must be at least 2 characters" };
+            }
+            if (!/^[a-zA-Z\s'-]+$/.test(firstName.trim())) {
+              return { valid: false, message: "First name can only contain letters, spaces, hyphens, and apostrophes" };
+            }
+            return { valid: true, message: "" };
+          }
+
+          validateSurname(surname) {
+            if (!surname || surname.trim() === "") {
+              return { valid: false, message: "Surname is required" };
+            }
+            if (surname.trim().length < 2) {
+              return { valid: false, message: "Surname must be at least 2 characters" };
+            }
+            if (!/^[a-zA-Z\s'-]+$/.test(surname.trim())) {
+              return { valid: false, message: "Surname can only contain letters, spaces, hyphens, and apostrophes" };
+            }
+            return { valid: true, message: "" };
+          }
+
+          validateMiddleName(middleName) {
+            // Middle name is optional, so only validate if provided
+            if (middleName && middleName.trim() !== "") {
+              if (middleName.trim().length < 2) {
+                return { valid: false, message: "Middle name must be at least 2 characters" };
+              }
+              if (!/^[a-zA-Z\s'-]+$/.test(middleName.trim())) {
+                return { valid: false, message: "Middle name can only contain letters, spaces, hyphens, and apostrophes" };
+              }
+            }
+            return { valid: true, message: "" };
+          }
+
           showFieldError(fieldId, message) {
             const field = document.getElementById(fieldId);
             const errorDiv = document.getElementById(fieldId + "Error");
@@ -1364,6 +1531,11 @@
               document.getElementById("confirmPassword").value;
             const role = this.selectedRole; // Use the selected role from class property
             const coachName = document.getElementById("coachName").value.trim();
+            
+            // Get name fields (only for signup)
+            const firstName = document.getElementById("firstName").value.trim();
+            const middleName = document.getElementById("middleName").value.trim();
+            const surname = document.getElementById("surname").value.trim();
 
             // Validate email
             const emailValidation = this.validateEmail(email);
@@ -1401,6 +1573,32 @@
                 isValid = false;
               } else {
                 this.showFieldSuccess("confirmPassword");
+              }
+
+              // Validate name fields
+              const firstNameValidation = this.validateFirstName(firstName);
+              if (!firstNameValidation.valid) {
+                this.showFieldError("firstName", firstNameValidation.message);
+                isValid = false;
+              } else {
+                this.showFieldSuccess("firstName");
+              }
+
+              const surnameValidation = this.validateSurname(surname);
+              if (!surnameValidation.valid) {
+                this.showFieldError("surname", surnameValidation.message);
+                isValid = false;
+              } else {
+                this.showFieldSuccess("surname");
+              }
+
+              // Validate middle name (optional)
+              const middleNameValidation = this.validateMiddleName(middleName);
+              if (!middleNameValidation.valid) {
+                this.showFieldError("middleName", middleNameValidation.message);
+                isValid = false;
+              } else if (middleName) {
+                this.showFieldSuccess("middleName");
               }
 
               // Validate role selection

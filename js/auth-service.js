@@ -138,11 +138,11 @@ class AuthService {
       await sendPasswordResetEmail(auth, email);
       return {
         success: true,
-        message: "Password reset email sent successfully"
+        message: "Password reset email sent successfully",
       };
     } catch (error) {
       console.error("Password reset error:", error);
-      
+
       let errorMessage = "Failed to send password reset email";
       if (error.code === "auth/user-not-found") {
         errorMessage = "No account found with this email address";
@@ -151,11 +151,30 @@ class AuthService {
       } else if (error.code === "auth/too-many-requests") {
         errorMessage = "Too many requests. Please try again later";
       }
-      
+
       return {
         success: false,
-        error: errorMessage
+        error: errorMessage,
       };
+    }
+  }
+
+  // Get user profile from Firestore
+  async getUserProfile(uid) {
+    try {
+      const { db } = await import("./firebase-config.js");
+      const { doc, getDoc } = await import(
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+      );
+
+      const userDoc = await getDoc(doc(db, "users", uid));
+      if (userDoc.exists()) {
+        return userDoc.data();
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting user profile:", error);
+      return null;
     }
   }
 
