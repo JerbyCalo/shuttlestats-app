@@ -83,9 +83,21 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 2rem; /* align with login logo size */
   font-weight: bold;
   color: #1211ca;
+  text-decoration: none; /* match login logo (no underline) */
+  transition: transform 0.3s ease; /* subtle hover like login */
+}
+
+.nav-logo:hover {
+  transform: scale(1.05);
+}
+
+.nav-logo:focus-visible {
+  outline: 2px solid #1211ca;
+  outline-offset: 3px;
+  border-radius: 6px;
 }
 
 .logo-icon {

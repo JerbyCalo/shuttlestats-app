@@ -5,19 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Schedule - ShuttleStats</title>
     <link rel="stylesheet" href="css/dashboard-style.css" />
-    <link rel="stylesheet" href="css/schedule.css" />
+  <link rel="stylesheet" href="css/schedule.css" />
+  <link rel="stylesheet" href="css/modal.css" />
   </head>
   <body>
     <!-- Navigation -->
     <nav class="navbar">
       <div class="nav-container">
-        <div class="nav-logo">
+  <a href="dashboard.html" class="nav-logo">
           <span class="logo-icon">🏸</span>
           <span class="logo-text"
             ><span class="logo-shuttle">Shuttle</span
             ><span class="logo-stats">Stats</span></span
           >
-        </div>
+  </a>
         <div class="nav-right">
           <div class="user-info">
             <span class="user-name" id="userName">Welcome back!</span>
@@ -180,10 +181,14 @@
             </div>
           </div>
 
-          <!-- Session Form -->
-          <div id="sessionForm" class="schedule-section" style="display: none">
-            <div class="section-card">
-              <h2>Schedule Training Session</h2>
+          <!-- Session Form (now in modal) -->
+          <div id="sessionFormModal" class="modal" style="display:none">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h2>Schedule Training Session</h2>
+                <button class="close" id="closeScheduleForm">&times;</button>
+              </div>
+              <div class="modal-body">
               <form id="sessionScheduleForm" class="session-form">
                 <!-- Basic Session Info -->
                 <div class="form-section">
@@ -465,6 +470,7 @@
                   </button>
                 </div>
               </form>
+              </div>
             </div>
           </div>
 

@@ -86,6 +86,20 @@ export class TrainingManager {
       .getElementById("cancelSessionBtn")
       .addEventListener("click", () => this.hideSessionForm());
 
+    // Modal close (X) and overlay click
+    const closeBtn = document.getElementById("closeTrainingForm");
+    if (closeBtn)
+      closeBtn.addEventListener("click", () => this.hideSessionForm());
+    const modal = document.getElementById("sessionFormModal");
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) this.hideSessionForm();
+      });
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") this.hideSessionForm();
+    });
+
     // Rating sliders
     document.getElementById("overallRating").addEventListener("input", (e) => {
       document.getElementById("ratingValue").textContent = e.target.value;
@@ -137,38 +151,32 @@ export class TrainingManager {
   }
 
   showSessionForm() {
-    FormAnimations.showForm(
-      "sessionForm",
-      "trainingHistory",
-      "newSessionBtn",
-      "⬅️ Back to History"
-    );
-
-    // Hide quick stats
-    document.getElementById("quickStats").style.display = "none";
-
-    // Update button handler
-    FormAnimations.replaceButtonListener("newSessionBtn", () =>
-      this.hideSessionForm()
-    );
+    // Open modal
+    const modal = document.getElementById("sessionFormModal");
+    if (modal) modal.style.display = "block";
+    // Update New Session button to back behavior
+    const newBtn = document.getElementById("newSessionBtn");
+    if (newBtn) {
+      newBtn.innerHTML = '<span class="btn-icon">⬅️</span> Back to History';
+      const clone = newBtn.cloneNode(true);
+      newBtn.parentNode.replaceChild(clone, newBtn);
+      clone.addEventListener("click", () => this.hideSessionForm());
+    }
   }
 
   hideSessionForm() {
-    FormAnimations.hideForm(
-      "sessionForm",
-      "trainingHistory",
-      "newSessionBtn",
-      "Log New Session",
-      "➕"
-    );
+    // Close modal
+    const modal = document.getElementById("sessionFormModal");
+    if (modal) modal.style.display = "none";
 
-    // Show quick stats
-    document.getElementById("quickStats").style.display = "block";
-
-    // Update button handler and reset form
-    FormAnimations.replaceButtonListener("newSessionBtn", () =>
-      this.showSessionForm()
-    );
+    // Restore New Session button
+    const newBtn = document.getElementById("newSessionBtn");
+    if (newBtn) {
+      newBtn.innerHTML = '<span class="btn-icon">➕</span> Log New Session';
+      const clone = newBtn.cloneNode(true);
+      newBtn.parentNode.replaceChild(clone, newBtn);
+      clone.addEventListener("click", () => this.showSessionForm());
+    }
     this.resetForm();
   }
 

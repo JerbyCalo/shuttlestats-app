@@ -5,19 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Matches - ShuttleStats</title>
     <link rel="stylesheet" href="css/dashboard-style.css" />
-    <link rel="stylesheet" href="css/matches.css" />
+  <link rel="stylesheet" href="css/matches.css" />
+  <link rel="stylesheet" href="css/modal.css" />
   </head>
   <body>
     <!-- Navigation -->
     <nav class="navbar">
       <div class="nav-container">
-        <div class="nav-logo">
+  <a href="dashboard.html" class="nav-logo">
           <span class="logo-icon">🏸</span>
           <span class="logo-text"
             ><span class="logo-shuttle">Shuttle</span
             ><span class="logo-stats">Stats</span></span
           >
-        </div>
+  </a>
         <div class="nav-right">
           <div class="user-info">
             <span class="user-name" id="userName">Welcome back!</span>
@@ -146,10 +147,14 @@
 
         <!-- Match Content Sections -->
         <div class="match-content">
-          <!-- Match Recording Form -->
-          <div id="matchForm" class="match-section" style="display: none">
-            <div class="section-card">
-              <h2>Record Match</h2>
+          <!-- Match Recording Form (now in modal) -->
+          <div id="matchFormModal" class="modal" style="display:none">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h2>Record Match</h2>
+                <button class="close" id="closeMatchForm">&times;</button>
+              </div>
+              <div class="modal-body">
               <form id="matchRecordForm" class="match-form">
                 <!-- Basic Match Information -->
                 <div class="form-section">
@@ -528,6 +533,7 @@
                   </button>
                 </div>
               </form>
+              </div>
             </div>
           </div>
 

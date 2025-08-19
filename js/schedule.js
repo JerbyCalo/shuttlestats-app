@@ -188,6 +188,20 @@ export class ScheduleManager {
       });
     }
 
+    // Form modal close/overlay/ESC handling
+    const closeBtn = document.getElementById("closeScheduleForm");
+    if (closeBtn)
+      closeBtn.addEventListener("click", () => this.hideSessionForm());
+    const formModal = document.getElementById("sessionFormModal");
+    if (formModal) {
+      formModal.addEventListener("click", (e) => {
+        if (e.target === formModal) this.hideSessionForm();
+      });
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") this.hideSessionForm();
+    });
+
     // Delegated listeners for sessions list actions and empty state CTA
     const sessionsList = document.getElementById("sessionsList");
     if (sessionsList) {
@@ -392,7 +406,7 @@ export class ScheduleManager {
     }
 
     const sessionData = {
-      id: Date.now().toString(),
+      id: form.dataset.editingId || Date.now().toString(),
       title: formData.get("sessionTitle"),
       type: formData.get("sessionType"),
       date: formData.get("sessionDate"),
@@ -422,26 +436,39 @@ export class ScheduleManager {
       return;
     }
 
-    // Handle recurring sessions
-    if (sessionData.isRecurring) {
-      const recurringType = formData.get("recurringType");
-      const selectedDays = formData.getAll("recurringDays");
-      const endDate = formData.get("recurringEnd");
-
-      await this.createRecurringSessions(
-        sessionData,
-        recurringType,
-        selectedDays,
-        endDate
-      );
+    const isEditing = !!form.dataset.editingId;
+    if (isEditing) {
+      await this.updateSession(sessionData.id, sessionData);
     } else {
-      await this.addSession(sessionData);
+      // Handle recurring sessions
+      if (sessionData.isRecurring) {
+        const recurringType = formData.get("recurringType");
+        const selectedDays = formData.getAll("recurringDays");
+        const endDate = formData.get("recurringEnd");
+
+        await this.createRecurringSessions(
+          sessionData,
+          recurringType,
+          selectedDays,
+          endDate
+        );
+      } else {
+        await this.addSession(sessionData);
+      }
     }
 
     // Hide session form and show upcoming view to see the new session
+    this.hideSessionForm();
     this.showUpcomingView();
     form.reset();
-    this.showMessage("Session scheduled successfully!", "success");
+    // Clear editing state
+    delete form.dataset.editingId;
+    this.showMessage(
+      isEditing
+        ? "Session updated successfully!"
+        : "Session scheduled successfully!",
+      "success"
+    );
   }
 
   async addSession(sessionData) {
@@ -451,7 +478,10 @@ export class ScheduleManager {
         window.dataService &&
         typeof window.dataService.addScheduleSession === "function"
       ) {
-        await window.dataService.addScheduleSession(sessionData);
+        const saved = await window.dataService.addScheduleSession(sessionData);
+        if (saved && saved.id) {
+          sessionData.id = saved.id;
+        }
         // Optimistically update UI if remote subscription hasn't delivered yet
         if (!this.remoteReady) {
           this.sessions.push(sessionData);
@@ -480,6 +510,31 @@ export class ScheduleManager {
         "Failed to schedule session. Please try again.",
         "error"
       );
+    }
+  }
+
+  async updateSession(sessionId, updates) {
+    try {
+      if (
+        this.remote &&
+        window.dataService &&
+        typeof window.dataService.updateScheduleSession === "function"
+      ) {
+        await window.dataService.updateScheduleSession(sessionId, updates);
+      }
+
+      // Update local state immediately
+      const idx = this.sessions.findIndex((s) => s.id === sessionId);
+      if (idx !== -1) {
+        this.sessions[idx] = { ...this.sessions[idx], ...updates };
+      }
+      this.saveSessions();
+      this.renderCalendar();
+      this.renderSessions();
+      this.updateScheduleStats();
+    } catch (err) {
+      console.error("Failed to update session:", err);
+      this.showMessage("Failed to update session.", "error");
     }
   }
 
@@ -776,7 +831,19 @@ export class ScheduleManager {
     // Store editing session ID
     form.dataset.editingId = sessionId;
 
-    this.showModal("sessionModal");
+    // Open the form modal for editing without resetting populated values
+    const modal = document.getElementById("sessionFormModal");
+    if (modal) modal.style.display = "block";
+    // Toggle button to back mode (mirror showSessionForm behavior)
+    const newSessionBtn = document.getElementById("newSessionBtn");
+    if (newSessionBtn) {
+      newSessionBtn.innerHTML =
+        '<span class="btn-icon">⬅️</span> Back to Calendar';
+      newSessionBtn.classList.add("active");
+      const newBtn = newSessionBtn.cloneNode(true);
+      newSessionBtn.parentNode.replaceChild(newBtn, newSessionBtn);
+      newBtn.addEventListener("click", () => this.hideSessionForm());
+    }
   }
 
   async deleteSession(sessionId) {
@@ -795,6 +862,16 @@ export class ScheduleManager {
         this.renderCalendar();
         this.renderSessions();
         this.updateScheduleStats();
+      }
+      // Close any open details modal
+      const detailsModal = document.getElementById("sessionDetailsModal");
+      if (detailsModal && detailsModal.style.display === "block") {
+        this.closeModal(detailsModal);
+      }
+      // Also ensure form modal is closed if it was open
+      const formModal = document.getElementById("sessionFormModal");
+      if (formModal && formModal.style.display === "block") {
+        this.hideSessionForm();
       }
       this.showMessage("Session deleted successfully!", "success");
     } catch (err) {
@@ -1181,18 +1258,40 @@ END:VALARM`
 
   // View Management Methods
   showSessionForm() {
-    // Hide all views
-    this.hideAllViews();
-
-    // Show session form
-    const sessionForm = document.getElementById("sessionForm");
-    if (sessionForm) {
-      sessionForm.style.display = "block";
+    // Open modal
+    const modal = document.getElementById("sessionFormModal");
+    if (modal) modal.style.display = "block";
+    // Toggle button to back mode
+    const newSessionBtn = document.getElementById("newSessionBtn");
+    if (newSessionBtn) {
+      newSessionBtn.innerHTML =
+        '<span class="btn-icon">⬅️</span> Back to Calendar';
+      newSessionBtn.classList.add("active");
+      const newBtn = newSessionBtn.cloneNode(true);
+      newSessionBtn.parentNode.replaceChild(newBtn, newSessionBtn);
+      newBtn.addEventListener("click", () => this.hideSessionForm());
     }
+    // Reset form
+    const form = document.getElementById("sessionScheduleForm");
+    if (form) {
+      form.reset();
+      delete form.dataset.editingId;
+    }
+  }
 
-    // Update active button
-    this.setActiveButton("newSessionBtn");
-
+  hideSessionForm() {
+    const modal = document.getElementById("sessionFormModal");
+    if (modal) modal.style.display = "none";
+    // Restore button
+    const newSessionBtn = document.getElementById("newSessionBtn");
+    if (newSessionBtn) {
+      newSessionBtn.innerHTML =
+        '<span class="btn-icon">➕</span> Schedule Session';
+      newSessionBtn.classList.remove("active");
+      const newBtn = newSessionBtn.cloneNode(true);
+      newSessionBtn.parentNode.replaceChild(newBtn, newSessionBtn);
+      newBtn.addEventListener("click", () => this.showSessionForm());
+    }
     // Reset form
     const form = document.getElementById("sessionScheduleForm");
     if (form) {

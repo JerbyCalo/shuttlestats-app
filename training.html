@@ -6,18 +6,19 @@
     <title>Training - ShuttleStats</title>
     <link rel="stylesheet" href="css/dashboard-style.css" />
     <link rel="stylesheet" href="css/training.css" />
+    <link rel="stylesheet" href="css/modal.css" />
   </head>
   <body>
     <!-- Navigation -->
     <nav class="navbar">
       <div class="nav-container">
-        <div class="nav-logo">
+        <a href="dashboard.html" class="nav-logo">
           <span class="logo-icon">🏸</span>
           <span class="logo-text"
             ><span class="logo-shuttle">Shuttle</span
             ><span class="logo-stats">Stats</span></span
           >
-        </div>
+        </a>
         <div class="nav-right">
           <div class="user-info">
             <span class="user-name" id="userName">Welcome back!</span>
@@ -142,208 +143,223 @@
 
         <!-- Training Content Sections -->
         <div class="training-content">
-          <!-- Session Logging Form -->
-          <div id="sessionForm" class="training-section" style="display: none">
-            <div class="section-card">
-              <h2>Log Training Session</h2>
-              <form id="trainingSessionForm" class="session-form">
-                <!-- Basic Information -->
-                <div class="form-section">
-                  <h3>Session Details</h3>
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label for="sessionDate">Date</label>
-                      <input
-                        type="date"
-                        id="sessionDate"
-                        name="date"
-                        required
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label for="sessionDuration">Duration (minutes)</label>
-                      <input
-                        type="number"
-                        id="sessionDuration"
-                        name="duration"
-                        min="5"
-                        max="480"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label for="sessionLocation">Location</label>
-                      <input
-                        type="text"
-                        id="sessionLocation"
-                        name="location"
-                        placeholder="e.g., City Sports Center"
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label for="sessionType">Session Type</label>
-                      <select id="sessionType" name="type" required>
-                        <option value="">Select type</option>
-                        <option value="individual">Individual Training</option>
-                        <option value="group">Group Training</option>
-                        <option value="coaching">Coaching Session</option>
-                        <option value="self-practice">Self Practice</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Focus Areas -->
-                <div class="form-section">
-                  <h3>Focus Areas</h3>
-                  <div class="focus-areas-grid">
-                    <label class="focus-area-item">
-                      <input
-                        type="checkbox"
-                        name="focusAreas"
-                        value="footwork"
-                      />
-                      <span class="focus-icon">🦵</span>
-                      <span class="focus-label">Footwork Drills</span>
-                    </label>
-                    <label class="focus-area-item">
-                      <input
-                        type="checkbox"
-                        name="focusAreas"
-                        value="backhand"
-                      />
-                      <span class="focus-icon">🏸</span>
-                      <span class="focus-label">Backhand Techniques</span>
-                    </label>
-                    <label class="focus-area-item">
-                      <input
-                        type="checkbox"
-                        name="focusAreas"
-                        value="forehand"
-                      />
-                      <span class="focus-icon">💪</span>
-                      <span class="focus-label">Forehand Shots</span>
-                    </label>
-                    <label class="focus-area-item">
-                      <input type="checkbox" name="focusAreas" value="serve" />
-                      <span class="focus-icon">🎯</span>
-                      <span class="focus-label">Serving Practice</span>
-                    </label>
-                    <label class="focus-area-item">
-                      <input type="checkbox" name="focusAreas" value="smash" />
-                      <span class="focus-icon">⚡</span>
-                      <span class="focus-label">Smash Technique</span>
-                    </label>
-                    <label class="focus-area-item">
-                      <input
-                        type="checkbox"
-                        name="focusAreas"
-                        value="defense"
-                      />
-                      <span class="focus-icon">🛡️</span>
-                      <span class="focus-label">Defensive Play</span>
-                    </label>
-                    <label class="focus-area-item">
-                      <input
-                        type="checkbox"
-                        name="focusAreas"
-                        value="doubles"
-                      />
-                      <span class="focus-icon">👥</span>
-                      <span class="focus-label">Doubles Strategy</span>
-                    </label>
-                    <label class="focus-area-item">
-                      <input
-                        type="checkbox"
-                        name="focusAreas"
-                        value="conditioning"
-                      />
-                      <span class="focus-icon">💪</span>
-                      <span class="focus-label">Physical Conditioning</span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Performance Rating -->
-                <div class="form-section">
-                  <h3>Performance Assessment</h3>
-                  <div class="form-row">
-                    <div class="form-group">
-                      <label for="overallRating">Overall Performance</label>
-                      <div class="rating-input">
+          <!-- Session Logging Form (now in modal) -->
+          <div id="sessionFormModal" class="modal" style="display: none">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h2>Log Training Session</h2>
+                <button class="close" id="closeTrainingForm">&times;</button>
+              </div>
+              <div class="modal-body">
+                <form id="trainingSessionForm" class="session-form">
+                  <!-- Basic Information -->
+                  <div class="form-section">
+                    <h3>Session Details</h3>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="sessionDate">Date</label>
                         <input
-                          type="range"
-                          id="overallRating"
-                          name="rating"
-                          min="1"
-                          max="10"
-                          value="5"
+                          type="date"
+                          id="sessionDate"
+                          name="date"
+                          required
                         />
-                        <div class="rating-display">
-                          <span id="ratingValue">5</span>/10
-                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="sessionDuration">Duration (minutes)</label>
+                        <input
+                          type="number"
+                          id="sessionDuration"
+                          name="duration"
+                          min="5"
+                          max="480"
+                          required
+                        />
                       </div>
                     </div>
-                    <div class="form-group">
-                      <label for="effortLevel">Effort Level</label>
-                      <div class="rating-input">
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="sessionLocation">Location</label>
                         <input
-                          type="range"
-                          id="effortLevel"
-                          name="effort"
-                          min="1"
-                          max="10"
-                          value="5"
+                          type="text"
+                          id="sessionLocation"
+                          name="location"
+                          placeholder="e.g., City Sports Center"
                         />
-                        <div class="rating-display">
-                          <span id="effortValue">5</span>/10
-                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="sessionType">Session Type</label>
+                        <select id="sessionType" name="type" required>
+                          <option value="">Select type</option>
+                          <option value="individual">
+                            Individual Training
+                          </option>
+                          <option value="group">Group Training</option>
+                          <option value="coaching">Coaching Session</option>
+                          <option value="self-practice">Self Practice</option>
+                        </select>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- Notes -->
-                <div class="form-section">
-                  <h3>Session Notes</h3>
-                  <div class="form-group">
-                    <label for="sessionNotes"
-                      >What went well? What needs improvement?</label
+                  <!-- Focus Areas -->
+                  <div class="form-section">
+                    <h3>Focus Areas</h3>
+                    <div class="focus-areas-grid">
+                      <label class="focus-area-item">
+                        <input
+                          type="checkbox"
+                          name="focusAreas"
+                          value="footwork"
+                        />
+                        <span class="focus-icon">🦵</span>
+                        <span class="focus-label">Footwork Drills</span>
+                      </label>
+                      <label class="focus-area-item">
+                        <input
+                          type="checkbox"
+                          name="focusAreas"
+                          value="backhand"
+                        />
+                        <span class="focus-icon">🏸</span>
+                        <span class="focus-label">Backhand Techniques</span>
+                      </label>
+                      <label class="focus-area-item">
+                        <input
+                          type="checkbox"
+                          name="focusAreas"
+                          value="forehand"
+                        />
+                        <span class="focus-icon">💪</span>
+                        <span class="focus-label">Forehand Shots</span>
+                      </label>
+                      <label class="focus-area-item">
+                        <input
+                          type="checkbox"
+                          name="focusAreas"
+                          value="serve"
+                        />
+                        <span class="focus-icon">🎯</span>
+                        <span class="focus-label">Serving Practice</span>
+                      </label>
+                      <label class="focus-area-item">
+                        <input
+                          type="checkbox"
+                          name="focusAreas"
+                          value="smash"
+                        />
+                        <span class="focus-icon">⚡</span>
+                        <span class="focus-label">Smash Technique</span>
+                      </label>
+                      <label class="focus-area-item">
+                        <input
+                          type="checkbox"
+                          name="focusAreas"
+                          value="defense"
+                        />
+                        <span class="focus-icon">🛡️</span>
+                        <span class="focus-label">Defensive Play</span>
+                      </label>
+                      <label class="focus-area-item">
+                        <input
+                          type="checkbox"
+                          name="focusAreas"
+                          value="doubles"
+                        />
+                        <span class="focus-icon">👥</span>
+                        <span class="focus-label">Doubles Strategy</span>
+                      </label>
+                      <label class="focus-area-item">
+                        <input
+                          type="checkbox"
+                          name="focusAreas"
+                          value="conditioning"
+                        />
+                        <span class="focus-icon">💪</span>
+                        <span class="focus-label">Physical Conditioning</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Performance Rating -->
+                  <div class="form-section">
+                    <h3>Performance Assessment</h3>
+                    <div class="form-row">
+                      <div class="form-group">
+                        <label for="overallRating">Overall Performance</label>
+                        <div class="rating-input">
+                          <input
+                            type="range"
+                            id="overallRating"
+                            name="rating"
+                            min="1"
+                            max="10"
+                            value="5"
+                          />
+                          <div class="rating-display">
+                            <span id="ratingValue">5</span>/10
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="effortLevel">Effort Level</label>
+                        <div class="rating-input">
+                          <input
+                            type="range"
+                            id="effortLevel"
+                            name="effort"
+                            min="1"
+                            max="10"
+                            value="5"
+                          />
+                          <div class="rating-display">
+                            <span id="effortValue">5</span>/10
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Notes -->
+                  <div class="form-section">
+                    <h3>Session Notes</h3>
+                    <div class="form-group">
+                      <label for="sessionNotes"
+                        >What went well? What needs improvement?</label
+                      >
+                      <textarea
+                        id="sessionNotes"
+                        name="notes"
+                        rows="4"
+                        placeholder="Describe your training session, achievements, challenges, and areas for improvement..."
+                      ></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label for="nextGoals">Goals for Next Session</label>
+                      <textarea
+                        id="nextGoals"
+                        name="nextGoals"
+                        rows="2"
+                        placeholder="What do you want to focus on in your next training session?"
+                      ></textarea>
+                    </div>
+                  </div>
+
+                  <!-- Form Actions -->
+                  <div class="form-actions">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      id="cancelSessionBtn"
                     >
-                    <textarea
-                      id="sessionNotes"
-                      name="notes"
-                      rows="4"
-                      placeholder="Describe your training session, achievements, challenges, and areas for improvement..."
-                    ></textarea>
+                      Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                      Save Session
+                    </button>
                   </div>
-                  <div class="form-group">
-                    <label for="nextGoals">Goals for Next Session</label>
-                    <textarea
-                      id="nextGoals"
-                      name="nextGoals"
-                      rows="2"
-                      placeholder="What do you want to focus on in your next training session?"
-                    ></textarea>
-                  </div>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="form-actions">
-                  <button
-                    type="button"
-                    class="btn btn-secondary"
-                    id="cancelSessionBtn"
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" class="btn btn-primary">
-                    Save Session
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
 

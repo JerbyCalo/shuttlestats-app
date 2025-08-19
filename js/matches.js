@@ -91,6 +91,20 @@ export class MatchManager {
       .getElementById("cancelMatchBtn")
       .addEventListener("click", () => this.hideMatchForm());
 
+    // Modal close (X) and overlay click
+    const closeBtn = document.getElementById("closeMatchForm");
+    if (closeBtn)
+      closeBtn.addEventListener("click", () => this.hideMatchForm());
+    const modal = document.getElementById("matchFormModal");
+    if (modal) {
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) this.hideMatchForm();
+      });
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") this.hideMatchForm();
+    });
+
     // Score inputs for automatic result calculation
     this.setupScoreCalculation();
 
@@ -218,64 +232,34 @@ export class MatchManager {
   }
 
   showMatchForm() {
-    document.getElementById("matchForm").style.display = "block";
-    document.getElementById("matchHistory").style.display = "none";
-    document.getElementById("performanceAnalysis").style.display = "none";
-
-    // Add smooth scroll to form
-    document.getElementById("matchForm").scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-
-    // Add entrance animation
-    const matchForm = document.getElementById("matchForm");
-    matchForm.style.opacity = "0";
-    matchForm.style.transform = "translateY(20px)";
-
-    setTimeout(() => {
-      matchForm.style.transition = "all 0.5s ease";
-      matchForm.style.opacity = "1";
-      matchForm.style.transform = "translateY(0)";
-    }, 100);
-
+    // Open modal
+    const modal = document.getElementById("matchFormModal");
+    if (modal) modal.style.display = "block";
     const newMatchBtn = document.getElementById("newMatchBtn");
-    newMatchBtn.innerHTML = '<span class="btn-icon">⬅️</span> Back to History';
-    newMatchBtn.classList.add("btn-back");
-
-    // Remove existing event listener and add new one
-    const newBtn = newMatchBtn.cloneNode(true);
-    newMatchBtn.parentNode.replaceChild(newBtn, newMatchBtn);
-    newBtn.addEventListener("click", () => this.hideMatchForm());
+    if (newMatchBtn) {
+      newMatchBtn.innerHTML =
+        '<span class="btn-icon">⬅️</span> Back to History';
+      newMatchBtn.classList.add("btn-back");
+      const newBtn = newMatchBtn.cloneNode(true);
+      newMatchBtn.parentNode.replaceChild(newBtn, newMatchBtn);
+      newBtn.addEventListener("click", () => this.hideMatchForm());
+    }
   }
 
   hideMatchForm() {
-    // Add exit animation
-    const matchForm = document.getElementById("matchForm");
-    matchForm.style.transition = "all 0.3s ease";
-    matchForm.style.opacity = "0";
-    matchForm.style.transform = "translateY(-20px)";
-
-    setTimeout(() => {
-      document.getElementById("matchForm").style.display = "none";
-      document.getElementById("matchHistory").style.display = "block";
-      document.getElementById("performanceAnalysis").style.display = "none";
-
-      // Reset styles
-      matchForm.style.opacity = "";
-      matchForm.style.transform = "";
-      matchForm.style.transition = "";
-    }, 300);
+    // Close modal
+    const modal = document.getElementById("matchFormModal");
+    if (modal) modal.style.display = "none";
 
     const newMatchBtn = document.getElementById("newMatchBtn");
-    newMatchBtn.innerHTML = '<span class="btn-icon">🏆</span> Record New Match';
-    newMatchBtn.classList.remove("btn-back");
-
-    // Remove existing event listener and add new one
-    const newBtn = newMatchBtn.cloneNode(true);
-    newMatchBtn.parentNode.replaceChild(newBtn, newMatchBtn);
-    newBtn.addEventListener("click", () => this.showMatchForm());
-
+    if (newMatchBtn) {
+      newMatchBtn.innerHTML =
+        '<span class="btn-icon">🏆</span> Record New Match';
+      newMatchBtn.classList.remove("btn-back");
+      const newBtn = newMatchBtn.cloneNode(true);
+      newMatchBtn.parentNode.replaceChild(newBtn, newMatchBtn);
+      newBtn.addEventListener("click", () => this.showMatchForm());
+    }
     // Reset form with animation
     this.resetFormWithAnimation();
   }
