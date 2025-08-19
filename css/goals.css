@@ -479,6 +479,140 @@
   line-height: 1.6;
 }
 
+/* === Align Goals UI to Matches UI === */
+/* Action ribbon like Matches */
+.training-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #1211ca 0%, #f9b314 100%);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(18, 17, 202, 0.2);
+}
+.training-actions .btn {
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.training-actions .btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+.training-actions .btn:hover::before {
+  left: 100%;
+}
+
+/* Filter block styled like section-card */
+.goals-filter {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  padding: 1rem 1.25rem;
+}
+.goals-filter::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #1211ca, #f9b314, #1211ca);
+  background-size: 200% 100%;
+  animation: goalsGradientShift 3s ease-in-out infinite;
+}
+@keyframes goalsGradientShift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Goal items styled similar to match list cards */
+.goal-item {
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+.goal-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(135deg, #1211ca, #f9b314);
+  transition: width 0.3s ease;
+}
+.goal-item:hover {
+  transform: translateY(-5px);
+}
+.goal-item:hover::before {
+  width: 100%;
+  opacity: 0.04;
+}
+
+/* Completed/overdue states keep their emphasis */
+.goal-item.completed {
+  background: #f9fafb;
+}
+.goal-item.overdue {
+  border-left: 4px solid #e53e3e;
+}
+
+/* Goal form actions bar similar to Matches */
+.goal-form .form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-radius: 0 0 12px 12px;
+}
+.goal-form .form-actions .btn {
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  min-width: 140px;
+}
+.goal-form .form-actions .btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+.goal-form .form-actions .btn:hover::before {
+  left: 100%;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .page-header {
@@ -616,4 +750,77 @@
   100% {
     opacity: 0.5;
   }
+}
+
+/* === ShuttleStats Brand Alignment Overrides for Goals === */
+/* These override earlier rules to match dashboard-style.css branding */
+
+/* Stat cards and metrics */
+.stats-row .stat-card {
+  border: none;
+}
+.stats-row .stat-icon {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1211ca, #f9b314);
+  color: #ffffff;
+  border-radius: 50%;
+}
+.stats-row .stat-number {
+  color: #1211ca;
+}
+
+/* Filter tabs */
+.filter-tab.active {
+  background: #1211ca;
+  color: #ffffff;
+  border-color: #1211ca;
+}
+
+/* Inputs focus */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #1211ca;
+  box-shadow: 0 0 0 3px rgba(18, 17, 202, 0.1);
+}
+
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: none;
+}
+.btn-primary {
+  background: linear-gradient(135deg, #1211ca, #f9b314);
+  color: #ffffff;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(18, 17, 202, 0.3);
+}
+.btn-secondary {
+  background: #f8f9fa;
+  color: #1211ca;
+  border: 2px solid #e2e8f0;
+}
+.btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+/* Goal action buttons (edit uses brand color) */
+.goal-action-btn.edit {
+  color: #1211ca;
+}
+
+/* Progress bar uses brand gradient */
+.progress-bar {
+  background: linear-gradient(90deg, #1211ca, #f9b314);
 }
