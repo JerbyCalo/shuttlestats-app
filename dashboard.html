@@ -822,31 +822,10 @@
       }
 
       // Initialize dashboard when DOM is ready
-      // Load and display user's first name in welcome message
-      async function loadUserName() {
-        try {
-          const user = authService.getCurrentUser();
-          if (user) {
-            const userProfile = await authService.getUserProfile(user.uid);
-            const userNameElement = document.querySelector('[data-user-name]');
-            
-            if (userProfile && userProfile.firstName) {
-              userNameElement.textContent = `Welcome back, ${userProfile.firstName}!`;
-            } else {
-              // Fallback to default message if no first name is available
-              userNameElement.textContent = 'Welcome back!';
-            }
-          }
-        } catch (error) {
-          console.error('Error loading user name:', error);
-          // Keep default welcome message on error
-        }
-      }
-
       function initializeDashboard() {
         // Load and display user's first name
-        loadUserName();
-        
+        loadUserName("[data-user-name]");
+
         // Initialize dashboard data manager
         window.dashboardManager = new DashboardManager(); // The constructor already calls init()
 

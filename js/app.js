@@ -456,10 +456,15 @@ class DashboardPage {
   }
 
   setupDashboard(user) {
-    // Update user info
-    const userNameElement = document.getElementById("userName");
-    if (userNameElement) {
-      userNameElement.textContent = `Welcome back, ${user.name}!`;
+    // Load and display user's first name
+    if (window.loadUserName) {
+      loadUserName("#userName");
+    } else {
+      // Fallback if common-ui.js not loaded
+      const userNameElement = document.getElementById("userName");
+      if (userNameElement) {
+        userNameElement.textContent = `Welcome back, ${user.name}!`;
+      }
     }
 
     // Show appropriate sidebar sections

@@ -667,12 +667,8 @@
         // Set user for data service
         dataService.setCurrentUser(user.uid);
 
-        // Update user name
-        const name =
-          user.displayName ||
-          (user.email ? user.email.split("@")[0] : "Player");
-        const nameEl = document.getElementById("userName");
-        if (nameEl) nameEl.textContent = `Welcome back, ${name}!`;
+        // Load and display user's first name
+        loadUserName("#userName");
 
         // Role-based sidebar
         const userRole = localStorage.getItem("userRole") || "player";

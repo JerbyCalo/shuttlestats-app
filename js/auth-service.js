@@ -122,9 +122,14 @@ class AuthService {
       userEmailElements.forEach((el) => (el.textContent = user.email));
 
       const userNameElements = document.querySelectorAll("[data-user-name]");
-      userNameElements.forEach(
-        (el) => (el.textContent = user.displayName || user.email)
-      );
+      // Use centralized loadUserName if available, otherwise fallback
+      if (window.loadUserName && userNameElements.length > 0) {
+        window.loadUserName("[data-user-name]");
+      } else {
+        userNameElements.forEach(
+          (el) => (el.textContent = user.displayName || user.email)
+        );
+      }
     } else {
       // User is signed out
       authElements.forEach((el) => (el.style.display = "block"));
