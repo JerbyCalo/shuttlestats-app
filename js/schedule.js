@@ -191,7 +191,9 @@ export class ScheduleManager {
     // Delegated listeners for sessions list actions and empty state CTA
     const sessionsList = document.getElementById("sessionsList");
     if (sessionsList) {
-      sessionsList.addEventListener("click", (e) => this.onSessionsListClick(e));
+      sessionsList.addEventListener("click", (e) =>
+        this.onSessionsListClick(e)
+      );
     }
 
     // Delegated listeners inside session details modal
@@ -576,7 +578,7 @@ export class ScheduleManager {
     });
 
     if (sessionsToShow.length === 0) {
-  sessionsList.innerHTML = `
+      sessionsList.innerHTML = `
                 <div class="no-sessions">
                     <div class="empty-state">
                         <span class="empty-icon">📅</span>
@@ -1014,7 +1016,9 @@ END:VALARM`
                         <span class="info-label">${this.formatTime(
                           session.time
                         )}:</span>
-                        <span class="info-value">${session.title} (${session.type})</span>
+                        <span class="info-value">${session.title} (${
+                      session.type
+                    })</span>
                     </div>
                 `
                   )

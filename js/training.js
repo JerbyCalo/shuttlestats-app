@@ -104,7 +104,9 @@ export class TrainingManager {
     // Delegated listeners for session list actions
     const sessionsList = document.getElementById("sessionsList");
     if (sessionsList) {
-      sessionsList.addEventListener("click", (e) => this.onSessionsListClick(e));
+      sessionsList.addEventListener("click", (e) =>
+        this.onSessionsListClick(e)
+      );
     }
   }
 
