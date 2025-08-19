@@ -56,6 +56,15 @@ body {
   font-size: 2rem;
 }
 
+/* Logo split colors */
+.logo-shuttle {
+  color: #1211ca;
+}
+
+.logo-stats {
+  color: #f9b314;
+}
+
 .nav-menu {
   display: flex;
   list-style: none;
