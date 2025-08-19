@@ -500,10 +500,18 @@
         margin-bottom: 8px;
       }
 
-      .strength-weak-text { color: #ef4444; }
-      .strength-fair-text { color: #f59e0b; }
-      .strength-good-text { color: #3b82f6; }
-      .strength-strong-text { color: #10b981; }
+      .strength-weak-text {
+        color: #ef4444;
+      }
+      .strength-fair-text {
+        color: #f59e0b;
+      }
+      .strength-good-text {
+        color: #3b82f6;
+      }
+      .strength-strong-text {
+        color: #10b981;
+      }
 
       /* Forgot Password Link */
       .forgot-password {
@@ -576,7 +584,11 @@
                 👁️
               </button>
             </div>
-            <div class="password-strength-container" id="passwordStrengthContainer" style="display: none;">
+            <div
+              class="password-strength-container"
+              id="passwordStrengthContainer"
+              style="display: none"
+            >
               <div class="strength-text" id="strengthText"></div>
               <div class="password-strength-bar">
                 <div class="password-strength-fill" id="strengthFill"></div>
@@ -611,7 +623,11 @@
                 id="confirmPassword"
                 name="confirmPassword"
               />
-              <button type="button" class="password-toggle" id="confirmPasswordToggle">
+              <button
+                type="button"
+                class="password-toggle"
+                id="confirmPasswordToggle"
+              >
                 👁️
               </button>
             </div>
@@ -660,7 +676,7 @@
 
           <!-- Remember Me (only for sign in) -->
           <div class="remember-me" id="rememberMeGroup">
-            <input type="checkbox" id="rememberMe" name="rememberMe">
+            <input type="checkbox" id="rememberMe" name="rememberMe" />
             <label for="rememberMe">Remember me</label>
           </div>
 
@@ -846,31 +862,33 @@
 
           initPasswordSecurity() {
             // Password visibility toggles
-            this.initPasswordToggle('password', 'passwordToggle');
-            this.initPasswordToggle('confirmPassword', 'confirmPasswordToggle');
+            this.initPasswordToggle("password", "passwordToggle");
+            this.initPasswordToggle("confirmPassword", "confirmPasswordToggle");
 
             // Password strength indicator
-            const passwordField = document.getElementById('password');
-            passwordField.addEventListener('input', () => {
+            const passwordField = document.getElementById("password");
+            passwordField.addEventListener("input", () => {
               this.updatePasswordStrength(passwordField.value);
             });
 
             // Forgot password link
-            document.getElementById('forgotPasswordLink').addEventListener('click', (e) => {
-              e.preventDefault();
-              this.handleForgotPassword();
-            });
+            document
+              .getElementById("forgotPasswordLink")
+              .addEventListener("click", (e) => {
+                e.preventDefault();
+                this.handleForgotPassword();
+              });
           }
 
           initPasswordToggle(inputId, toggleId) {
             const input = document.getElementById(inputId);
             const toggle = document.getElementById(toggleId);
-            
+
             if (toggle) {
-              toggle.addEventListener('click', () => {
-                const isPassword = input.type === 'password';
-                input.type = isPassword ? 'text' : 'password';
-                toggle.textContent = isPassword ? '🙈' : '👁️';
+              toggle.addEventListener("click", () => {
+                const isPassword = input.type === "password";
+                input.type = isPassword ? "text" : "password";
+                toggle.textContent = isPassword ? "🙈" : "👁️";
               });
             }
           }
@@ -880,7 +898,7 @@
             const requirements = {
               length: password.length >= 6,
               uppercase: /[A-Z]/.test(password),
-              number: /[0-9]/.test(password)
+              number: /[0-9]/.test(password),
             };
 
             // Score calculation (no symbols required)
@@ -888,68 +906,74 @@
             if (requirements.uppercase) score += 1;
             if (requirements.number) score += 1;
 
-            let strength = 'weak';
-            if (score === 3) strength = 'strong';
-            else if (score === 2) strength = 'good';
-            else if (score === 1) strength = 'fair';
+            let strength = "weak";
+            if (score === 3) strength = "strong";
+            else if (score === 2) strength = "good";
+            else if (score === 1) strength = "fair";
 
             return { strength, score, requirements };
           }
 
           updatePasswordStrength(password) {
-            const container = document.getElementById('passwordStrengthContainer');
-            const strengthText = document.getElementById('strengthText');
-            const strengthFill = document.getElementById('strengthFill');
-            
+            const container = document.getElementById(
+              "passwordStrengthContainer"
+            );
+            const strengthText = document.getElementById("strengthText");
+            const strengthFill = document.getElementById("strengthFill");
+
             // Show/hide strength indicator based on signup mode
             if (this.isSignUp && password.length > 0) {
-              container.style.display = 'block';
-              
-              const { strength, requirements } = this.calculatePasswordStrength(password);
-              
+              container.style.display = "block";
+
+              const { strength, requirements } =
+                this.calculatePasswordStrength(password);
+
               // Update strength text and bar
-              strengthText.textContent = `Password strength: ${strength.charAt(0).toUpperCase() + strength.slice(1)}`;
+              strengthText.textContent = `Password strength: ${
+                strength.charAt(0).toUpperCase() + strength.slice(1)
+              }`;
               strengthText.className = `strength-text strength-${strength}-text`;
-              
+
               strengthFill.className = `password-strength-fill strength-${strength}`;
-              
+
               // Update requirements
-              this.updateRequirement('lengthReq', requirements.length);
-              this.updateRequirement('uppercaseReq', requirements.uppercase);
-              this.updateRequirement('numberReq', requirements.number);
-              
+              this.updateRequirement("lengthReq", requirements.length);
+              this.updateRequirement("uppercaseReq", requirements.uppercase);
+              this.updateRequirement("numberReq", requirements.number);
             } else {
-              container.style.display = 'none';
+              container.style.display = "none";
             }
           }
 
           updateRequirement(reqId, met) {
             const requirement = document.getElementById(reqId);
-            const icon = requirement.querySelector('.requirement-icon');
-            
+            const icon = requirement.querySelector(".requirement-icon");
+
             if (met) {
-              icon.classList.remove('requirement-unmet');
-              icon.classList.add('requirement-met');
+              icon.classList.remove("requirement-unmet");
+              icon.classList.add("requirement-met");
             } else {
-              icon.classList.remove('requirement-met');
-              icon.classList.add('requirement-unmet');
+              icon.classList.remove("requirement-met");
+              icon.classList.add("requirement-unmet");
             }
           }
 
           handleForgotPassword() {
-            const email = document.getElementById('email').value.trim();
-            
+            const email = document.getElementById("email").value.trim();
+
             if (!email) {
-              window.toastManager.warning('Please enter your email address first');
-              document.getElementById('email').focus();
+              window.toastManager.warning(
+                "Please enter your email address first"
+              );
+              document.getElementById("email").focus();
               return;
             }
 
             // Basic email validation
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-              window.toastManager.error('Please enter a valid email address');
-              document.getElementById('email').focus();
+              window.toastManager.error("Please enter a valid email address");
+              document.getElementById("email").focus();
               return;
             }
 
@@ -960,18 +984,26 @@
             try {
               // Note: This will need to be implemented in auth-service.js
               if (window.authService.sendPasswordReset) {
-                const result = await window.authService.sendPasswordReset(email);
+                const result = await window.authService.sendPasswordReset(
+                  email
+                );
                 if (result.success) {
-                  window.toastManager.success(`Password reset email sent to ${email}`);
+                  window.toastManager.success(
+                    `Password reset email sent to ${email}`
+                  );
                 } else {
-                  window.toastManager.error(result.error || 'Failed to send reset email');
+                  window.toastManager.error(
+                    result.error || "Failed to send reset email"
+                  );
                 }
               } else {
-                window.toastManager.info('Password reset feature will be available soon');
+                window.toastManager.info(
+                  "Password reset feature will be available soon"
+                );
               }
             } catch (error) {
-              console.error('Password reset error:', error);
-              window.toastManager.error('Failed to send password reset email');
+              console.error("Password reset error:", error);
+              window.toastManager.error("Failed to send password reset email");
             }
           }
 
@@ -1172,7 +1204,9 @@
               "coachSelectionGroup"
             );
             const rememberMeGroup = document.getElementById("rememberMeGroup");
-            const forgotPasswordGroup = document.getElementById("forgotPasswordGroup");
+            const forgotPasswordGroup = document.getElementById(
+              "forgotPasswordGroup"
+            );
             const submitBtn = document.getElementById("authBtnText");
             const switchText = document.getElementById("authSwitchText");
             const switchLink = document.getElementById("authSwitchLink");
@@ -1228,11 +1262,11 @@
             if (!password) {
               return { valid: false, message: "Password is required" };
             }
-            
+
             if (isSignup) {
               // Enhanced validation for signup
               const requirements = [];
-              
+
               if (password.length < 6) {
                 requirements.push("at least 6 characters");
               }
@@ -1242,11 +1276,11 @@
               if (!/[0-9]/.test(password)) {
                 requirements.push("one number");
               }
-              
+
               if (requirements.length > 0) {
                 return {
                   valid: false,
-                  message: `Password must include ${requirements.join(", ")}`
+                  message: `Password must include ${requirements.join(", ")}`,
                 };
               }
             } else {
@@ -1258,7 +1292,7 @@
                 };
               }
             }
-            
+
             return { valid: true, message: "" };
           }
 
@@ -1328,9 +1362,7 @@
             const password = document.getElementById("password").value;
             const confirmPassword =
               document.getElementById("confirmPassword").value;
-            const role = document.querySelector(
-              'input[name="role"]:checked'
-            )?.value;
+            const role = this.selectedRole; // Use the selected role from class property
             const coachName = document.getElementById("coachName").value.trim();
 
             // Validate email
