@@ -1,4 +1,8 @@
 // Matches Page JavaScript Functionality
+import { FormAnimations } from "./form-animations.js";
+import { DataPersistence } from "./data-persistence.js";
+import { MessageSystem } from "./message-system.js";
+import { EmptyStateRenderer } from "./empty-state.js";
 
 export class MatchManager {
   constructor() {
@@ -969,23 +973,7 @@ export class MatchManager {
   }
 
   showMessage(text, type = "info") {
-    const messageContainer = document.getElementById("messageContainer");
-    const messageId = Date.now().toString();
-
-    const messageElement = document.createElement("div");
-    messageElement.className = `message ${type}`;
-    messageElement.id = messageId;
-    messageElement.textContent = text;
-
-    messageContainer.appendChild(messageElement);
-
-    // Auto remove after 4 seconds
-    setTimeout(() => {
-      const element = document.getElementById(messageId);
-      if (element) {
-        element.remove();
-      }
-    }, 4000);
+    MessageSystem.showMessage(text, type);
   }
 }
 

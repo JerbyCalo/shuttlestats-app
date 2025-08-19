@@ -1,4 +1,8 @@
 // Training Page JavaScript Functionality
+import { FormAnimations } from "./form-animations.js";
+import { DataPersistence } from "./data-persistence.js";
+import { MessageSystem } from "./message-system.js";
+import { EmptyStateRenderer } from "./empty-state.js";
 
 export class TrainingManager {
   constructor() {
@@ -133,41 +137,31 @@ export class TrainingManager {
   }
 
   showSessionForm() {
-    document.getElementById("sessionForm").style.display = "block";
-    document.getElementById("trainingHistory").style.display = "none";
-    document.getElementById("quickStats").style.display = "none";
-
-    const newSessionBtn = document.getElementById("newSessionBtn");
-    newSessionBtn.innerHTML =
-      '<span class="btn-icon">⬅️</span> Back to History';
-
-    // Remove existing event listener and add new one
-    const newBtn = newSessionBtn.cloneNode(true);
-    newSessionBtn.parentNode.replaceChild(newBtn, newSessionBtn);
-    newBtn.addEventListener("click", () => this.hideSessionForm());
+    FormAnimations.showForm('sessionForm', 'trainingHistory', 'newSessionBtn', '⬅️ Back to History');
+    
+    // Hide quick stats
+    document.getElementById('quickStats').style.display = 'none';
+    
+    // Update button handler
+    FormAnimations.replaceButtonListener('newSessionBtn', () => this.hideSessionForm());
   }
 
   hideSessionForm() {
-    document.getElementById("sessionForm").style.display = "none";
-    document.getElementById("trainingHistory").style.display = "block";
-    document.getElementById("quickStats").style.display = "block";
+    FormAnimations.hideForm('sessionForm', 'trainingHistory', 'newSessionBtn', 'Log New Session', '➕');
+    
+    // Show quick stats
+    document.getElementById('quickStats').style.display = 'block';
+    
+    // Update button handler and reset form
+    FormAnimations.replaceButtonListener('newSessionBtn', () => this.showSessionForm());
+    this.resetForm();
+  }
 
-    const newSessionBtn = document.getElementById("newSessionBtn");
-    newSessionBtn.innerHTML =
-      '<span class="btn-icon">➕</span> Log New Session';
-
-    // Remove existing event listener and add new one
-    const newBtn = newSessionBtn.cloneNode(true);
-    newSessionBtn.parentNode.replaceChild(newBtn, newSessionBtn);
-    newBtn.addEventListener("click", () => this.showSessionForm());
-
-    // Reset form
-    document.getElementById("trainingSessionForm").reset();
-    document.getElementById("sessionDate").value = new Date()
-      .toISOString()
-      .split("T")[0];
-    document.getElementById("ratingValue").textContent = "5";
-    document.getElementById("effortValue").textContent = "5";
+  resetForm() {
+    document.getElementById('trainingSessionForm').reset();
+    document.getElementById('sessionDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('ratingValue').textContent = '5';
+    document.getElementById('effortValue').textContent = '5';
   }
 
   showHistory() {
@@ -228,17 +222,11 @@ export class TrainingManager {
   }
 
   loadSessions() {
-    const userEmail = localStorage.getItem("userEmail") || "practice@gmail.com";
-    const savedSessions = localStorage.getItem(`trainingSessions_${userEmail}`);
-    this.sessions = savedSessions ? JSON.parse(savedSessions) : [];
+    this.sessions = DataPersistence.loadUserData('trainingSessions');
   }
 
   saveSessions() {
-    const userEmail = localStorage.getItem("userEmail") || "practice@gmail.com";
-    localStorage.setItem(
-      `trainingSessions_${userEmail}`,
-      JSON.stringify(this.sessions)
-    );
+    DataPersistence.saveUserData('trainingSessions', this.sessions);
   }
 
   updateStats() {
@@ -277,16 +265,14 @@ export class TrainingManager {
     const sessionsList = document.getElementById("sessionsList");
 
     if (this.sessions.length === 0) {
-      sessionsList.innerHTML = `
-        <div class="no-sessions">
-          <div class="empty-state">
-            <span class="empty-icon">🏸</span>
-            <h3>No training sessions yet</h3>
-            <p>Start logging your training sessions to track your progress!</p>
-            <button class="btn btn-primary" id="logFirstSessionBtn">Log Your First Session</button>
-          </div>
-        </div>
-      `;
+      EmptyStateRenderer.renderEmptyState('sessionsList', {
+        icon: '🏸',
+        title: 'No training sessions yet',
+        message: 'Start logging your training sessions to track your progress!',
+        buttonText: 'Log Your First Session',
+        buttonId: 'logFirstSessionBtn',
+        onButtonClick: () => this.showSessionForm()
+      });
       return;
     }
 
@@ -392,15 +378,7 @@ export class TrainingManager {
     // Render filtered sessions
     const sessionsList = document.getElementById("sessionsList");
     if (filteredSessions.length === 0) {
-      sessionsList.innerHTML = `
-        <div class="no-sessions">
-          <div class="empty-state">
-            <span class="empty-icon">🔍</span>
-            <h3>No sessions found</h3>
-            <p>Try adjusting your filters or log more training sessions.</p>
-          </div>
-        </div>
-      `;
+      EmptyStateRenderer.renderFilteredEmptyState('sessionsList', 'filter');
       return;
     }
 
@@ -576,23 +554,7 @@ export class TrainingManager {
   }
 
   showMessage(text, type = "info") {
-    const messageContainer = document.getElementById("messageContainer");
-    const messageId = Date.now().toString();
-
-    const messageElement = document.createElement("div");
-    messageElement.className = `message ${type}`;
-    messageElement.id = messageId;
-    messageElement.textContent = text;
-
-    messageContainer.appendChild(messageElement);
-
-    // Auto remove after 4 seconds
-    setTimeout(() => {
-      const element = document.getElementById(messageId);
-      if (element) {
-        element.remove();
-      }
-    }, 4000);
+    MessageSystem.showMessage(text, type);
   }
 }
 
