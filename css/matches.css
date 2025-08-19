@@ -327,23 +327,54 @@
   font-size: 1.2rem;
 }
 
+
+/* Align labels above their respective inputs with a centered dash */
 .score-input {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* you | dash | opponent */
+  grid-template-rows: auto auto;       /* labels row, inputs row */
   align-items: center;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
+  justify-items: center;
+  gap: 0.5rem 1rem;
 }
 
 .score-input label {
   font-weight: 700;
   color: #4a5568;
-  min-width: 80px;
+  min-width: auto; /* avoid forcing awkward spacing */
   text-align: center;
   background: linear-gradient(135deg, #1211ca, #f9b314);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Place children in the grid: labels on top, inputs bottom, dash centered */
+.score-input label:first-of-type {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.score-input input:first-of-type {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.score-input span {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  justify-self: center;
+}
+
+.score-input input:last-of-type {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.score-input label:last-of-type {
+  grid-column: 3;
+  grid-row: 1;
 }
 
 .score-input input {
@@ -1299,10 +1330,12 @@
     justify-content: center;
   }
 
+  /* Keep grid but tighten spacing on small screens */
   .score-input {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-rows: auto auto;
+    gap: 0.25rem 0.5rem;
   }
 
   .score-input label {
