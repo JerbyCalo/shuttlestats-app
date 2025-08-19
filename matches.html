@@ -629,10 +629,11 @@
     <script type="module">
       import { authService } from "./js/auth-service.js";
       import { dataService } from "./js/data-service.js";
-      import "./js/matches.js"; // defines MatchManager globally
+      import { MatchManager } from "./js/matches.js"; // Import the class directly
 
       window.dataService = dataService;
       window.authService = authService;
+      window.MatchManager = MatchManager; // Ensure it's available globally
 
       document.addEventListener("DOMContentLoaded", async () => {
         // Setup dropdown and sidebar via shared helpers
@@ -648,9 +649,10 @@
             month: "long",
             day: "numeric",
           });
-        document.getElementById("matchDate").value = today
-          .toISOString()
-          .split("T")[0];
+        const matchDateEl = document.getElementById("matchDate");
+        if (matchDateEl) {
+          matchDateEl.value = today.toISOString().split("T")[0];
+        }
 
         // Wait briefly for auth state
         if (!authService.isAuthenticated()) {
@@ -678,7 +680,11 @@
 
         // Initialize manager now that services are ready
         if (typeof MatchManager !== "undefined") {
-          window.matchManager = new MatchManager();
+          console.log("Creating MatchManager with services:", dataService, authService);
+          window.matchManager = new MatchManager(dataService, authService);
+          console.log("MatchManager created:", window.matchManager);
+        } else {
+          console.error("MatchManager not available");
         }
 
         // Logout button
@@ -708,6 +714,9 @@
             try {
               window.matchManager.initialize();
             } catch (_) {}
+          } else if (typeof MatchManager !== "undefined") {
+            // Re-create manager with updated services
+            window.matchManager = new MatchManager(dataService, authService);
           }
         });
       });

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug Deletion Issue</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .test-result {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 4px;
+      }
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Debug Deletion Issue</h1>
+    <div id="results"></div>
+    <button onclick="runTests()">Run Debug Tests</button>
+
+    <script>
+      function logResult(message, type = "info") {
+        const div = document.createElement("div");
+        div.className = `test-result ${type}`;
+        div.textContent = message;
+        document.getElementById("results").appendChild(div);
+        console.log(`[${type.toUpperCase()}] ${message}`);
+      }
+
+      async function runTests() {
+        document.getElementById("results").innerHTML = "";
+
+        try {
+          // Test 1: Check if window.dataService exists
+          logResult(
+            `window.dataService exists: ${!!window.dataService}`,
+            window.dataService ? "success" : "error"
+          );
+
+          if (window.dataService) {
+            logResult(
+              `dataService methods: ${Object.getOwnPropertyNames(
+                window.dataService
+              ).join(", ")}`,
+              "info"
+            );
+            logResult(
+              `deleteTrainingSession exists: ${
+                typeof window.dataService.deleteTrainingSession === "function"
+              }`,
+              typeof window.dataService.deleteTrainingSession === "function"
+                ? "success"
+                : "error"
+            );
+          }
+
+          // Test 2: Check if TrainingManager exists and can be instantiated
+          if (typeof TrainingManager !== "undefined") {
+            logResult("TrainingManager class available", "success");
+
+            const mockDataService = {
+              deleteTrainingSession: async (id) => {
+                logResult(
+                  `Mock deleteTrainingSession called with ID: ${id}`,
+                  "info"
+                );
+                return true;
+              },
+            };
+
+            const manager = new TrainingManager(mockDataService, null);
+            logResult(`TrainingManager instantiated successfully`, "success");
+            logResult(
+              `Manager has dataService: ${!!manager.dataService}`,
+              manager.dataService ? "success" : "error"
+            );
+
+            // Test delete method
+            if (typeof manager.deleteSession === "function") {
+              logResult("deleteSession method exists", "success");
+
+              // Mock confirm to always return true
+              const originalConfirm = window.confirm;
+              window.confirm = () => true;
+
+              try {
+                await manager.deleteSession("test-id");
+                logResult(
+                  "deleteSession method executed without error",
+                  "success"
+                );
+              } catch (error) {
+                logResult(
+                  `deleteSession method failed: ${error.message}`,
+                  "error"
+                );
+              } finally {
+                window.confirm = originalConfirm;
+              }
+            } else {
+              logResult("deleteSession method not found", "error");
+            }
+          } else {
+            logResult("TrainingManager class not available", "error");
+          }
+
+          // Test 3: Check DOM elements
+          const sessionsList = document.getElementById("sessionsList");
+          logResult(
+            `sessionsList element exists: ${!!sessionsList}`,
+            sessionsList ? "success" : "error"
+          );
+        } catch (error) {
+          logResult(`Test error: ${error.message}`, "error");
+        }
+      }
+
+      // Load the training manager module
+      async function loadTrainingManager() {
+        try {
+          const module = await import("./js/training.js");
+          window.TrainingManager = module.TrainingManager;
+          logResult("TrainingManager module loaded successfully", "success");
+        } catch (error) {
+          logResult(
+            `Failed to load TrainingManager: ${error.message}`,
+            "error"
+          );
+        }
+      }
+
+      // Initialize
+      window.addEventListener("DOMContentLoaded", () => {
+        loadTrainingManager();
+      });
+    </script>
+  </body>
+</html>

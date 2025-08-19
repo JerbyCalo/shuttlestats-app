@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Firestore Cleanup: Remove embedded id fields</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .log {
+        white-space: pre-wrap;
+        background: #f7fafc;
+        border: 1px solid #e2e8f0;
+        padding: 12px;
+        border-radius: 6px;
+        max-height: 400px;
+        overflow: auto;
+      }
+      button {
+        padding: 8px 12px;
+      }
+      .ok {
+        color: #2f855a;
+      }
+      .err {
+        color: #c53030;
+      }
+      .warn {
+        color: #975a16;
+      }
+      .section {
+        margin: 16px 0;
+      }
+      label {
+        display: inline-block;
+        margin-right: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Firestore Cleanup: Remove embedded id fields</h1>
+    <p>
+      This one-time admin tool removes any stray <code>id</code> field inside
+      document data for your collections, so the app uses Firestore's
+      <code>doc.id</code> consistently.
+    </p>
+
+    <div class="section">
+      <label
+        ><input type="checkbox" id="col_training" checked />
+        training_sessions</label
+      >
+      <label><input type="checkbox" id="col_matches" checked /> matches</label>
+      <label
+        ><input type="checkbox" id="col_schedule" checked />
+        schedule_sessions</label
+      >
+      <label><input type="checkbox" id="col_goals" /> goals</label>
+    </div>
+
+    <div class="section">
+      <button id="runBtn">Run cleanup</button>
+      <button id="signInBtn">Sign in (popup)</button>
+      <button id="signOutBtn">Sign out</button>
+    </div>
+
+    <div class="section">
+      <strong>Status:</strong> <span id="status">Idle</span>
+      <div id="originInfo" class="warn" style="margin-top: 8px"></div>
+    </div>
+    <div class="section"><div id="log" class="log"></div></div>
+
+    <script type="module">
+      import { auth, db } from "../js/firebase-config.js";
+      import {
+        collection,
+        getDocs,
+        doc,
+        updateDoc,
+        query,
+        where,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+      import {
+        GoogleAuthProvider,
+        signInWithPopup,
+        onAuthStateChanged,
+        signOut as fbSignOut,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+      const statusEl = document.getElementById("status");
+      const originInfoEl = document.getElementById("originInfo");
+      const logEl = document.getElementById("log");
+      const runBtn = document.getElementById("runBtn");
+      const signInBtn = document.getElementById("signInBtn");
+      const signOutBtn = document.getElementById("signOutBtn");
+
+      const checkedCollections = () => {
+        const cols = [];
+        if (document.getElementById("col_training").checked)
+          cols.push("training_sessions");
+        if (document.getElementById("col_matches").checked)
+          cols.push("matches");
+        if (document.getElementById("col_schedule").checked)
+          cols.push("schedule_sessions");
+        if (document.getElementById("col_goals").checked) cols.push("goals");
+        return cols;
+      };
+
+      const setStatus = (text) => (statusEl.textContent = text);
+      const log = (text, cls = "ok") => {
+        const div = document.createElement("div");
+        div.className = cls;
+        div.textContent = text;
+        logEl.appendChild(div);
+        logEl.scrollTop = logEl.scrollHeight;
+      };
+
+      // Show current origin and warn when using file://
+      const isFile = window.location.protocol === "file:";
+      const originText = isFile
+        ? `file://${window.location.pathname}`
+        : window.location.origin;
+      originInfoEl.textContent = `Origin: ${originText}`;
+      if (isFile) {
+        const msg =
+          "Warning: Opened via file://. Firebase Auth popups require an authorized domain. Serve this page on http://localhost (e.g., with VS Code Live Server) and add 'localhost' to Firebase Auth > Settings > Authorized domains.";
+        const warnDiv = document.createElement("div");
+        warnDiv.className = "warn";
+        warnDiv.textContent = msg;
+        logEl.appendChild(warnDiv);
+      }
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setStatus(`Signed in as ${user.email || user.uid}`);
+        } else {
+          setStatus("Not signed in");
+        }
+      });
+
+      signInBtn.addEventListener("click", async () => {
+        try {
+          if (isFile) {
+            log(
+              "Cannot sign in from file:// origin. Please run on http://localhost and add it to Authorized domains in Firebase Auth.",
+              "warn"
+            );
+            return;
+          }
+          await signInWithPopup(auth, new GoogleAuthProvider());
+        } catch (e) {
+          log(`Sign-in error: ${e.message}`, "err");
+        }
+      });
+
+      signOutBtn.addEventListener("click", async () => {
+        try {
+          await fbSignOut(auth);
+        } catch (e) {
+          log(`Sign-out error: ${e.message}`, "err");
+        }
+      });
+
+      runBtn.addEventListener("click", async () => {
+        const user = auth.currentUser;
+        if (!user) {
+          log("Please sign in first.", "warn");
+          return;
+        }
+
+        const collections = checkedCollections();
+        if (collections.length === 0) {
+          log("Select at least one collection.", "warn");
+          return;
+        }
+
+        setStatus("Running cleanup...");
+
+        for (const colName of collections) {
+          try {
+            log(`\nScanning collection: ${colName}`, "info");
+            const q = query(
+              collection(db, colName),
+              where("userId", "==", user.uid)
+            );
+            const snap = await getDocs(q);
+            let updated = 0;
+            snap.forEach((docSnap) => {
+              const data = docSnap.data() || {};
+              if ("id" in data) {
+                // remove embedded id
+                const { id: _omit, ...rest } = data;
+                updateDoc(doc(db, colName, docSnap.id), rest)
+                  .then(() => log(`Cleaned ${colName}/${docSnap.id}`))
+                  .catch((e) =>
+                    log(
+                      `Failed to clean ${colName}/${docSnap.id}: ${e.message}`,
+                      "err"
+                    )
+                  );
+                updated++;
+              }
+            });
+            log(
+              `Found ${snap.size} docs; cleaned ${updated} with embedded id`,
+              updated > 0 ? "ok" : "info"
+            );
+          } catch (e) {
+            log(`Error scanning ${colName}: ${e.message}`, "err");
+          }
+        }
+
+        setStatus("Done");
+      });
+    </script>
+  </body>
+</html>

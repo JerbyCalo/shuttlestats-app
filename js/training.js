@@ -5,9 +5,16 @@ import { MessageSystem } from "./message-system.js";
 import { EmptyStateRenderer } from "./empty-state.js";
 
 export class TrainingManager {
-  constructor() {
+  constructor(dataService = null, authService = null) {
+    this.dataService =
+      dataService ||
+      (typeof window !== "undefined" ? window.dataService : null);
+    this.authService =
+      authService ||
+      (typeof window !== "undefined" ? window.authService : null);
+
     this.sessions = [];
-    this.remote = typeof window !== "undefined" && !!window.dataService;
+    this.remote = !!this.dataService;
     this.unsubscribe = null;
     this.focusAreaLabels = {
       footwork: "Footwork Drills",
@@ -22,15 +29,20 @@ export class TrainingManager {
     this.init();
   }
 
+  // Public initialize method for re-initialization
+  initialize() {
+    this.init();
+  }
+
   init() {
     // Prefer Firestore subscription when available
     if (
       this.remote &&
-      window.dataService &&
-      typeof window.dataService.subscribeToTrainingSessions === "function"
+      this.dataService &&
+      typeof this.dataService.subscribeToTrainingSessions === "function"
     ) {
       try {
-        this.unsubscribe = window.dataService.subscribeToTrainingSessions(
+        this.unsubscribe = this.dataService.subscribeToTrainingSessions(
           (sessions) => {
             // Ensure data shape parity with local version
             this.sessions = (sessions || []).map((s) => ({
@@ -100,13 +112,21 @@ export class TrainingManager {
       if (e.key === "Escape") this.hideSessionForm();
     });
 
-    // Rating sliders
-    document.getElementById("overallRating").addEventListener("input", (e) => {
-      document.getElementById("ratingValue").textContent = e.target.value;
-    });
-    document.getElementById("effortLevel").addEventListener("input", (e) => {
-      document.getElementById("effortValue").textContent = e.target.value;
-    });
+    // Rating sliders (guard missing elements)
+    const overallRatingEl = document.getElementById("overallRating");
+    if (overallRatingEl) {
+      overallRatingEl.addEventListener("input", (e) => {
+        const ratingValueEl = document.getElementById("ratingValue");
+        if (ratingValueEl) ratingValueEl.textContent = e.target.value;
+      });
+    }
+    const effortLevelEl = document.getElementById("effortLevel");
+    if (effortLevelEl) {
+      effortLevelEl.addEventListener("input", (e) => {
+        const effortValueEl = document.getElementById("effortValue");
+        if (effortValueEl) effortValueEl.textContent = e.target.value;
+      });
+    }
 
     // Filter controls
     document
@@ -130,6 +150,7 @@ export class TrainingManager {
 
   onSessionsListClick(e) {
     const target = e.target.closest("[data-action]");
+
     if (!target) {
       // Handle empty-state CTA
       const firstBtn = e.target.closest("#logFirstSessionBtn");
@@ -182,11 +203,14 @@ export class TrainingManager {
 
   resetForm() {
     document.getElementById("trainingSessionForm").reset();
-    document.getElementById("sessionDate").value = new Date()
-      .toISOString()
-      .split("T")[0];
-    document.getElementById("ratingValue").textContent = "5";
-    document.getElementById("effortValue").textContent = "5";
+    const dateEl = document.getElementById("sessionDate");
+    if (dateEl) {
+      dateEl.value = new Date().toISOString().split("T")[0];
+    }
+    const ratingValueEl = document.getElementById("ratingValue");
+    if (ratingValueEl) ratingValueEl.textContent = "5";
+    const effortValueEl = document.getElementById("effortValue");
+    if (effortValueEl) effortValueEl.textContent = "5";
   }
 
   showHistory() {
@@ -225,10 +249,10 @@ export class TrainingManager {
     try {
       if (
         this.remote &&
-        window.dataService &&
-        typeof window.dataService.addTrainingSession === "function"
+        this.dataService &&
+        typeof this.dataService.addTrainingSession === "function"
       ) {
-        await window.dataService.addTrainingSession(session);
+        await this.dataService.addTrainingSession(session);
         // UI will refresh via subscription
       } else {
         this.sessions.unshift(session);
@@ -513,11 +537,17 @@ export class TrainingManager {
     try {
       if (
         this.remote &&
-        window.dataService &&
-        typeof window.dataService.deleteTrainingSession === "function"
+        this.dataService &&
+        typeof this.dataService.deleteTrainingSession === "function"
       ) {
-        await window.dataService.deleteTrainingSession(sessionId);
-        // UI will refresh via subscription
+        await this.dataService.deleteTrainingSession(sessionId);
+        // If no active subscription, update UI optimistically
+        if (!this.unsubscribe) {
+          this.sessions = this.sessions.filter((s) => s.id !== sessionId);
+          this.updateStats();
+          this.renderSessions();
+          this.updateInsights();
+        }
       } else {
         this.sessions = this.sessions.filter(
           (session) => session.id !== sessionId
@@ -530,7 +560,8 @@ export class TrainingManager {
       this.showMessage("Training session deleted.", "success");
     } catch (err) {
       console.error("Failed to delete session:", err);
-      this.showMessage("Failed to delete. Please try again.", "error");
+      const msg = err?.message || String(err || "");
+      this.showMessage(`Failed to delete. ${msg}`, "error");
     }
   }
 

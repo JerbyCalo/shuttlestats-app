@@ -630,10 +630,11 @@
     <script type="module">
       import { authService } from "./js/auth-service.js";
       import { dataService } from "./js/data-service.js";
-      import "./js/schedule.js"; // defines ScheduleManager globally
+      import { ScheduleManager } from "./js/schedule.js"; // Import the class directly
 
       window.dataService = dataService;
       window.authService = authService;
+      window.ScheduleManager = ScheduleManager; // Ensure it's available globally
 
       document.addEventListener("DOMContentLoaded", async () => {
         // Setup dropdown and sidebar via shared helpers
@@ -649,9 +650,10 @@
             month: "long",
             day: "numeric",
           });
-        document.getElementById("sessionDate").value = today
-          .toISOString()
-          .split("T")[0];
+        const sessionDateEl = document.getElementById("sessionDate");
+        if (sessionDateEl) {
+          sessionDateEl.value = today.toISOString().split("T")[0];
+        }
 
         // Wait briefly for auth state
         if (!authService.isAuthenticated()) {
@@ -679,7 +681,11 @@
 
         // Initialize manager
         if (typeof ScheduleManager !== "undefined") {
-          window.scheduleManager = new ScheduleManager();
+          console.log("Creating ScheduleManager with services:", dataService, authService);
+          window.scheduleManager = new ScheduleManager(dataService, authService);
+          console.log("ScheduleManager created:", window.scheduleManager);
+        } else {
+          console.error("ScheduleManager not available");
         }
 
         // Logout button
@@ -707,6 +713,9 @@
             try {
               window.scheduleManager.initialize();
             } catch (_) {}
+          } else if (typeof ScheduleManager !== "undefined") {
+            // Re-create manager with updated services
+            window.scheduleManager = new ScheduleManager(dataService, authService);
           }
         });
       });

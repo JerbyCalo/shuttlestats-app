@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Deletion Fix</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .session-item {
+        border: 1px solid #ccc;
+        margin: 10px 0;
+        padding: 10px;
+      }
+      .session-actions {
+        margin-top: 10px;
+      }
+      .action-button {
+        margin-right: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      .log {
+        background: #f0f0f0;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test Deletion Fix</h1>
+    <div id="sessionsList"></div>
+    <div class="log" id="logOutput"></div>
+
+    <script type="module">
+      import { TrainingManager } from "./js/training.js";
+
+      // Mock services
+      const mockDataService = {
+        deleteTrainingSession: async (id) => {
+          console.log(`Mock deleteTrainingSession called with ID: ${id}`);
+          return true;
+        },
+      };
+
+      const mockAuthService = {
+        getCurrentUser: () => ({ uid: "test-user" }),
+      };
+
+      // Create manager
+      const manager = new TrainingManager(mockDataService, mockAuthService);
+
+      // Override some methods for testing
+      manager.sessions = [
+        {
+          id: "1",
+          date: "2025-08-20",
+          duration: 60,
+          type: "individual",
+          focusAreas: ["footwork"],
+          rating: 8,
+          effort: 7,
+          notes: "Good session",
+        },
+        {
+          id: "2",
+          date: "2025-08-19",
+          duration: 90,
+          type: "group",
+          focusAreas: ["backhand"],
+          rating: 7,
+          effort: 8,
+          notes: "Worked on technique",
+        },
+      ];
+
+      manager.showMessage = (text, type) => {
+        const logDiv = document.getElementById("logOutput");
+        logDiv.innerHTML += `<div>[${type.toUpperCase()}] ${text}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+      };
+
+      manager.renderSessions();
+
+      // Override console.log to show in our log div
+      const originalLog = console.log;
+      console.log = (...args) => {
+        originalLog(...args);
+        const logDiv = document.getElementById("logOutput");
+        logDiv.innerHTML += `<div>[LOG] ${args.join(" ")}</div>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+      };
+
+      window.manager = manager; // For debugging
+    </script>
+  </body>
+</html>

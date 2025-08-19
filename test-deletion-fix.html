@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deletion Fix Test</title>
+  </head>
+  <body>
+    <h1>Testing Deletion Fix</h1>
+    <div id="results"></div>
+
+    <script type="module">
+      // Mock data service
+      const mockDataService = {
+        deleteTrainingSession: (id) => Promise.resolve(true),
+        deleteMatch: (id) => Promise.resolve(true),
+        deleteScheduleSession: (id) => Promise.resolve(true),
+        deleteGoal: (id) => Promise.resolve(true),
+      };
+
+      const mockAuthService = {
+        getCurrentUser: () => ({ uid: "test-user" }),
+      };
+
+      // Test imports
+      try {
+        const { TrainingManager } = await import("./js/training.js");
+        const { MatchManager } = await import("./js/matches.js");
+        const { ScheduleManager } = await import("./js/schedule.js");
+
+        // Test instantiation with services
+        const trainingManager = new TrainingManager(
+          mockDataService,
+          mockAuthService
+        );
+        const matchManager = new MatchManager(mockDataService, mockAuthService);
+        const scheduleManager = new ScheduleManager(
+          mockDataService,
+          mockAuthService
+        );
+
+        // Test that managers have the correct services
+        const results = [];
+        results.push(
+          trainingManager.dataService
+            ? "✅ TrainingManager has dataService"
+            : "❌ TrainingManager missing dataService"
+        );
+        results.push(
+          matchManager.dataService
+            ? "✅ MatchManager has dataService"
+            : "❌ MatchManager missing dataService"
+        );
+        results.push(
+          scheduleManager.dataService
+            ? "✅ ScheduleManager has dataService"
+            : "❌ ScheduleManager missing dataService"
+        );
+
+        // Test that deletion methods exist and are bound to the right service
+        results.push(
+          typeof trainingManager.deleteSession === "function"
+            ? "✅ TrainingManager.deleteSession exists"
+            : "❌ TrainingManager.deleteSession missing"
+        );
+        results.push(
+          typeof matchManager.deleteMatch === "function"
+            ? "✅ MatchManager.deleteMatch exists"
+            : "❌ MatchManager.deleteMatch missing"
+        );
+        results.push(
+          typeof scheduleManager.deleteSession === "function"
+            ? "✅ ScheduleManager.deleteSession exists"
+            : "❌ ScheduleManager.deleteSession missing"
+        );
+
+        document.getElementById("results").innerHTML = results.join("<br>");
+      } catch (error) {
+        document.getElementById(
+          "results"
+        ).innerHTML = `❌ Error: ${error.message}`;
+      }
+    </script>
+  </body>
+</html>

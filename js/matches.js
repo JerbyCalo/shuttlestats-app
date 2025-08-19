@@ -5,9 +5,15 @@ import { MessageSystem } from "./message-system.js";
 import { EmptyStateRenderer } from "./empty-state.js";
 
 export class MatchManager {
-  constructor() {
+  constructor(dataService = null, authService = null) {
+    this.dataService =
+      dataService ||
+      (typeof window !== "undefined" ? window.dataService : null);
+    this.authService =
+      authService ||
+      (typeof window !== "undefined" ? window.authService : null);
     this.matches = [];
-    this.remote = typeof window !== "undefined" && !!window.dataService;
+    this.remote = !!this.dataService;
     this.unsubscribe = null;
     this.errorTypes = {
       netErrors: "Net Errors",
@@ -24,15 +30,20 @@ export class MatchManager {
     this.init();
   }
 
+  // Public initialize method for re-initialization
+  initialize() {
+    this.init();
+  }
+
   init() {
     // Prefer Firestore subscription when available
     if (
       this.remote &&
-      window.dataService &&
-      typeof window.dataService.subscribeToMatches === "function"
+      this.dataService &&
+      typeof this.dataService.subscribeToMatches === "function"
     ) {
       try {
-        this.unsubscribe = window.dataService.subscribeToMatches((matches) => {
+        this.unsubscribe = this.dataService.subscribeToMatches((matches) => {
           this.matches = (matches || []).map((m) => ({
             id: m.id,
             date: m.date,
@@ -436,10 +447,10 @@ export class MatchManager {
     try {
       if (
         this.remote &&
-        window.dataService &&
-        typeof window.dataService.addMatch === "function"
+        this.dataService &&
+        typeof this.dataService.addMatch === "function"
       ) {
-        await window.dataService.addMatch(match);
+        await this.dataService.addMatch(match);
         // UI will refresh via subscription
       } else {
         this.matches.unshift(match); // Add to beginning of array
@@ -885,11 +896,17 @@ export class MatchManager {
     try {
       if (
         this.remote &&
-        window.dataService &&
-        typeof window.dataService.deleteMatch === "function"
+        this.dataService &&
+        typeof this.dataService.deleteMatch === "function"
       ) {
-        await window.dataService.deleteMatch(matchId);
-        // UI via subscription
+        await this.dataService.deleteMatch(matchId);
+        // If no active subscription, update UI optimistically
+        if (!this.unsubscribe) {
+          this.matches = this.matches.filter((m) => m.id !== matchId);
+          this.updateStats();
+          this.renderMatches();
+          this.updateAnalysis();
+        }
       } else {
         this.matches = this.matches.filter((match) => match.id !== matchId);
         this.saveMatches();

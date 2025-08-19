@@ -1,9 +1,15 @@
 // Schedule Manager for ShuttleStats Badminton Tracking App
 
 export class ScheduleManager {
-  constructor() {
+  constructor(dataService = null, authService = null) {
+    this.dataService =
+      dataService ||
+      (typeof window !== "undefined" ? window.dataService : null);
+    this.authService =
+      authService ||
+      (typeof window !== "undefined" ? window.authService : null);
     this.sessions = this.loadSessions();
-    this.remote = typeof window !== "undefined" && !!window.dataService;
+    this.remote = !!this.dataService;
     this.remoteReady = false; // becomes true after first server snapshot
     this.unsubscribe = null;
     this.currentDate = new Date();
@@ -13,15 +19,16 @@ export class ScheduleManager {
     this.initialize();
   }
 
+  // Public initialize method for re-initialization (can be called from HTML)
   initialize() {
     // Prefer Firestore subscription when available
     if (
       this.remote &&
-      window.dataService &&
-      typeof window.dataService.subscribeToScheduleSessions === "function"
+      this.dataService &&
+      typeof this.dataService.subscribeToScheduleSessions === "function"
     ) {
       try {
-        this.unsubscribe = window.dataService.subscribeToScheduleSessions(
+        this.unsubscribe = this.dataService.subscribeToScheduleSessions(
           (sessions) => {
             // Mark that remote data is flowing
             this.remoteReady = true;
@@ -116,19 +123,25 @@ export class ScheduleManager {
         this.handleSessionSubmit();
       });
 
-    // Recurring session checkbox
-    document.getElementById("isRecurring").addEventListener("change", (e) => {
-      const recurringOptions = document.getElementById("recurringOptions");
-      recurringOptions.style.display = e.target.checked ? "block" : "none";
-    });
-
-    // Reminder notification checkbox
-    document
-      .getElementById("enableReminders")
-      .addEventListener("change", (e) => {
-        const reminderOptions = document.getElementById("reminderOptions");
-        reminderOptions.style.display = e.target.checked ? "block" : "none";
+    // Recurring session checkbox (guard missing element)
+    const isRecurringEl = document.getElementById("isRecurring");
+    if (isRecurringEl) {
+      isRecurringEl.addEventListener("change", (e) => {
+        const recurringOptions = document.getElementById("recurringOptions");
+        if (recurringOptions)
+          recurringOptions.style.display = e.target.checked ? "block" : "none";
       });
+    }
+
+    // Reminder notification checkbox (guard missing element)
+    const enableRemindersEl = document.getElementById("enableReminders");
+    if (enableRemindersEl) {
+      enableRemindersEl.addEventListener("change", (e) => {
+        const reminderOptions = document.getElementById("reminderOptions");
+        if (reminderOptions)
+          reminderOptions.style.display = e.target.checked ? "block" : "none";
+      });
+    }
 
     // Modal close handlers
     document.querySelectorAll(".close").forEach((closeBtn) => {
@@ -228,6 +241,36 @@ export class ScheduleManager {
           if (id) this.showSessionDetails(id);
         }
       });
+    }
+
+    // Legacy session modal buttons (if used elsewhere in the UI)
+    const legacyDeleteBtn = document.getElementById("deleteSessionBtn");
+    const legacyEditBtn = document.getElementById("editSessionBtn");
+    const legacyMarkCompleteBtn = document.getElementById("markCompleteBtn");
+    // Store selected session id on the modal when opening details through legacy flows
+    const legacyModal = document.getElementById("sessionModal");
+    if (legacyModal) {
+      // If buttons exist, wire them using a data attribute on the modal
+      const getLegacyId = () => legacyModal.getAttribute("data-session-id");
+      if (legacyDeleteBtn) {
+        legacyDeleteBtn.addEventListener("click", () => {
+          const id = getLegacyId();
+          if (id) this.deleteSession(id);
+        });
+      }
+      if (legacyEditBtn) {
+        legacyEditBtn.addEventListener("click", () => {
+          const id = getLegacyId();
+          if (id) this.editSession(id);
+        });
+      }
+      if (legacyMarkCompleteBtn) {
+        legacyMarkCompleteBtn.addEventListener("click", () => {
+          // For now, mark complete just hides the modal and shows a toast
+          this.closeModal(legacyModal);
+          this.showMessage("Session marked complete.", "success");
+        });
+      }
     }
   }
 
@@ -475,10 +518,10 @@ export class ScheduleManager {
     try {
       if (
         this.remote &&
-        window.dataService &&
-        typeof window.dataService.addScheduleSession === "function"
+        this.dataService &&
+        typeof this.dataService.addScheduleSession === "function"
       ) {
-        const saved = await window.dataService.addScheduleSession(sessionData);
+        const saved = await this.dataService.addScheduleSession(sessionData);
         if (saved && saved.id) {
           sessionData.id = saved.id;
         }
@@ -517,10 +560,10 @@ export class ScheduleManager {
     try {
       if (
         this.remote &&
-        window.dataService &&
-        typeof window.dataService.updateScheduleSession === "function"
+        this.dataService &&
+        typeof this.dataService.updateScheduleSession === "function"
       ) {
-        await window.dataService.updateScheduleSession(sessionId, updates);
+        await this.dataService.updateScheduleSession(sessionId, updates);
       }
 
       // Update local state immediately
@@ -710,6 +753,9 @@ export class ScheduleManager {
     if (!session) return;
 
     const modal = document.getElementById("sessionDetailsModal");
+    // Also set selected id on legacy modal for compatibility
+    const legacyModal = document.getElementById("sessionModal");
+    if (legacyModal) legacyModal.setAttribute("data-session-id", sessionId);
     const content = modal.querySelector(".session-details");
 
     const sessionDate = new Date(session.date);
@@ -851,11 +897,17 @@ export class ScheduleManager {
     try {
       if (
         this.remote &&
-        window.dataService &&
-        typeof window.dataService.deleteScheduleSession === "function"
+        this.dataService &&
+        typeof this.dataService.deleteScheduleSession === "function"
       ) {
-        await window.dataService.deleteScheduleSession(sessionId);
-        // UI via subscription
+        await this.dataService.deleteScheduleSession(sessionId);
+        // If no active subscription yet, update UI optimistically
+        if (!this.remoteReady) {
+          this.sessions = this.sessions.filter((s) => s.id !== sessionId);
+          this.renderCalendar();
+          this.renderSessions();
+          this.updateScheduleStats();
+        }
       } else {
         this.sessions = this.sessions.filter((s) => s.id !== sessionId);
         this.saveSessions();

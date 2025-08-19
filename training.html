@@ -440,11 +440,12 @@
     <script type="module">
       import { authService } from "./js/auth-service.js";
       import { dataService } from "./js/data-service.js";
-      import "./js/training.js"; // defines TrainingManager globally
+      import { TrainingManager } from "./js/training.js"; // Import the class directly
 
       // Expose services for non-module scripts
       window.dataService = dataService;
       window.authService = authService;
+      window.TrainingManager = TrainingManager; // Ensure it's available globally
 
       document.addEventListener("DOMContentLoaded", async () => {
         // Setup dropdown and sidebar via shared helpers
@@ -460,9 +461,10 @@
             month: "long",
             day: "numeric",
           });
-        document.getElementById("sessionDate").value = today
-          .toISOString()
-          .split("T")[0];
+        const sessionDateEl = document.getElementById("sessionDate");
+        if (sessionDateEl) {
+          sessionDateEl.value = today.toISOString().split("T")[0];
+        }
 
         // Auth gating: redirect if not authenticated after a short wait
         if (!authService.isAuthenticated()) {
@@ -491,7 +493,18 @@
 
         // Initialize TrainingManager once services are ready
         if (typeof TrainingManager !== "undefined") {
-          window.trainingManager = new TrainingManager();
+          console.log(
+            "Creating TrainingManager with services:",
+            dataService,
+            authService
+          );
+          window.trainingManager = new TrainingManager(
+            dataService,
+            authService
+          );
+          console.log("TrainingManager created:", window.trainingManager);
+        } else {
+          console.error("TrainingManager not available");
         }
 
         // Attach logout handler using authService
@@ -520,6 +533,12 @@
             try {
               window.trainingManager.initialize();
             } catch (_) {}
+          } else if (typeof TrainingManager !== "undefined") {
+            // Re-create manager with updated services
+            window.trainingManager = new TrainingManager(
+              dataService,
+              authService
+            );
           }
         });
       });

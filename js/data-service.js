@@ -48,7 +48,7 @@ class DataService {
         orderBy("date", "desc")
       );
       const snap = await getDocs(qPrimary);
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      return snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     } catch (error) {
       // Fallback if composite index is missing: drop orderBy and sort client-side
       console.warn(
@@ -61,7 +61,7 @@ class DataService {
           where("userId", "==", this.currentUserId)
         );
         const snap = await getDocs(qFallback);
-        const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const items = snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
         items.sort((a, b) => String(b.date).localeCompare(String(a.date)));
         return items;
       } catch (e2) {
@@ -75,13 +75,15 @@ class DataService {
     if (!this.currentUserId) throw new Error("User not authenticated");
 
     try {
+      // Never persist client-generated id fields into Firestore
+      const { id: _omit, ...data } = sessionData || {};
       const docRef = await addDoc(collection(db, "training_sessions"), {
-        ...sessionData,
+        ...data,
         userId: this.currentUserId,
         createdAt: serverTimestamp(),
       });
 
-      return { id: docRef.id, ...sessionData };
+      return { ...data, id: docRef.id };
     } catch (error) {
       console.error("Error adding training session:", error);
       throw error;
@@ -91,8 +93,9 @@ class DataService {
   async updateTrainingSession(sessionId, updates) {
     try {
       const sessionRef = doc(db, "training_sessions", sessionId);
+      const { id: _omit, ...data } = updates || {};
       await updateDoc(sessionRef, {
-        ...updates,
+        ...data,
         updatedAt: serverTimestamp(),
       });
 
@@ -124,7 +127,7 @@ class DataService {
         orderBy("date", "desc")
       );
       const snap = await getDocs(qPrimary);
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      return snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     } catch (error) {
       console.warn(
         "Primary matches query failed (likely missing index). Falling back without orderBy.",
@@ -136,7 +139,7 @@ class DataService {
           where("userId", "==", this.currentUserId)
         );
         const snap = await getDocs(qFallback);
-        const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const items = snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
         items.sort((a, b) => String(b.date).localeCompare(String(a.date)));
         return items;
       } catch (e2) {
@@ -150,13 +153,14 @@ class DataService {
     if (!this.currentUserId) throw new Error("User not authenticated");
 
     try {
+      const { id: _omit, ...data } = matchData || {};
       const docRef = await addDoc(collection(db, "matches"), {
-        ...matchData,
+        ...data,
         userId: this.currentUserId,
         createdAt: serverTimestamp(),
       });
 
-      return { id: docRef.id, ...matchData };
+      return { ...data, id: docRef.id };
     } catch (error) {
       console.error("Error adding match:", error);
       throw error;
@@ -166,8 +170,9 @@ class DataService {
   async updateMatch(matchId, updates) {
     try {
       const matchRef = doc(db, "matches", matchId);
+      const { id: _omit, ...data } = updates || {};
       await updateDoc(matchRef, {
-        ...updates,
+        ...data,
         updatedAt: serverTimestamp(),
       });
 
@@ -199,7 +204,7 @@ class DataService {
         orderBy("date", "asc")
       );
       const snap = await getDocs(qPrimary);
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      return snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     } catch (error) {
       console.warn(
         "Primary schedule_sessions query failed (likely missing index). Falling back without orderBy.",
@@ -211,7 +216,7 @@ class DataService {
           where("userId", "==", this.currentUserId)
         );
         const snap = await getDocs(qFallback);
-        const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const items = snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
         items.sort((a, b) => String(a.date).localeCompare(String(b.date)));
         return items;
       } catch (e2) {
@@ -225,13 +230,14 @@ class DataService {
     if (!this.currentUserId) throw new Error("User not authenticated");
 
     try {
+      const { id: _omit, ...data } = sessionData || {};
       const docRef = await addDoc(collection(db, "schedule_sessions"), {
-        ...sessionData,
+        ...data,
         userId: this.currentUserId,
         createdAt: serverTimestamp(),
       });
 
-      return { id: docRef.id, ...sessionData };
+      return { ...data, id: docRef.id };
     } catch (error) {
       console.error("Error adding schedule session:", error);
       throw error;
@@ -241,8 +247,9 @@ class DataService {
   async updateScheduleSession(sessionId, updates) {
     try {
       const sessionRef = doc(db, "schedule_sessions", sessionId);
+      const { id: _omit, ...data } = updates || {};
       await updateDoc(sessionRef, {
-        ...updates,
+        ...data,
         updatedAt: serverTimestamp(),
       });
 
@@ -274,7 +281,7 @@ class DataService {
         orderBy("createdAt", "desc")
       );
       const snap = await getDocs(qPrimary);
-      return snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      return snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
     } catch (error) {
       console.warn(
         "Primary goals query failed (likely missing index). Falling back without orderBy.",
@@ -286,7 +293,7 @@ class DataService {
           where("userId", "==", this.currentUserId)
         );
         const snap = await getDocs(qFallback);
-        const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const items = snap.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
         items.sort((a, b) => {
           const at = a.createdAt?.toMillis
             ? a.createdAt.toMillis()
@@ -338,7 +345,11 @@ class DataService {
   async updateGoal(goalId, updates) {
     try {
       const goalRef = doc(db, "goals", goalId);
-      await updateDoc(goalRef, { ...updates, updatedAt: serverTimestamp() });
+      const { id: _omitGoal, ...goalUpdates } = updates || {};
+      await updateDoc(goalRef, {
+        ...goalUpdates,
+        updatedAt: serverTimestamp(),
+      });
       return true;
     } catch (error) {
       console.error("Error updating goal:", error);
@@ -373,8 +384,8 @@ class DataService {
       primaryQ,
       (snapshot) => {
         const items = snapshot.docs.map((doc) => ({
-          id: doc.id,
           ...doc.data(),
+          id: doc.id,
         }));
         callback(items);
       },
@@ -386,8 +397,8 @@ class DataService {
         if (typeof unsub === "function") unsub();
         unsub = onSnapshot(fallbackQ, (snapshot) => {
           const items = snapshot.docs.map((doc) => ({
-            id: doc.id,
             ...doc.data(),
+            id: doc.id,
           }));
           items.sort((a, b) => String(b.date).localeCompare(String(a.date)));
           callback(items);
@@ -415,8 +426,8 @@ class DataService {
       primaryQ,
       (snapshot) => {
         const items = snapshot.docs.map((doc) => ({
-          id: doc.id,
           ...doc.data(),
+          id: doc.id,
         }));
         callback(items);
       },
@@ -428,8 +439,8 @@ class DataService {
         if (typeof unsub === "function") unsub();
         unsub = onSnapshot(fallbackQ, (snapshot) => {
           const items = snapshot.docs.map((doc) => ({
-            id: doc.id,
             ...doc.data(),
+            id: doc.id,
           }));
           items.sort((a, b) => String(b.date).localeCompare(String(a.date)));
           callback(items);
@@ -457,8 +468,8 @@ class DataService {
       primaryQ,
       (snapshot) => {
         const items = snapshot.docs.map((doc) => ({
-          id: doc.id,
           ...doc.data(),
+          id: doc.id,
         }));
         callback(items);
       },
@@ -470,8 +481,8 @@ class DataService {
         if (typeof unsub === "function") unsub();
         unsub = onSnapshot(fallbackQ, (snapshot) => {
           const items = snapshot.docs.map((doc) => ({
-            id: doc.id,
             ...doc.data(),
+            id: doc.id,
           }));
           items.sort((a, b) => String(a.date).localeCompare(String(b.date)));
           callback(items);
@@ -499,8 +510,8 @@ class DataService {
       primaryQ,
       (snapshot) => {
         const items = snapshot.docs.map((doc) => ({
-          id: doc.id,
           ...doc.data(),
+          id: doc.id,
         }));
         callback(items);
       },
@@ -512,8 +523,8 @@ class DataService {
         if (typeof unsub === "function") unsub();
         unsub = onSnapshot(fallbackQ, (snapshot) => {
           const items = snapshot.docs.map((doc) => ({
-            id: doc.id,
             ...doc.data(),
+            id: doc.id,
           }));
           items.sort((a, b) => {
             const at = a.createdAt?.toMillis
