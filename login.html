@@ -621,31 +621,34 @@
             <div class="name-fields">
               <div class="name-field">
                 <label for="firstName">First Name</label>
-                <input 
-                  type="text" 
-                  id="firstName" 
-                  name="firstName" 
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
                   placeholder="John"
                   autocomplete="given-name"
                 />
                 <div class="field-error" id="firstNameError"></div>
               </div>
               <div class="name-field optional">
-                <label for="middleName">Middle Name <span style="color: #9ca3af;">(Optional)</span></label>
-                <input 
-                  type="text" 
-                  id="middleName" 
-                  name="middleName" 
+                <label for="middleName"
+                  >Middle Name
+                  <span style="color: #9ca3af">(Optional)</span></label
+                >
+                <input
+                  type="text"
+                  id="middleName"
+                  name="middleName"
                   placeholder="Michael"
                   autocomplete="additional-name"
                 />
               </div>
               <div class="name-field">
                 <label for="surname">Surname</label>
-                <input 
-                  type="text" 
-                  id="surname" 
-                  name="surname" 
+                <input
+                  type="text"
+                  id="surname"
+                  name="surname"
                   placeholder="Doe"
                   autocomplete="family-name"
                 />
@@ -947,7 +950,9 @@
             const firstNameField = document.getElementById("firstName");
             firstNameField.addEventListener("blur", () => {
               if (firstNameField.value.trim()) {
-                const validation = this.validateFirstName(firstNameField.value.trim());
+                const validation = this.validateFirstName(
+                  firstNameField.value.trim()
+                );
                 if (validation.valid) {
                   this.showFieldSuccess("firstName");
                 } else {
@@ -959,7 +964,9 @@
             const surnameField = document.getElementById("surname");
             surnameField.addEventListener("blur", () => {
               if (surnameField.value.trim()) {
-                const validation = this.validateSurname(surnameField.value.trim());
+                const validation = this.validateSurname(
+                  surnameField.value.trim()
+                );
                 if (validation.valid) {
                   this.showFieldSuccess("surname");
                 } else {
@@ -971,7 +978,9 @@
             const middleNameField = document.getElementById("middleName");
             middleNameField.addEventListener("blur", () => {
               if (middleNameField.value.trim()) {
-                const validation = this.validateMiddleName(middleNameField.value.trim());
+                const validation = this.validateMiddleName(
+                  middleNameField.value.trim()
+                );
                 if (validation.valid) {
                   this.showFieldSuccess("middleName");
                 } else {
@@ -1228,17 +1237,21 @@
             try {
               let result;
 
-              if (this.isSignUp) {
-                const role = this.selectedRole;
-                const userData = { 
-                  role: role,
-                  firstName: firstName,
-                  middleName: middleName || null,
-                  surname: surname,
-                  fullName: middleName ? `${firstName} ${middleName} ${surname}` : `${firstName} ${surname}`
-                };
-
-                if (role === "player") {
+            if (this.isSignUp) {
+              const role = this.selectedRole;
+              const firstName = document.getElementById("firstName").value.trim();
+              const middleName = document.getElementById("middleName").value.trim();
+              const surname = document.getElementById("surname").value.trim();
+              
+              const userData = {
+                role: role,
+                firstName: firstName,
+                middleName: middleName || null,
+                surname: surname,
+                fullName: middleName
+                  ? `${firstName} ${middleName} ${surname}`
+                  : `${firstName} ${surname}`,
+              };                if (role === "player") {
                   userData.coachName = document
                     .getElementById("coachName")
                     .value.trim();
@@ -1452,10 +1465,17 @@
               return { valid: false, message: "First name is required" };
             }
             if (firstName.trim().length < 2) {
-              return { valid: false, message: "First name must be at least 2 characters" };
+              return {
+                valid: false,
+                message: "First name must be at least 2 characters",
+              };
             }
             if (!/^[a-zA-Z\s'-]+$/.test(firstName.trim())) {
-              return { valid: false, message: "First name can only contain letters, spaces, hyphens, and apostrophes" };
+              return {
+                valid: false,
+                message:
+                  "First name can only contain letters, spaces, hyphens, and apostrophes",
+              };
             }
             return { valid: true, message: "" };
           }
@@ -1465,10 +1485,17 @@
               return { valid: false, message: "Surname is required" };
             }
             if (surname.trim().length < 2) {
-              return { valid: false, message: "Surname must be at least 2 characters" };
+              return {
+                valid: false,
+                message: "Surname must be at least 2 characters",
+              };
             }
             if (!/^[a-zA-Z\s'-]+$/.test(surname.trim())) {
-              return { valid: false, message: "Surname can only contain letters, spaces, hyphens, and apostrophes" };
+              return {
+                valid: false,
+                message:
+                  "Surname can only contain letters, spaces, hyphens, and apostrophes",
+              };
             }
             return { valid: true, message: "" };
           }
@@ -1477,10 +1504,17 @@
             // Middle name is optional, so only validate if provided
             if (middleName && middleName.trim() !== "") {
               if (middleName.trim().length < 2) {
-                return { valid: false, message: "Middle name must be at least 2 characters" };
+                return {
+                  valid: false,
+                  message: "Middle name must be at least 2 characters",
+                };
               }
               if (!/^[a-zA-Z\s'-]+$/.test(middleName.trim())) {
-                return { valid: false, message: "Middle name can only contain letters, spaces, hyphens, and apostrophes" };
+                return {
+                  valid: false,
+                  message:
+                    "Middle name can only contain letters, spaces, hyphens, and apostrophes",
+                };
               }
             }
             return { valid: true, message: "" };
@@ -1531,10 +1565,12 @@
               document.getElementById("confirmPassword").value;
             const role = this.selectedRole; // Use the selected role from class property
             const coachName = document.getElementById("coachName").value.trim();
-            
+
             // Get name fields (only for signup)
             const firstName = document.getElementById("firstName").value.trim();
-            const middleName = document.getElementById("middleName").value.trim();
+            const middleName = document
+              .getElementById("middleName")
+              .value.trim();
             const surname = document.getElementById("surname").value.trim();
 
             // Validate email
