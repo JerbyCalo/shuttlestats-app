@@ -693,7 +693,10 @@
         // Handle auth changes in-place
         window.addEventListener("auth:changed", (e) => {
           const u = e.detail?.user;
-          if (!u) return;
+          if (!u) {
+            window.location.href = "login.html";
+            return;
+          }
           dataService.setCurrentUser(u.uid);
           if (
             window.scheduleManager &&

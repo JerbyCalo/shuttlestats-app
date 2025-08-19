@@ -12,8 +12,8 @@ import {
   where,
   orderBy,
   onSnapshot,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 class DataService {
   constructor() {
@@ -327,7 +327,7 @@ class DataService {
   async updateGoal(goalId, updates) {
     try {
       const goalRef = doc(db, "goals", goalId);
-  await updateDoc(goalRef, { ...updates, updatedAt: serverTimestamp() });
+      await updateDoc(goalRef, { ...updates, updatedAt: serverTimestamp() });
       return true;
     } catch (error) {
       console.error("Error updating goal:", error);

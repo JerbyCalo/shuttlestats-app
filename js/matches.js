@@ -979,6 +979,9 @@ try {
   if (typeof window !== "undefined") {
     window.MatchManager = MatchManager;
   }
-} catch (_) {}
+} catch (err) {
+  // Swallow if window is undefined in non-browser envs
+  console.debug("matches: window attach skipped", err);
+}
 
 export default MatchManager;

@@ -1,0 +1,17 @@
+{
+  "name": "shuttlestats-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ShuttleStats static web app",
+  "scripts": {
+    "lint": "eslint \"js/**/*.js\"",
+    "format": "prettier --write \"**/*.{js,css,html,json,md}\"",
+    "check:format": "prettier --check \"**/*.{js,css,html,json,md}\""
+  },
+  "devDependencies": {
+    "eslint": "8.57.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "prettier": "3.3.3"
+  }
+}

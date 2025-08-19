@@ -48,7 +48,10 @@ class AuthService {
       try {
         const evt = new CustomEvent("auth:changed", { detail: { user } });
         window.dispatchEvent(evt);
-      } catch (_) {}
+      } catch (err) {
+        // Ignore if CustomEvent/window not available
+        console.debug("auth: event dispatch skipped", err);
+      }
     });
   }
 

@@ -13,5 +13,9 @@
         }
       });
     });
-  } catch (_) {}
+  } catch (err) {
+    // Ignore errors in older browsers or non-DOM environments
+    // Ensure block is not empty for ESLint no-empty
+    console.debug("landing: smooth scroll init skipped", err);
+  }
 })();

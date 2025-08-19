@@ -493,15 +493,17 @@ export class ScheduleManager {
         });
         break;
       case "week":
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - now.getDay());
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
+        {
+          const weekStart = new Date(now);
+          weekStart.setDate(now.getDate() - now.getDay());
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 6);
 
-        sessionsToShow = this.sessions.filter((session) => {
-          const sessionDate = new Date(session.date);
-          return sessionDate >= weekStart && sessionDate <= weekEnd;
-        });
+          sessionsToShow = this.sessions.filter((session) => {
+            const sessionDate = new Date(session.date);
+            return sessionDate >= weekStart && sessionDate <= weekEnd;
+          });
+        }
         break;
       case "month":
         sessionsToShow = this.sessions.filter((session) => {
@@ -519,6 +521,9 @@ export class ScheduleManager {
             return sessionDate >= now;
           })
           .slice(0, 10);
+        break;
+      default:
+        // No-op: fallback to empty list
         break;
     }
 
@@ -1332,6 +1337,9 @@ try {
   if (typeof window !== "undefined") {
     window.ScheduleManager = ScheduleManager;
   }
-} catch (_) {}
+} catch (err) {
+  // Swallow if window is undefined (SSR/tests)
+  console.debug("schedule: window attach skipped", err);
+}
 
 export default ScheduleManager;

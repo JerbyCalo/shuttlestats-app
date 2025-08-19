@@ -584,6 +584,9 @@ try {
   if (typeof window !== "undefined") {
     window.TrainingManager = TrainingManager;
   }
-} catch (_) {}
+} catch (err) {
+  // Swallow if not in a browser environment
+  console.debug("training: window attach skipped", err);
+}
 
 export default TrainingManager;
