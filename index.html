@@ -44,25 +44,53 @@
       </div>
     </section>
 
-                  <span class="stat-label">Goals Achieved</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="section-text">
-            <h2>For Players</h2>
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+      <div class="container">
+        <h2>Everything you need to track and improve</h2>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🏃‍♂️</div>
+            <h3>Log Training</h3>
             <p>
-              Take control of your badminton journey with personalized tracking:
+              Capture session details, focus areas, ratings, and notes. See trends over time.
             </p>
-            <ul class="feature-list">
-              <li>✓ Log and analyze your training sessions</li>
-              <li>✓ Track your match performance and results</li>
-              <li>✓ Set personal goals and monitor progress</li>
-              <li>✓ Access your performance history and trends</li>
-              <li>✓ Receive feedback from your coach</li>
-            </ul>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🏆</div>
+            <h3>Record Matches</h3>
+            <p>
+              Track opponents, scores, winners, and errors to learn from every match.
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📅</div>
+            <h3>Plan Your Schedule</h3>
+            <p>
+              Schedule sessions with reminders and export events to your calendar.
+            </p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+      <div class="container">
+        <h2>About ShuttleStats</h2>
+        <p>
+          ShuttleStats helps players and coaches organize training, analyze performance, and stay consistent. Built for the badminton community.
+        </p>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+      <div class="container">
+        <h2>Contact</h2>
+        <p>
+          Have feedback or questions? Reach us at <a href="mailto:support@shuttlestats.app">support@shuttlestats.app</a>.
+        </p>
       </div>
     </section>
 
@@ -80,130 +108,6 @@
       </div>
     </section>
 
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <div class="login-container">
-          <form class="login-form" id="loginForm" action="#" method="POST">
-            <h2>Welcome to ShuttleStats</h2>
-
-            <div class="form-group">
-              <label for="email">Email Address</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Enter your password"
-                required
-              />
-            </div>
-
-            <button type="submit" class="btn login-btn">Sign In</button>
-
-            <div class="form-footer">
-              <p>
-                Don't have an account?
-                <a href="#" id="signupLink">Sign up here</a>
-              </p>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sign up Modal -->
-    <div id="signupModal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <div class="login-container">
-          <form class="login-form" id="signupForm" action="#" method="POST">
-            <h2>Join ShuttleStats</h2>
-
-            <div class="form-group">
-              <label for="signup-name">Full Name</label>
-              <input
-                type="text"
-                id="signup-name"
-                name="name"
-                placeholder="Enter your full name"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="signup-email">Email Address</label>
-              <input
-                type="email"
-                id="signup-email"
-                name="email"
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="signup-password">Password</label>
-              <input
-                type="password"
-                id="signup-password"
-                name="password"
-                placeholder="Create a password"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="confirm-password">Confirm Password</label>
-              <input
-                type="password"
-                id="confirm-password"
-                name="confirmPassword"
-                placeholder="Confirm your password"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="signup-role">I am a:</label>
-              <select id="signup-role" name="role" required>
-                <option value="">Select your role</option>
-                <option value="player">Player</option>
-                <option value="coach">Coach</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label class="checkbox-container">
-                <input type="checkbox" id="terms" name="terms" required />
-                <span class="checkmark"></span>
-                I agree to the Terms of Service and Privacy Policy
-              </label>
-            </div>
-
-            <button type="submit" class="btn login-btn">Create Account</button>
-
-            <div class="form-footer">
-              <p>
-                Already have an account?
-                <a href="#" id="loginFromSignupLink">Sign in here</a>
-              </p>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
 
     <!-- Footer -->
     <footer class="footer">

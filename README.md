@@ -206,6 +206,7 @@ service cloud.firestore {
 ```
 
 Notes:
+
 - Ensure each document has a `userId` field matching the authenticated user.
 - If Firestore asks for an index on first run, follow the link to create it.
 

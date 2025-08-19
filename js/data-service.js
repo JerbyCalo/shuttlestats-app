@@ -287,8 +287,12 @@ class DataService {
         const snap = await getDocs(qFallback);
         const items = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         items.sort((a, b) => {
-          const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : Date.parse(a.createdAt || 0);
-          const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : Date.parse(b.createdAt || 0);
+          const at = a.createdAt?.toMillis
+            ? a.createdAt.toMillis()
+            : Date.parse(a.createdAt || 0);
+          const bt = b.createdAt?.toMillis
+            ? b.createdAt.toMillis()
+            : Date.parse(b.createdAt || 0);
           return bt - at;
         });
         return items;
@@ -356,7 +360,10 @@ class DataService {
     let unsub = onSnapshot(
       primaryQ,
       (snapshot) => {
-        const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const items = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         callback(items);
       },
       (error) => {
@@ -366,7 +373,10 @@ class DataService {
         );
         if (typeof unsub === "function") unsub();
         unsub = onSnapshot(fallbackQ, (snapshot) => {
-          const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          const items = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
           items.sort((a, b) => String(b.date).localeCompare(String(a.date)));
           callback(items);
         });
@@ -392,7 +402,10 @@ class DataService {
     let unsub = onSnapshot(
       primaryQ,
       (snapshot) => {
-        const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const items = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         callback(items);
       },
       (error) => {
@@ -402,7 +415,10 @@ class DataService {
         );
         if (typeof unsub === "function") unsub();
         unsub = onSnapshot(fallbackQ, (snapshot) => {
-          const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          const items = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
           items.sort((a, b) => String(b.date).localeCompare(String(a.date)));
           callback(items);
         });
@@ -428,7 +444,10 @@ class DataService {
     let unsub = onSnapshot(
       primaryQ,
       (snapshot) => {
-        const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const items = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         callback(items);
       },
       (error) => {
@@ -438,7 +457,10 @@ class DataService {
         );
         if (typeof unsub === "function") unsub();
         unsub = onSnapshot(fallbackQ, (snapshot) => {
-          const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          const items = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
           items.sort((a, b) => String(a.date).localeCompare(String(b.date)));
           callback(items);
         });
@@ -464,7 +486,10 @@ class DataService {
     let unsub = onSnapshot(
       primaryQ,
       (snapshot) => {
-        const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        const items = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         callback(items);
       },
       (error) => {
@@ -474,10 +499,17 @@ class DataService {
         );
         if (typeof unsub === "function") unsub();
         unsub = onSnapshot(fallbackQ, (snapshot) => {
-          const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          const items = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
           items.sort((a, b) => {
-            const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : Date.parse(a.createdAt || 0);
-            const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : Date.parse(b.createdAt || 0);
+            const at = a.createdAt?.toMillis
+              ? a.createdAt.toMillis()
+              : Date.parse(a.createdAt || 0);
+            const bt = b.createdAt?.toMillis
+              ? b.createdAt.toMillis()
+              : Date.parse(b.createdAt || 0);
             return bt - at;
           });
           callback(items);

@@ -695,8 +695,13 @@
           const u = e.detail?.user;
           if (!u) return;
           dataService.setCurrentUser(u.uid);
-          if (window.scheduleManager && typeof window.scheduleManager.initialize === "function") {
-            try { window.scheduleManager.initialize(); } catch (_) {}
+          if (
+            window.scheduleManager &&
+            typeof window.scheduleManager.initialize === "function"
+          ) {
+            try {
+              window.scheduleManager.initialize();
+            } catch (_) {}
           }
         });
       });

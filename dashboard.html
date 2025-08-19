@@ -911,7 +911,10 @@
         window.addEventListener("auth:changed", (e) => {
           const u = e.detail?.user;
           if (!u) return;
-          if (window.dataService && typeof window.dataService.setCurrentUser === "function") {
+          if (
+            window.dataService &&
+            typeof window.dataService.setCurrentUser === "function"
+          ) {
             window.dataService.setCurrentUser(u.uid);
           }
           // Refresh dashboard datasets

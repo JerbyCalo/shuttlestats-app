@@ -698,8 +698,13 @@
           const u = e.detail?.user;
           if (!u) return;
           dataService.setCurrentUser(u.uid);
-          if (window.matchManager && typeof window.matchManager.initialize === "function") {
-            try { window.matchManager.initialize(); } catch (_) {}
+          if (
+            window.matchManager &&
+            typeof window.matchManager.initialize === "function"
+          ) {
+            try {
+              window.matchManager.initialize();
+            } catch (_) {}
           }
         });
       });
