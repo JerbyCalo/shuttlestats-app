@@ -311,10 +311,16 @@ class DataService {
       const payload = {
         title: goalData.title || "Untitled Goal",
         description: goalData.description || "",
-        targetDate: goalData.targetDate || null,
+        category: goalData.category || "other",
+        priority: goalData.priority || "medium",
+        target: goalData.target || null,
+        unit: goalData.unit || "sessions",
+        current: goalData.current || 0,
+        deadline: goalData.deadline || null,
         completed: !!goalData.completed,
         userId: this.currentUserId,
-        createdAt: serverTimestamp(),
+        createdAt: goalData.createdAt || serverTimestamp(),
+        updatedAt: goalData.updatedAt || serverTimestamp(),
       };
       const docRef = await addDoc(collection(db, "goals"), payload);
       return { id: docRef.id, ...payload };
@@ -322,6 +328,11 @@ class DataService {
       console.error("Error adding goal:", error);
       throw error;
     }
+  }
+
+  // Alias for compatibility with goals.js
+  async saveGoal(goalData) {
+    return this.addGoal(goalData);
   }
 
   async updateGoal(goalId, updates) {

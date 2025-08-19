@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Cache-Control"
+      content="no-cache, no-store, must-revalidate"
+    />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>Goals - ShuttleStats</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/goals.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <span class="logo-icon">🏸</span>
+          <span class="logo-text"
+            ><span class="logo-shuttle">Shuttle</span
+            ><span class="logo-stats">Stats</span></span
+          >
+        </div>
+        <div class="nav-right">
+          <div class="user-info">
+            <span class="user-name" data-user-name>Welcome back!</span>
+            <div class="user-dropdown">
+              <button class="dropdown-toggle">⚙️</button>
+              <div class="dropdown-menu">
+                <a href="#profile">Profile</a>
+                <a href="#settings">Settings</a>
+                <a href="#" id="signOutBtn">Sign Out</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="header-content">
+            <div class="breadcrumb">
+              <a href="dashboard.html" class="breadcrumb-link">Dashboard</a>
+              <span class="breadcrumb-separator">›</span>
+              <span class="breadcrumb-current">Goals</span>
+            </div>
+            <h1 class="page-title">⭐ My Goals</h1>
+            <p class="page-subtitle">Set and track your badminton goals to stay motivated and measure progress</p>
+          </div>
+          <div class="header-actions">
+            <button id="newGoalBtn" class="btn btn-primary">
+              <span class="btn-icon">➕</span>
+              Add New Goal
+            </button>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+              <div class="stat-number" id="totalGoals">0</div>
+              <div class="stat-label">Total Goals</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+              <div class="stat-number" id="completedGoals">0</div>
+              <div class="stat-label">Completed</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔥</div>
+            <div class="stat-content">
+              <div class="stat-number" id="activeGoals">0</div>
+              <div class="stat-label">Active</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-content">
+              <div class="stat-number" id="completionRate">0%</div>
+              <div class="stat-label">Success Rate</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Goals Filter -->
+        <div class="goals-filter">
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All Goals</button>
+            <button class="filter-tab" data-filter="active">Active</button>
+            <button class="filter-tab" data-filter="completed">Completed</button>
+            <button class="filter-tab" data-filter="overdue">Overdue</button>
+          </div>
+          <div class="filter-sort">
+            <select id="sortGoals" class="sort-select">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="deadline">By Deadline</option>
+              <option value="priority">By Priority</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Goals List -->
+        <div class="goals-container">
+          <div id="goalsList" class="goals-list">
+            <!-- Goals will be populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- New Goal Form (Hidden) -->
+        <div id="goalForm" class="goal-form-container" style="display: none;">
+          <div class="goal-form">
+            <div class="form-header">
+              <h2 id="formTitle">Add New Goal</h2>
+              <button id="closeFormBtn" class="close-btn">✕</button>
+            </div>
+            
+            <form id="goalFormData">
+              <div class="form-group">
+                <label for="goalTitle">Goal Title *</label>
+                <input
+                  type="text"
+                  id="goalTitle"
+                  placeholder="e.g., Train 3 times per week"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="goalDescription">Description</label>
+                <textarea
+                  id="goalDescription"
+                  placeholder="Add more details about your goal..."
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="goalCategory">Category</label>
+                  <select id="goalCategory">
+                    <option value="training">🏃‍♂️ Training</option>
+                    <option value="matches">🏆 Matches</option>
+                    <option value="skills">⚡ Skills</option>
+                    <option value="fitness">💪 Fitness</option>
+                    <option value="other">📋 Other</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="goalPriority">Priority</label>
+                  <select id="goalPriority">
+                    <option value="low">🟢 Low</option>
+                    <option value="medium" selected>🟡 Medium</option>
+                    <option value="high">🔴 High</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="goalTarget">Target Value</label>
+                  <input
+                    type="number"
+                    id="goalTarget"
+                    placeholder="e.g., 12 (sessions)"
+                    min="1"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="goalUnit">Unit</label>
+                  <select id="goalUnit">
+                    <option value="sessions">Sessions</option>
+                    <option value="matches">Matches</option>
+                    <option value="wins">Wins</option>
+                    <option value="hours">Hours</option>
+                    <option value="days">Days</option>
+                    <option value="weeks">Weeks</option>
+                    <option value="times">Times</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="goalDeadline">Target Date</label>
+                <input type="date" id="goalDeadline" />
+              </div>
+
+              <div class="form-actions">
+                <button type="button" id="cancelBtn" class="btn btn-secondary">
+                  Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  <span id="submitText">Create Goal</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Message Container -->
+    <div id="messageContainer"></div>
+
+    <!-- Scripts -->
+    <script src="js/common-ui.js"></script>
+    <script src="js/message-system.js"></script>
+    <script src="js/form-animations.js"></script>
+    <script src="js/data-persistence.js"></script>
+    <script src="js/empty-state.js"></script>
+    <script type="module">
+      import { authService } from "./js/auth-service.js";
+      import { dataService } from "./js/data-service.js";
+
+      // Check authentication on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        // Initialize UI components
+        setupDropdown();
+
+        // Gate by auth before initializing goals
+        const ensureAuth = async () => {
+          if (!authService.isAuthenticated()) {
+            await new Promise((r) => setTimeout(r, 600));
+          }
+          const user = authService.getCurrentUser();
+          if (!user) {
+            window.location.href = "login.html";
+            return null;
+          }
+          dataService.setCurrentUser(user.uid);
+          return user;
+        };
+
+        ensureAuth().then((user) => {
+          if (!user) return;
+          
+          // Load user name
+          loadUserName("[data-user-name]");
+          
+          // Initialize goals functionality
+          window.goalsManager = new GoalsManager(dataService, authService);
+        });
+
+        // Handle sign out
+        document.getElementById("signOutBtn").addEventListener("click", async (e) => {
+          e.preventDefault();
+          const result = await authService.signOut();
+          if (result.success) {
+            window.location.href = "login.html";
+          }
+        });
+      });
+    </script>
+    <script src="js/goals.js"></script>
+  </body>
+</html>

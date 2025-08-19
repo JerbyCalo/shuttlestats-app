@@ -6,7 +6,9 @@
 
 class AuthManager {
   constructor() {
-    console.warn("AuthManager is deprecated. Use authService from auth-service.js instead");
+    console.warn(
+      "AuthManager is deprecated. Use authService from auth-service.js instead"
+    );
     this.currentUser = null;
   }
 
@@ -45,7 +47,9 @@ class AuthManager {
 
 class ModalManager {
   constructor() {
-    console.warn("ModalManager is deprecated. Use specific modal implementations in service files");
+    console.warn(
+      "ModalManager is deprecated. Use specific modal implementations in service files"
+    );
     this.setupModalListeners();
   }
 
@@ -93,7 +97,9 @@ class ModalManager {
 // Simplified managers - actual functionality moved to common-ui.js
 class SidebarManager {
   constructor() {
-    console.warn("SidebarManager is deprecated. Use setupSidebar() from common-ui.js");
+    console.warn(
+      "SidebarManager is deprecated. Use setupSidebar() from common-ui.js"
+    );
     // Delegate to common-ui.js implementation
     if (window.setupSidebar) {
       window.setupSidebar();
@@ -103,8 +109,10 @@ class SidebarManager {
 
 class DropdownManager {
   constructor() {
-    console.warn("DropdownManager is deprecated. Use setupDropdown() from common-ui.js");
-    // Delegate to common-ui.js implementation  
+    console.warn(
+      "DropdownManager is deprecated. Use setupDropdown() from common-ui.js"
+    );
+    // Delegate to common-ui.js implementation
     if (window.setupDropdown) {
       window.setupDropdown();
     }
@@ -397,7 +405,7 @@ class DashboardPage {
     } else if (menuText.includes("Achievements")) {
       alert("Achievements feature coming soon!");
     } else if (menuText.includes("Goals")) {
-      alert("Goals feature coming soon!");
+      window.location.href = "goals.html";
     } else if (menuText.includes("My Players")) {
       alert("Player management feature coming soon!");
     } else if (menuText.includes("Training Plans")) {
@@ -442,7 +450,7 @@ class ShuttleStatsApp {
     // Initialize common UI components
     if (window.setupSidebar) window.setupSidebar();
     if (window.setupDropdown) window.setupDropdown();
-    
+
     // Determine which page we're on
     const path = window.location.pathname;
     const page = path.substring(path.lastIndexOf("/") + 1);
@@ -450,7 +458,9 @@ class ShuttleStatsApp {
 
     // Let dashboard.html own its logic via its inline script to avoid duplication
     if (page === "dashboard.html") {
-      console.log("Dashboard page - delegating to dashboard.html inline scripts");
+      console.log(
+        "Dashboard page - delegating to dashboard.html inline scripts"
+      );
       return;
     }
 

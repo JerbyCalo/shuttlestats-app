@@ -72,7 +72,7 @@
               <li>
                 <a href="#achievements" class="menu-item">🎯 Achievements</a>
               </li>
-              <li><a href="#goals" class="menu-item">⭐ Goals</a></li>
+              <li><a href="goals.html" class="menu-item">⭐ Goals</a></li>
             </ul>
           </div>
           <div class="menu-section" id="coachSection" style="display: none">
@@ -101,7 +101,9 @@
             <div class="stat-card">
               <div class="stat-icon">🏃‍♂️</div>
               <div class="stat-info">
-                <span class="stat-number loading" id="trainingSessions">...</span>
+                <span class="stat-number loading" id="trainingSessions"
+                  >...</span
+                >
                 <span class="stat-label">Training Sessions</span>
               </div>
             </div>
@@ -115,7 +117,9 @@
             <div class="stat-card">
               <div class="stat-icon">📈</div>
               <div class="stat-info">
-                <span class="stat-number loading" id="improvementRate">...</span>
+                <span class="stat-number loading" id="improvementRate"
+                  >...</span
+                >
                 <span class="stat-label">Improvement Rate</span>
               </div>
             </div>
@@ -306,7 +310,7 @@
           if (!user) return;
           // Initialize dashboard functionality after services are ready
           initializeDashboard();
-          
+
           // Initialize quick actions after dashboard is ready
           setTimeout(() => {
             if (window.bindQuickActions) {
@@ -458,7 +462,7 @@
             const el = document.getElementById(id);
             if (el) {
               el.textContent = val;
-              el.classList.remove('loading'); // Remove loading state
+              el.classList.remove("loading"); // Remove loading state
             }
           };
 
@@ -834,7 +838,7 @@
       // Initialize dashboard when DOM is ready
       function initializeDashboard() {
         console.log("Initializing dashboard...");
-        
+
         // Load and display user's first name
         loadUserName("[data-user-name]");
 
@@ -948,7 +952,7 @@
       // Quick action functions
       function setupQuickActions() {
         console.log("Setting up quick actions...");
-        
+
         const quickActions = {
           qaLogTraining: () => {
             console.log("Navigating to training.html");
@@ -963,37 +967,13 @@
             window.location.href = "schedule.html";
           },
           qaSetGoal: async () => {
-            console.log("Setting new goal...");
-            try {
-              if (!window.dataService || !window.authService) {
-                alert("Please log in to set goals.");
-                return;
-              }
-              const title = prompt("What's your new goal? (e.g., 3x training this week)");
-              if (!title) return;
-              
-              const targetDate = prompt("Target date (YYYY-MM-DD), optional:");
-              const payload = { title: title.trim(), completed: false };
-              if (targetDate && /\d{4}-\d{2}-\d{2}/.test(targetDate)) {
-                payload.targetDate = targetDate;
-              }
-              
-              await window.dataService.addGoal(payload);
-              alert("Goal added!");
-              
-              // Refresh dashboard
-              if (window.refreshDashboard) {
-                window.refreshDashboard();
-              }
-            } catch (e) {
-              console.error("Error adding goal:", e);
-              alert("Failed to add goal. Try again.");
-            }
-          }
+            console.log("Navigating to goals page...");
+            window.location.href = "goals.html";
+          },
         };
 
         // Bind the actions
-        Object.keys(quickActions).forEach(actionId => {
+        Object.keys(quickActions).forEach((actionId) => {
           const button = document.getElementById(actionId);
           if (button) {
             // Remove any existing listeners
