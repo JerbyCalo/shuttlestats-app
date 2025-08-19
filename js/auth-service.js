@@ -7,6 +7,7 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  sendPasswordResetEmail,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 class AuthService {
@@ -128,6 +129,33 @@ class AuthService {
       // User is signed out
       authElements.forEach((el) => (el.style.display = "block"));
       userElements.forEach((el) => (el.style.display = "none"));
+    }
+  }
+
+  // Send password reset email
+  async sendPasswordReset(email) {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return {
+        success: true,
+        message: "Password reset email sent successfully"
+      };
+    } catch (error) {
+      console.error("Password reset error:", error);
+      
+      let errorMessage = "Failed to send password reset email";
+      if (error.code === "auth/user-not-found") {
+        errorMessage = "No account found with this email address";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Invalid email address";
+      } else if (error.code === "auth/too-many-requests") {
+        errorMessage = "Too many requests. Please try again later";
+      }
+      
+      return {
+        success: false,
+        error: errorMessage
+      };
     }
   }
 
