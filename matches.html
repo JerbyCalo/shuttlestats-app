@@ -696,10 +696,7 @@
         // Re-bind on auth change without requiring hard reload
         window.addEventListener("auth:changed", (e) => {
           const u = e.detail?.user;
-          if (!u) {
-            window.location.href = "login.html";
-            return;
-          }
+          if (!u) return;
           dataService.setCurrentUser(u.uid);
           if (
             window.matchManager &&

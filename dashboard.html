@@ -910,10 +910,7 @@
         // Keep dashboard bound to the current auth user without reload
         window.addEventListener("auth:changed", (e) => {
           const u = e.detail?.user;
-          if (!u) {
-            window.location.href = "login.html";
-            return;
-          }
+          if (!u) return;
           if (
             window.dataService &&
             typeof window.dataService.setCurrentUser === "function"
