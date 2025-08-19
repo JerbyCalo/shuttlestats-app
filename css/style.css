@@ -9,6 +9,7 @@ body {
   line-height: 1.6;
   color: #333;
   overflow-x: hidden;
+  scroll-behavior: smooth;
   /* Subtle, non-distracting background using brand colors */
   background: radial-gradient(
       1000px 600px at 10% -10%,
@@ -209,6 +210,19 @@ body {
 /* Sections */
 section {
   padding: 5rem 0;
+}
+
+/* Improve section contrast for landing */
+.features-section {
+  background: #f8f9fb;
+}
+
+.about-section {
+  background: #ffffff;
+}
+
+.contact-section {
+  background: #f8f9fb;
 }
 
 .section-title {
@@ -697,6 +711,11 @@ section {
   background: #2d3748;
   color: white;
   padding: 3rem 0 1rem;
+}
+
+/* Offset for fixed navbar when using in-page anchors */
+[id] {
+  scroll-margin-top: 90px;
 }
 
 .footer-content {
