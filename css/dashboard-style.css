@@ -386,6 +386,17 @@ body {
   color: #1211ca;
 }
 
+.stat-number.loading {
+  color: #999;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
 .stat-label {
   color: #666;
   font-size: 0.9rem;

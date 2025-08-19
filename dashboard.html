@@ -101,28 +101,28 @@
             <div class="stat-card">
               <div class="stat-icon">🏃‍♂️</div>
               <div class="stat-info">
-                <span class="stat-number" id="trainingSessions">0</span>
+                <span class="stat-number loading" id="trainingSessions">...</span>
                 <span class="stat-label">Training Sessions</span>
               </div>
             </div>
             <div class="stat-card">
               <div class="stat-icon">🏆</div>
               <div class="stat-info">
-                <span class="stat-number" id="matchesPlayed">0</span>
+                <span class="stat-number loading" id="matchesPlayed">...</span>
                 <span class="stat-label">Matches Played</span>
               </div>
             </div>
             <div class="stat-card">
               <div class="stat-icon">📈</div>
               <div class="stat-info">
-                <span class="stat-number" id="improvementRate">0</span>
+                <span class="stat-number loading" id="improvementRate">...</span>
                 <span class="stat-label">Improvement Rate</span>
               </div>
             </div>
             <div class="stat-card">
               <div class="stat-icon">⭐</div>
               <div class="stat-info">
-                <span class="stat-number" id="goalsAchieved">0</span>
+                <span class="stat-number loading" id="goalsAchieved">...</span>
                 <span class="stat-label">Goals Achieved</span>
               </div>
             </div>
@@ -456,7 +456,10 @@
 
           const setText = (id, val) => {
             const el = document.getElementById(id);
-            if (el) el.textContent = val;
+            if (el) {
+              el.textContent = val;
+              el.classList.remove('loading'); // Remove loading state
+            }
           };
 
           setText("trainingSessions", String(trainingCount));
