@@ -33,6 +33,12 @@
         color: #1211ca;
         margin-bottom: 8px;
         font-size: 2rem;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      .auth-header h1:hover {
+        transform: scale(1.05);
       }
 
       .auth-header p {
@@ -175,13 +181,75 @@
           transform: rotate(360deg);
         }
       }
+
+      /* Role and Coach Selection Styles */
+      .role-selection {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .role-option {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+      }
+
+      .role-option:hover {
+        border-color: #1211ca;
+        background: #f8f9ff;
+      }
+
+      .role-option.selected {
+        border-color: #1211ca;
+        background: #1211ca;
+        color: white;
+      }
+
+      .coach-selection {
+        margin-top: 15px;
+      }
+
+      .coach-options {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .coach-option {
+        flex: 1;
+        padding: 8px 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+        font-size: 14px;
+      }
+
+      .coach-option:hover {
+        border-color: #1211ca;
+        background: #f8f9ff;
+      }
+
+      .coach-option.selected {
+        border-color: #1211ca;
+        background: #1211ca;
+        color: white;
+      }
     </style>
   </head>
   <body>
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-header">
-          <h1>🏸 ShuttleStats</h1>
+          <h1 id="logoHeader" onclick="window.location.href='index.html'">🏸 ShuttleStats</h1>
           <p id="authSubtitle">Sign in to your account</p>
         </div>
 
@@ -218,6 +286,41 @@
               id="confirmPassword"
               name="confirmPassword"
             />
+          </div>
+
+          <!-- Role Selection for Signup -->
+          <div class="form-group" id="roleSelectionGroup" style="display: none">
+            <label>I am a:</label>
+            <div class="role-selection">
+              <div class="role-option" id="playerOption" data-role="player">
+                🏸 Player
+              </div>
+              <div class="role-option" id="coachOption" data-role="coach">
+                👨‍🏫 Coach
+              </div>
+            </div>
+          </div>
+
+          <!-- Coach Selection for Players -->
+          <div class="form-group" id="coachSelectionGroup" style="display: none">
+            <label>Do you have a coach?</label>
+            <div class="coach-options">
+              <div class="coach-option" id="hasCoachOption" data-coach="yes">
+                Yes, I have a coach
+              </div>
+              <div class="coach-option" id="soloOption" data-coach="no">
+                I train solo
+              </div>
+            </div>
+            <div id="coachNameGroup" style="display: none; margin-top: 15px;">
+              <label for="coachName">Coach Name</label>
+              <input
+                type="text"
+                id="coachName"
+                name="coachName"
+                placeholder="Enter your coach's name"
+              />
+            </div>
           </div>
 
           <button type="submit" id="authSubmitBtn" class="auth-btn">
@@ -283,7 +386,10 @@
         class AuthPage {
           constructor() {
             this.isSignUp = false;
+            this.selectedRole = "";
+            this.hasCoach = false;
             this.initEventListeners();
+            this.initRoleSelection();
             this.checkAuthState();
           }
 
@@ -297,6 +403,63 @@
             document
               .getElementById("authSwitchLink")
               .addEventListener("click", this.toggleMode.bind(this));
+          }
+
+          initRoleSelection() {
+            // Role selection handlers
+            document.getElementById("playerOption").addEventListener("click", () => {
+              this.selectRole("player");
+            });
+
+            document.getElementById("coachOption").addEventListener("click", () => {
+              this.selectRole("coach");
+            });
+
+            // Coach selection handlers
+            document.getElementById("hasCoachOption").addEventListener("click", () => {
+              this.selectCoachOption(true);
+            });
+
+            document.getElementById("soloOption").addEventListener("click", () => {
+              this.selectCoachOption(false);
+            });
+          }
+
+          selectRole(role) {
+            this.selectedRole = role;
+            
+            // Update UI
+            document.querySelectorAll(".role-option").forEach(option => {
+              option.classList.remove("selected");
+            });
+            document.getElementById(role + "Option").classList.add("selected");
+
+            // Show/hide coach selection based on role
+            const coachSelectionGroup = document.getElementById("coachSelectionGroup");
+            if (role === "player") {
+              coachSelectionGroup.style.display = "flex";
+            } else {
+              coachSelectionGroup.style.display = "none";
+              this.hasCoach = false;
+              document.getElementById("coachNameGroup").style.display = "none";
+            }
+          }
+
+          selectCoachOption(hasCoach) {
+            this.hasCoach = hasCoach;
+            
+            // Update UI
+            document.querySelectorAll(".coach-option").forEach(option => {
+              option.classList.remove("selected");
+            });
+
+            if (hasCoach) {
+              document.getElementById("hasCoachOption").classList.add("selected");
+              document.getElementById("coachNameGroup").style.display = "block";
+            } else {
+              document.getElementById("soloOption").classList.add("selected");
+              document.getElementById("coachNameGroup").style.display = "none";
+            }
           }
 
           async checkAuthState() {
@@ -325,6 +488,19 @@
               return;
             }
 
+            // Validate signup-specific fields
+            if (this.isSignUp) {
+              if (!this.selectedRole) {
+                this.showError("Please select if you are a player or coach");
+                return;
+              }
+
+              if (this.selectedRole === "player" && this.hasCoach && !document.getElementById("coachName").value.trim()) {
+                this.showError("Please enter your coach's name");
+                return;
+              }
+            }
+
             this.setLoading(true);
             this.hideMessages();
 
@@ -332,7 +508,19 @@
               let result;
 
               if (this.isSignUp) {
-                result = await authService.signUp(email, password);
+                // Collect additional signup data
+                const userData = {
+                  role: this.selectedRole
+                };
+
+                if (this.selectedRole === "player") {
+                  userData.hasCoach = this.hasCoach;
+                  if (this.hasCoach) {
+                    userData.coachName = document.getElementById("coachName").value.trim();
+                  }
+                }
+
+                result = await authService.signUp(email, password, userData);
               } else {
                 result = await authService.signIn(email, password);
               }
@@ -401,9 +589,9 @@
 
           updateUI() {
             const subtitle = document.getElementById("authSubtitle");
-            const confirmGroup = document.getElementById(
-              "confirmPasswordGroup"
-            );
+            const confirmGroup = document.getElementById("confirmPasswordGroup");
+            const roleSelectionGroup = document.getElementById("roleSelectionGroup");
+            const coachSelectionGroup = document.getElementById("coachSelectionGroup");
             const submitBtn = document.getElementById("authBtnText");
             const switchText = document.getElementById("authSwitchText");
             const switchLink = document.getElementById("authSwitchLink");
@@ -411,15 +599,26 @@
             if (this.isSignUp) {
               subtitle.textContent = "Create your account";
               confirmGroup.style.display = "flex";
+              roleSelectionGroup.style.display = "flex";
               submitBtn.textContent = "Sign Up";
               switchText.textContent = "Already have an account?";
               switchLink.textContent = "Sign in";
             } else {
               subtitle.textContent = "Sign in to your account";
               confirmGroup.style.display = "none";
+              roleSelectionGroup.style.display = "none";
+              coachSelectionGroup.style.display = "none";
               submitBtn.textContent = "Sign In";
               switchText.textContent = "Don't have an account?";
               switchLink.textContent = "Sign up";
+              
+              // Reset selections when switching to login
+              this.selectedRole = "";
+              this.hasCoach = false;
+              document.querySelectorAll(".role-option, .coach-option").forEach(option => {
+                option.classList.remove("selected");
+              });
+              document.getElementById("coachNameGroup").style.display = "none";
             }
           }
 
