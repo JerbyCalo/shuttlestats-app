@@ -618,8 +618,11 @@
     <!-- Success/Error Messages -->
     <div id="messageContainer" class="message-container"></div>
 
-  <script src="js/common-ui.js"></script>
-  <script src="js/flags/schedule-no-auto.js"></script>
+    <script src="js/common-ui.js"></script>
+    <script>
+      // Prevent auto init; we'll initialize after auth is ready
+      window.shouldAutoInitSchedule = false;
+    </script>
     <script type="module">
       import { authService } from "./js/auth-service.js";
       import { dataService } from "./js/data-service.js";
