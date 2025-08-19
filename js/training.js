@@ -100,6 +100,34 @@ export class TrainingManager {
 
     // Global show session form function
     window.showSessionForm = () => this.showSessionForm();
+
+    // Delegated listeners for session list actions
+    const sessionsList = document.getElementById("sessionsList");
+    if (sessionsList) {
+      sessionsList.addEventListener("click", (e) => this.onSessionsListClick(e));
+    }
+  }
+
+  onSessionsListClick(e) {
+    const target = e.target.closest("[data-action]");
+    if (!target) {
+      // Handle empty-state CTA
+      const firstBtn = e.target.closest("#logFirstSessionBtn");
+      if (firstBtn) {
+        this.showSessionForm();
+      }
+      return;
+    }
+
+    const action = target.getAttribute("data-action");
+    const item = target.closest(".session-item");
+    const sessionId = item ? item.getAttribute("data-session-id") : null;
+
+    if (action === "edit" && sessionId) {
+      this.editSession(sessionId);
+    } else if (action === "delete" && sessionId) {
+      this.deleteSession(sessionId);
+    }
   }
 
   showSessionForm() {
@@ -253,7 +281,7 @@ export class TrainingManager {
             <span class="empty-icon">🏸</span>
             <h3>No training sessions yet</h3>
             <p>Start logging your training sessions to track your progress!</p>
-            <button class="btn btn-primary" onclick="showSessionForm()">Log Your First Session</button>
+            <button class="btn btn-primary" id="logFirstSessionBtn">Log Your First Session</button>
           </div>
         </div>
       `;
@@ -317,12 +345,8 @@ export class TrainingManager {
           }
         </div>
         <div class="session-actions">
-          <button class="action-button" onclick="trainingManager.editSession('${
-            session.id
-          }')" title="Edit">✏️</button>
-          <button class="action-button" onclick="trainingManager.deleteSession('${
-            session.id
-          }')" title="Delete">🗑️</button>
+          <button class="action-button" data-action="edit" title="Edit">✏️</button>
+          <button class="action-button" data-action="delete" title="Delete">🗑️</button>
         </div>
       </div>
     `;

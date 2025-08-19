@@ -50,10 +50,16 @@ class ToastManager {
     toast.innerHTML = `
       <div class="toast-header">
         <span class="toast-title">${icons[type]} ${titles[type]}</span>
-        <button class="toast-close" onclick="toastManager.remove(this.closest('.toast'))">&times;</button>
+        <button class="toast-close" type="button">&times;</button>
       </div>
       <div class="toast-message">${message}</div>
     `;
+
+    // Bind close button without inline handlers
+    const closeBtn = toast.querySelector(".toast-close");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => this.remove(toast));
+    }
 
     return toast;
   }

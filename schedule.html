@@ -26,7 +26,7 @@
               <div class="dropdown-menu">
                 <a href="#profile">Profile</a>
                 <a href="#settings">Settings</a>
-                <a href="#" onclick="logout()">Logout</a>
+                <a href="#" id="signOutBtn">Logout</a>
               </div>
             </div>
           </div>
@@ -488,12 +488,7 @@
                     <span class="empty-icon">📅</span>
                     <h3>No upcoming sessions</h3>
                     <p>Schedule your first training session to get started!</p>
-                    <button
-                      class="btn btn-primary"
-                      onclick="scheduleManager.showSessionForm()"
-                    >
-                      Schedule Session
-                    </button>
+                    <button class="btn btn-primary" id="scheduleFirstBtn">Schedule Session</button>
                   </div>
                 </div>
               </div>
@@ -681,14 +676,18 @@
           window.scheduleManager = new ScheduleManager();
         }
 
-        // Logout
-        window.logout = async function () {
-          if (!confirm("Are you sure you want to logout?")) return;
-          const result = await authService.signOut();
-          if (result.success) {
-            window.location.href = "login.html";
-          }
-        };
+        // Logout button
+        const signOutBtn = document.getElementById("signOutBtn");
+        if (signOutBtn) {
+          signOutBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            if (!confirm("Are you sure you want to logout?")) return;
+            const result = await authService.signOut();
+            if (result.success) {
+              window.location.href = "login.html";
+            }
+          });
+        }
 
         // Handle auth changes in-place
         window.addEventListener("auth:changed", (e) => {

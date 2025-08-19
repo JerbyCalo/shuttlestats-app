@@ -187,6 +187,52 @@ export class ScheduleManager {
         this.handleCalendarIntegration();
       });
     }
+
+    // Delegated listeners for sessions list actions and empty state CTA
+    const sessionsList = document.getElementById("sessionsList");
+    if (sessionsList) {
+      sessionsList.addEventListener("click", (e) => this.onSessionsListClick(e));
+    }
+
+    // Delegated listeners inside session details modal
+    const detailsModal = document.getElementById("sessionDetailsModal");
+    if (detailsModal) {
+      detailsModal.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-modal-action]");
+        if (btn) {
+          const action = btn.getAttribute("data-modal-action");
+          const id = btn.getAttribute("data-session-id");
+          if (action === "edit" && id) this.editSession(id);
+          if (action === "delete" && id) this.deleteSession(id);
+          return;
+        }
+        const viewEl = e.target.closest("[data-view-session-id]");
+        if (viewEl) {
+          const id = viewEl.getAttribute("data-view-session-id");
+          if (id) this.showSessionDetails(id);
+        }
+      });
+    }
+  }
+
+  onSessionsListClick(e) {
+    // Handle empty-state CTA
+    const scheduleBtn = e.target.closest("#scheduleFirstBtn");
+    if (scheduleBtn) {
+      this.showSessionForm();
+      return;
+    }
+
+    const actionBtn = e.target.closest("[data-action]");
+    if (!actionBtn) return;
+    const action = actionBtn.getAttribute("data-action");
+    const item = actionBtn.closest(".session-item");
+    const id = item ? item.getAttribute("data-session-id") : null;
+    if (!id) return;
+
+    if (action === "view") this.showSessionDetails(id);
+    if (action === "edit") this.editSession(id);
+    if (action === "delete") this.deleteSession(id);
   }
 
   renderCalendar() {
@@ -530,15 +576,13 @@ export class ScheduleManager {
     });
 
     if (sessionsToShow.length === 0) {
-      sessionsList.innerHTML = `
+  sessionsList.innerHTML = `
                 <div class="no-sessions">
                     <div class="empty-state">
                         <span class="empty-icon">📅</span>
                         <h3>No sessions found</h3>
                         <p>No sessions scheduled for the selected time period. Click "Add Session" to schedule your first training session!</p>
-                        <button class="btn btn-primary" onclick="document.getElementById('newSessionBtn').click()">
-                            Schedule Session
-                        </button>
+        <button class="btn btn-primary" id="scheduleFirstBtn">Schedule Session</button>
                     </div>
                 </div>
             `;
@@ -588,22 +632,10 @@ export class ScheduleManager {
                             <span>🔥 ${session.intensity}</span>
                         </div>
                     </div>
-                    <div class="session-actions">
-                        <button class="session-action" title="View Details" onclick="scheduleManager.showSessionDetails('${
-                          session.id
-                        }')">
-                            👁️
-                        </button>
-                        <button class="session-action" title="Edit Session" onclick="scheduleManager.editSession('${
-                          session.id
-                        }')">
-                            ✏️
-                        </button>
-                        <button class="session-action" title="Delete Session" onclick="scheduleManager.deleteSession('${
-                          session.id
-                        }')">
-                            🗑️
-                        </button>
+          <div class="session-actions">
+            <button class="session-action" title="View Details" data-action="view">👁️</button>
+            <button class="session-action" title="Edit Session" data-action="edit">✏️</button>
+            <button class="session-action" title="Delete Session" data-action="delete">🗑️</button>
                         ${
                           isUpcoming && session.reminderEnabled
                             ? `<button class="session-action" title="Reminder Set" style="background: #10b981; color: white;">🔔</button>`
@@ -697,12 +729,12 @@ export class ScheduleManager {
                 </div>
             </div>
             <div class="session-actions">
-                <button class="btn btn-secondary" onclick="scheduleManager.editSession('${
+                <button class="btn btn-secondary" data-modal-action="edit" data-session-id="${
                   session.id
-                }')">Edit</button>
-                <button class="btn btn-danger" onclick="scheduleManager.deleteSession('${
+                }">Edit</button>
+                <button class="btn btn-danger" data-modal-action="delete" data-session-id="${
                   session.id
-                }')">Delete</button>
+                }">Delete</button>
             </div>
         `;
 
@@ -976,15 +1008,13 @@ END:VALARM`
                 ${sessions
                   .map(
                     (session) => `
-                    <div class="info-item" style="cursor: pointer;" onclick="scheduleManager.showSessionDetails('${
+                    <div class="info-item" style="cursor: pointer;" data-view-session-id="${
                       session.id
-                    }')">
+                    }">
                         <span class="info-label">${this.formatTime(
                           session.time
                         )}:</span>
-                        <span class="info-value">${session.title} (${
-                      session.type
-                    })</span>
+                        <span class="info-value">${session.title} (${session.type})</span>
                     </div>
                 `
                   )

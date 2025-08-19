@@ -26,7 +26,7 @@
               <div class="dropdown-menu">
                 <a href="#profile">Profile</a>
                 <a href="#settings">Settings</a>
-                <a href="#" onclick="logout()">Logout</a>
+                <a href="#" id="signOutBtn">Logout</a>
               </div>
             </div>
           </div>
@@ -485,13 +485,17 @@
         }
 
         // Attach logout handler using authService
-        window.logout = async function () {
-          if (!confirm("Are you sure you want to logout?")) return;
-          const result = await authService.signOut();
-          if (result.success) {
-            window.location.href = "login.html";
-          }
-        };
+        const signOutBtn = document.getElementById("signOutBtn");
+        if (signOutBtn) {
+          signOutBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            if (!confirm("Are you sure you want to logout?")) return;
+            const result = await authService.signOut();
+            if (result.success) {
+              window.location.href = "login.html";
+            }
+          });
+        }
 
         // Re-bind data on auth changes without reload
         window.addEventListener("auth:changed", (e) => {

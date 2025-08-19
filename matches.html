@@ -26,7 +26,7 @@
               <div class="dropdown-menu">
                 <a href="#profile">Profile</a>
                 <a href="#settings">Settings</a>
-                <a href="#" onclick="logout()">Logout</a>
+                <a href="#" id="signOutBtn">Logout</a>
               </div>
             </div>
           </div>
@@ -557,15 +557,13 @@
                 </div>
               </div>
 
-              <div id="matchesList" class="matches-list">
+      <div id="matchesList" class="matches-list">
                 <div class="no-matches">
                   <div class="empty-state">
                     <span class="empty-icon">🏸</span>
                     <h3>No matches recorded yet</h3>
                     <p>Start recording your matches to track your progress!</p>
-                    <button class="btn btn-primary" onclick="showMatchForm()">
-                      Record Your First Match
-                    </button>
+        <button class="btn btn-primary" id="recordFirstMatchBtn">Record Your First Match</button>
                   </div>
                 </div>
               </div>
@@ -677,21 +675,20 @@
           window.matchManager = new MatchManager();
         }
 
-        // Logout
-        window.logout = async function () {
-          if (!confirm("Are you sure you want to logout?")) return;
-          const result = await authService.signOut();
-          if (result.success) {
-            window.location.href = "login.html";
-          }
-        };
+        // Logout button
+        const signOutBtn = document.getElementById("signOutBtn");
+        if (signOutBtn) {
+          signOutBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            if (!confirm("Are you sure you want to logout?")) return;
+            const result = await authService.signOut();
+            if (result.success) {
+              window.location.href = "login.html";
+            }
+          });
+        }
 
-        // Global function for match form
-        window.showMatchForm = function () {
-          if (window.matchManager) {
-            window.matchManager.showMatchForm();
-          }
-        };
+  // Back-compat still available via manager instance; CTA uses delegated handler now
 
         // Re-bind on auth change without requiring hard reload
         window.addEventListener("auth:changed", (e) => {

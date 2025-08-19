@@ -149,19 +149,19 @@
             <div class="dashboard-card">
               <h3>Quick Actions</h3>
               <div class="quick-actions">
-                <button class="action-btn" onclick="logTraining()">
+                <button class="action-btn" id="qaLogTraining">
                   <span class="btn-icon">🏃‍♂️</span>
                   Log Training Session
                 </button>
-                <button class="action-btn" onclick="recordMatch()">
+                <button class="action-btn" id="qaRecordMatch">
                   <span class="btn-icon">🏆</span>
                   Record Match
                 </button>
-                <button class="action-btn" onclick="viewSchedule()">
+                <button class="action-btn" id="qaViewSchedule">
                   <span class="btn-icon">📅</span>
                   View Schedule
                 </button>
-                <button class="action-btn" onclick="setGoal()">
+                <button class="action-btn" id="qaSetGoal">
                   <span class="btn-icon">🎯</span>
                   Set New Goal
                 </button>
@@ -1021,5 +1021,7 @@
         });
       });
     </script>
+  <!-- Bind dashboard quick actions without inline handlers -->
+  <script type="module" src="js/dashboard-actions.js"></script>
   </body>
 </html>

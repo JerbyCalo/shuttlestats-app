@@ -106,6 +106,34 @@ export class MatchManager {
 
     // Global show match form function
     window.showMatchForm = () => this.showMatchForm();
+
+    // Delegated listeners for match list actions
+    const matchesList = document.getElementById("matchesList");
+    if (matchesList) {
+      matchesList.addEventListener("click", (e) => this.onMatchesListClick(e));
+    }
+  }
+
+  onMatchesListClick(e) {
+    const target = e.target.closest("[data-action]");
+    if (!target) {
+      // Empty state CTA
+      const firstBtn = e.target.closest("#recordFirstMatchBtn");
+      if (firstBtn) {
+        this.showMatchForm();
+      }
+      return;
+    }
+
+    const action = target.getAttribute("data-action");
+    const item = target.closest(".match-item");
+    const matchId = item ? item.getAttribute("data-match-id") : null;
+
+    if (action === "edit" && matchId) {
+      this.editMatch(matchId);
+    } else if (action === "delete" && matchId) {
+      this.deleteMatch(matchId);
+    }
   }
 
   setupScoreCalculation() {
@@ -520,7 +548,7 @@ export class MatchManager {
             <span class="empty-icon">🏸</span>
             <h3>No matches recorded yet</h3>
             <p>Start recording your matches to track your progress!</p>
-            <button class="btn btn-primary" onclick="showMatchForm()">Record Your First Match</button>
+            <button class="btn btn-primary" id="recordFirstMatchBtn">Record Your First Match</button>
           </div>
         </div>
       `;
@@ -593,12 +621,8 @@ export class MatchManager {
           ${match.notes ? `<div class="match-notes">${match.notes}</div>` : ""}
         </div>
         <div class="match-actions">
-          <button class="action-button" onclick="matchManager.editMatch('${
-            match.id
-          }')" title="Edit">✏️</button>
-          <button class="action-button" onclick="matchManager.deleteMatch('${
-            match.id
-          }')" title="Delete">🗑️</button>
+          <button class="action-button" data-action="edit" title="Edit">✏️</button>
+          <button class="action-button" data-action="delete" title="Delete">🗑️</button>
         </div>
       </div>
     `;
