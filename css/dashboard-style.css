@@ -20,6 +20,7 @@ body {
       transparent 60%
     ),
     #f8f9fa;
+  overflow-x: hidden;
 }
 
 /* Shared Buttons */
@@ -268,14 +269,15 @@ body {
   position: fixed;
   height: calc(100vh - 80px);
   top: 80px;
-  left: -280px;
+  left: 0;
   overflow-y: auto;
   z-index: 1000;
-  transition: left 0.3s ease;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
 }
 
 .sidebar.active {
-  left: 0;
+  transform: translateX(0);
 }
 
 .sidebar-menu {
