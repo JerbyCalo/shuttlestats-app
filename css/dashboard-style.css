@@ -330,6 +330,7 @@ body {
   padding: 2rem;
   padding-left: 70px; /* Space for toggle button */
   transition: margin-left 0.3s ease, padding-left 0.3s ease;
+  overflow-x: hidden;
 }
 
 .content-section {

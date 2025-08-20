@@ -544,6 +544,13 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  /* Prevent horizontal overflow on mobile */
+  .training-content,
+  .content-area,
+  .section-card {
+    overflow-x: hidden;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
   }
@@ -573,6 +580,8 @@
 
   .form-actions {
     flex-direction: column;
+  padding: 1rem;
+  border-radius: 0 0 12px 12px;
   }
 
   .form-actions .btn {

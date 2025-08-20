@@ -953,6 +953,13 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  /* Prevent horizontal overflow on mobile */
+  .section-card,
+  .schedule-content,
+  .content-area {
+    overflow-x: hidden;
+  }
+
   .schedule-actions {
     flex-direction: column;
   }
@@ -1014,7 +1021,10 @@
   }
 
   .form-actions {
-    flex-direction: column;
+  flex-direction: column;
+  margin: 1rem 0 0 0; /* remove negative margins on mobile */
+  padding: 1rem; /* tighter padding */
+  border-radius: 0 0 12px 12px;
   }
 
   .form-actions .btn {
@@ -1024,6 +1034,14 @@
   .modal-content {
     margin: 20% auto;
     width: 95%;
+  }
+
+  /* Reduce side paddings that can push width */
+  .calendar-container {
+    padding: 0 1rem 1rem 1rem;
+  }
+  .section-header {
+    padding: 1rem 1rem 0.5rem 1rem;
   }
 
   .session-actions {
